@@ -1006,6 +1006,14 @@ Al abonar tu asesoría, el pago se valida de forma automática y Jose te envía 
       /* ---------- UI helpers ---------- */
       function $id(id) { return document.getElementById(id); }
 
+      function parseJson(res) {
+        return res.text().then(function (t) {
+          var j = null;
+          try { j = JSON.parse(t); } catch (err) { /* respuesta no JSON */ }
+          return { ok: res.ok, status: res.status, body: j };
+        });
+      }
+
       function getPreferenceList() {
         var prefs = [];
         ["p-omnivoro", "p-vegetariano", "p-vegano", "p-celiaco"].forEach(function (id) {
@@ -1120,11 +1128,9 @@ Al abonar tu asesoría, el pago se valida de forma automática y Jose te envía 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         })
-          .then(function (res) {
-            return res.json().then(function (j) { return { status: res.status, body: j }; });
-          })
+          .then(parseJson)
           .then(function (r) {
-            if (!r.body || !r.body.ok || !r.body.ref) {
+            if (!r.ok || !r.body || !r.body.ok || !r.body.ref) {
               throw new Error((r.body && r.body.error) || "No se pudo registrar tu plan.");
             }
             try { localStorage.setItem("nocito_ref", r.body.ref); } catch (err) {}
@@ -1196,11 +1202,9 @@ Al abonar tu asesoría, el pago se valida de forma automática y Jose te envía 
               diagnostic: data
             })
           })
-            .then(function (res) {
-              return res.json().then(function (j) { return { status: res.status, body: j }; });
-            })
+            .then(parseJson)
             .then(function (r) {
-              if (!r.body || !r.body.ok || !r.body.initPoint) {
+              if (!r.ok || !r.body || !r.body.ok || !r.body.initPoint) {
                 throw new Error((r.body && r.body.error) || "No se pudo iniciar el pago.");
               }
               window.location.href = r.body.initPoint;

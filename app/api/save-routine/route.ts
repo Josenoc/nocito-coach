@@ -15,9 +15,24 @@ export async function POST(req: Request) {
   const o = (body ?? {}) as Record<string, unknown>;
   const name = typeof o.name === "string" ? o.name.trim() : "";
   if (!name) {
-    return NextResponse.json({ ok: false, error: "Falta el nombre del cliente" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Falta el nombre del cliente." },
+      { status: 400 }
+    );
   }
 
-  const ref = await saveRoutine(o);
-  return NextResponse.json({ ok: true, ref });
+  try {
+    const ref = await saveRoutine(o);
+    return NextResponse.json({ ok: true, ref });
+  } catch (err) {
+    console.error("[save-routine]", err);
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "No se pudo guardar tu plan. Verificá que DATABASE_URL esté configurada en Vercel y que la base exista.",
+      },
+      { status: 500 }
+    );
+  }
 }

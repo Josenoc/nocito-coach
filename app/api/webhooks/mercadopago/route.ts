@@ -60,7 +60,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "sin referencia" }, { status: 400 });
   }
 
-  const raw = await getRoutine(ref);
+  let raw: Record<string, unknown> | undefined;
+  try {
+    raw = await getRoutine(ref);
+  } catch (err) {
+    console.error("[webhook] getRoutine:", err);
+    return NextResponse.json(
+      { ok: false, error: "Fallo la consulta a la base de datos." },
+      { status: 500 }
+    );
+  }
   const payload = parsePayload(raw);
   if (!payload) {
     console.error("Routine no encontrada para ref:", ref);
@@ -96,6 +105,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 
-  if (ref) await confirmPlan(ref);
+  if (ref) {
+    try {
+      await confirmPlan(ref);
+    } catch (err) {
+      console.error("[webhook] confirmPlan:", err);
+    }
+  }
   return NextResponse.json({ ok: true });
 }
