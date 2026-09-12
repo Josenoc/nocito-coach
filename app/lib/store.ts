@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, type PoolConfig } from "pg";
 
 export type RoutinePayload = Record<string, unknown>;
 
@@ -13,7 +13,7 @@ function createPool(): Pool {
   const ssl = /([?&]|^)sslmode=/.test(databaseUrl)
     ? undefined
     : { rejectUnauthorized: false };
-  const cfg: Record<string, unknown> = {
+  const cfg: PoolConfig = {
     connectionString: databaseUrl,
     max: 1,
     idleTimeoutMillis: 0,
