@@ -48,8 +48,8 @@ export default async function ExitoPage({
         </h1>
         <p style={{ color: "#aaa", lineHeight: 1.6, margin: "0 0 24px" }}>
           {pending
-            ? "Cuando completes el pago, tu rutina y tu pauta nutricional te llegan por email automáticamente."
-            : "Tu rutina y tu pauta nutricional te llegan por email de forma automática en los próximos minutos. Si no lo ves, revisá spam o escribinos por WhatsApp."}
+            ? "Cuando completes el pago, escribinos por WhatsApp para recibir tu rutina."
+            : "José ya recibió tu solicitud con tus datos y tu plan. Al confirmar la operación, te envía tu rutina y tu pauta nutricional. Si tardás en recibirla, escribinos por WhatsApp."}
         </p>
         <a
           href={waLink}
