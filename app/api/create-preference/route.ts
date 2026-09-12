@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { mpPreference, siteBaseUrl } from "@/app/lib/mp";
+import { mpPreference, siteBaseUrl, notificationUrl } from "@/app/lib/mp";
 import { getPlan } from "@/app/lib/plans";
+import { getRoutine, attachPlan } from "@/app/lib/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
   }
 
   const o = (body ?? {}) as Record<string, unknown>;
+  const clientRef = typeof o.clientRef === "string" ? o.clientRef : "";
   const planIndex = Number(o.planIndex);
   const diagnostic = ((o.diagnostic ?? {}) as Record<string, unknown>) || {};
 
@@ -31,12 +33,40 @@ export async function POST(req: Request) {
     );
   }
 
+  let saved: Record<string, unknown> | undefined;
+  try {
+    saved = clientRef ? await getRoutine(clientRef) : undefined;
+  } catch (err) {
+    console.error("[create-preference] lectura de rutina:", err);
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "No se pudo consultar la base de datos. Verificá que DATABASE_URL esté configurada y que la base exista.",
+      },
+      { status: 500 }
+    );
+  }
+
+  const savedObj = saved ?? {};
   const name =
-    (typeof diagnostic.name === "string" && diagnostic.name) || "Cliente";
-  const contact =
-    (typeof diagnostic.contact === "string" && diagnostic.contact) || "";
+    (typeof savedObj.name === "string" && savedObj.name) ||
+    (typeof diagnostic.name === "string" && diagnostic.name) ||
+    "Cliente";
+  const contact = savedObj.contact ?? diagnostic.contact ?? "";
+
+  try {
+    if (clientRef) await attachPlan(clientRef, plan.name);
+  } catch (err) {
+    console.error("[create-preference] attachPlan:", err);
+    return NextResponse.json(
+      { ok: false, error: "No se pudo registrar el plan elegido." },
+      { status: 500 }
+    );
+  }
 
   const base = siteBaseUrl();
+  const encodedName = encodeURIComponent(name);
 
   let initPoint: string | undefined;
   try {
@@ -56,12 +86,20 @@ export async function POST(req: Request) {
           name: name,
           email: emailFromContact(contact),
         },
+        external_reference: clientRef || "direct",
         back_urls: {
-          success: `${base}/exito?name=${encodeURIComponent(name)}`,
-          pending: `${base}/exito?name=${encodeURIComponent(name)}&status=pending`,
+          success: `${base}/exito?name=${encodedName}`,
+          pending: `${base}/exito?name=${encodedName}&status=pending`,
           failure: `${base}/`,
         },
         auto_return: "approved",
+        notification_url: notificationUrl(),
+        metadata: {
+          client_ref: clientRef,
+          plan_key: plan.key,
+          plan_name: plan.name,
+          client_name: name,
+        },
       },
     });
     initPoint = result?.init_point;

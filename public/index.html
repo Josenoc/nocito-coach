@@ -563,14 +563,14 @@
         <div class="gen-panel" id="genPanel">
           <div class="gen-success">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
-            <div><strong>Solicitud enviada correctamente</strong><br><span>José ya recibió tu plan por email. Ahora elegí tu plan abajo y aboná para recibir tu rutina y tu pauta nutricional.</span></div>
+            <div><strong>Tu plan quedó registrado correctamente</strong><br><span>Ahora elegí tu plan abajo y aboná para desbloquear el acceso completo.</span></div>
           </div>
 
           <div class="lock-note">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2" style="flex:0 0 auto;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <div>
-<p><b>Al confirmar el pago, José te envía tu rutina y tu pauta nutricional</b><br>
-Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y José te la hace llegar por email o WhatsApp.</p>
+<p><b>Tu rutina y tu plan de alimentación se entregan automáticamente por email al confirmarse el pago.</b><br>
+Al abonar tu asesoría, el pago se valida de forma automática y Jose te envía tu rutina y tu pauta nutricional personalizada.</p>
             </div>
           </div>
         </div>
@@ -1123,23 +1123,24 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         var submitBtn = form.querySelector('button[type="submit"]');
         if (submitBtn) submitBtn.disabled = true;
 
-        fetch("/api/send-request", {
+        fetch("/api/save-routine", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         })
           .then(parseJson)
           .then(function (r) {
-            if (!r.ok || !r.body || !r.body.ok) {
-              throw new Error((r.body && r.body.error) || "No se pudo enviar tu solicitud.");
+            if (!r.ok || !r.body || !r.body.ok || !r.body.ref) {
+              throw new Error((r.body && r.body.error) || "No se pudo registrar tu plan.");
             }
+            try { localStorage.setItem("nocito_ref", r.body.ref); } catch (err) {}
             $id("genPanel").classList.add("show");
             setTimeout(function () {
               $id("planes").scrollIntoView({ behavior: "smooth", block: "start" });
             }, 350);
           })
           .catch(function (err) {
-            showError([err.message || "No se pudo enviar tu plan. Intentalo de nuevo."]);
+            showError([err.message || "No se pudo registrar tu plan. Intentalo de nuevo."]);
           })
           .finally(function () {
             if (submitBtn) submitBtn.disabled = false;
@@ -1185,6 +1186,9 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             return;
           }
 
+          var ref = null;
+          try { ref = localStorage.getItem("nocito_ref"); } catch (err) {}
+
           var original = btn.textContent;
           btn.disabled = true;
           btn.textContent = "Procesando pago...";
@@ -1193,6 +1197,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              clientRef: ref,
               planIndex: planIndex,
               diagnostic: data
             })

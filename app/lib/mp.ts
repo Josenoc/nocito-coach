@@ -11,3 +11,7 @@ export function siteBaseUrl(): string {
   if (process.env.VERCEL_URL) return "https://" + process.env.VERCEL_URL;
   return "http://localhost:3000";
 }
+
+export function notificationUrl(): string {
+  return siteBaseUrl() + "/api/webhooks/mercadopago";
+}

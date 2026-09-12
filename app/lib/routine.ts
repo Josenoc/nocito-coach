@@ -184,7 +184,6 @@ export function renderRoutineHtml(p: ClientPayload): string {
     `<p style="margin:0;font-size:11px;letter-spacing:2px;color:#ff8a65;">NOCITO COACH</p>`,
     `<h1 style="margin:6px 0 0;font-size:22px;">RUTINA Y PLAN NUTRICIONAL</h1>`,
     `<p style="margin:6px 0 0;color:#bbb;font-size:13px;">Preparado para ${title}</p>`,
-    `<p style="margin:10px 0 0;font-size:12px;letter-spacing:1px;color:#ffcc80;font-weight:700;">SOLICITUD PENDIENTE DE PAGO</p>`,
     `</div>`,
     `<div style="background:#fff;padding:26px;border-radius:0 0 8px 8px;">`,
     `<h3 style="margin:0 0 6px;color:#111;">DATOS DEL CLIENTE</h3>`,
@@ -193,7 +192,7 @@ export function renderRoutineHtml(p: ClientPayload): string {
     routineBlocks(p).join("\n"),
     mealsBlock(p),
     `<hr style="border:none;border-top:1px solid #ddd;margin:22px 0;">`,
-    `<p style="font-size:12px;color:#555;margin:0;">Generado el ${esc(p.fecha)} · Solicitud recibida, pendiente de pago. Enviar la rutina al cliente cuando confirmes el pago en Mercado Pago.</p>`,
+    `<p style="font-size:12px;color:#555;margin:0;">Generado el ${esc(p.fecha)} · Pagado y confirmado automáticamente por Mercado Pago. Entregar esta rutina al cliente cuando confirmes el envío.</p>`,
     `</div>`,
     `</div>`,
   ].join("\n");
@@ -203,7 +202,6 @@ export function renderRoutineText(p: ClientPayload): string {
   const L: string[] = [];
   L.push("NOCITO COACH — RUTINA Y PLAN NUTRICIONAL");
   L.push("Preparado para " + (p.plan ? `${p.plan.name} · ` : "") + p.name);
-  L.push("SOLICITUD PENDIENTE DE PAGO");
   L.push("");
   L.push("DATOS DEL CLIENTE:");
   L.push("- Nombre: " + p.name);
@@ -233,6 +231,6 @@ export function renderRoutineText(p: ClientPayload): string {
     L.push("- " + m[0] + ": " + m[1]);
   }
   L.push("");
-  L.push("Generado el " + p.fecha + " · Solicitud recibida, pendiente de pago.");
+  L.push("Generado el " + p.fecha + " · Pago confirmado automáticamente por Mercado Pago.");
   return L.join("\n");
 }
