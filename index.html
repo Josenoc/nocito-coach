@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Jose · Personal Trainer — Asesorías personalizadas de entrenamiento y nutrición. Transformá tu cuerpo con ciencia y experiencia real.">
+  <meta name="theme-color" content="#121212">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="nocito.coach">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="data:application/manifest+json,&#123;&quot;name&quot;:&quot;nocito.coach&quot;,&quot;short_name&quot;:&quot;nocito&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#121212&quot;,&quot;theme_color&quot;:&quot;#121212&quot;,&quot;start_url&quot;:&quot;index.html&quot;&#125;">
+  <title>nocito.coach | Jose · Personal Trainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23121212'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%23FF5722'>J</text></svg>">
+  <style>
+    :root {
+      --bg: #121212;
+      --surface: #1E1E1E;
+      --surface-2: #26292C;
+      --border: #33373B;
+      --orange: #FF5722;
+      --orange-soft: #FF7A4D;
+      --blue: #00E5FF;
+      --text: #F5F6F7;
+      --muted: #9CA3AF;
+      --ok: #34D399;
+      --danger: #FF5252;
+      --radius: 16px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    a, button, input, select, label { touch-action: manipulation; }
+    h1, h2, h3, h4 { font-family: 'Montserrat', 'Inter', sans-serif; line-height: 1.15; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+    ul { list-style: none; }
+    .container { width: min(1140px, 92%); margin-inline: auto; }
+    .section { padding: 96px 0; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .8rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--blue); margin-bottom: 14px;
+    }
+    .section-label::before { content: ""; width: 22px; height: 2px; background: var(--blue); border-radius: 2px; }
+    .section-title { font-size: clamp(1.8rem, 3.6vw, 2.7rem); font-weight: 800; margin-bottom: 14px; }
+    .section-sub { color: var(--muted); max-width: 640px; font-size: 1.02rem; }
+    .grad-text { background: linear-gradient(90deg, var(--orange), var(--blue)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* ---------- Header ---------- */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(18,18,18,.82);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px;
+    }
+    .brand { display: flex; align-items: center; font-family: 'Montserrat', sans-serif; }
+    .brand-name {
+      font-weight: 800; font-size: clamp(2.24rem, 9vw, 2.84rem); letter-spacing: .02em;
+      background: linear-gradient(90deg, var(--orange), var(--blue));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .nav-links { display: flex; align-items: center; gap: 30px; }
+    .nav-links a { font-size: .92rem; font-weight: 500; color: var(--muted); transition: color .2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--orange); color: #0B0B0B; font-weight: 700;
+      padding: 10px 18px; border-radius: 10px; font-size: .9rem;
+      transition: transform .15s, box-shadow .2s;
+    }
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(255,87,34,.35);
+    }
+    .hamburger { display: none; background: none; border: 0; cursor: pointer; padding: 8px; }
+    .hamburger span { display: block; width: 26px; height: 2.5px; background: var(--text); margin: 5px 0; border-radius: 3px; transition: .25s; }
+    .mobile-menu { display: none; padding: 14px 0 22px; border-top: 1px solid var(--border); }
+    .mobile-menu a { display: block; padding: 13px 4px; color: var(--muted); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .mobile-menu a:last-child { border: 0; }
+
+    /* ---------- Hero ---------- */
+    .hero { position: relative; overflow: hidden; padding: 90px 0 110px; }
+    .hero::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(600px 380px at 12% 8%, rgba(255,87,34,.16), transparent 60%),
+        radial-gradient(640px 400px at 88% 20%, rgba(0,229,255,.12), transparent 60%),
+        radial-gradient(500px 420px at 55% 110%, rgba(255,87,34,.08), transparent 60%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: ""; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(700px 480px at 50% 30%, black, transparent);
+      pointer-events: none;
+    }
+    .hero-grid { position: relative; display: grid; grid-template-columns: 1.15fr .85fr; gap: 54px; align-items: center; }
+    .badge-hero {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,229,255,.08); color: var(--blue);
+      border: 1px solid rgba(0,229,255,.28);
+      padding: 7px 14px; border-radius: 999px; font-size: .82rem; font-weight: 600; margin-bottom: 22px;
+    }
+    .badge-hero::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 12px var(--blue); }
+    .hero h1 { font-size: clamp(2.3rem, 5.2vw, 3.6rem); font-weight: 800; margin-bottom: 20px; }
+    .hero p.lead { color: var(--muted); font-size: 1.06rem; max-width: 560px; }
+    .hero p.lead b { color: var(--text); font-weight: 600; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 34px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 15px 28px; border-radius: 12px; font-weight: 700; font-size: 1rem;
+      border: 0; cursor: pointer; transition: transform .15s, box-shadow .2s, background .2s;
+    }
+    .btn-primary { background: var(--orange); color: #0B0B0B; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,87,34,.4); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+    .avatar-card { justify-self: end; position: relative; width: min(360px, 100%); }
+    .avatar-ring {
+      aspect-ratio: 1; border-radius: 50%;
+      padding: 6px;
+      background: conic-gradient(from 200deg, var(--orange), var(--blue), var(--orange));
+      box-shadow: 0 0 80px rgba(255,87,34,.28);
+    }
+    .avatar-inner {
+      width: 100%; height: 100%; border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #2a2e33, #14161a 70%);
+      display: grid; place-items: center;
+      font-family: 'Montserrat'; font-weight: 800; font-size: 8rem; color: rgba(255,87,34,.28);
+    }
+    .avatar-chip {
+      position: absolute; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 14px; font-size: .82rem; box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .avatar-chip svg { flex: 0 0 auto; }
+    .chip-1 { top: 6%; left: -8%; }
+    .chip-2 { bottom: 12%; right: -6%; }
+    .chip-3 { bottom: 40%; left: -16%; }
+
+    /* ---------- Form ---------- */
+    .eval-wrap { display: grid; grid-template-columns: .85fr 1.15fr; gap: 44px; align-items: start; }
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 34px;
+    }
+    .form-card h3 { font-size: 1.35rem; margin-bottom: 6px; }
+    .form-card > p { color: var(--muted); font-size: .9rem; margin-bottom: 22px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: .86rem; font-weight: 600; margin-bottom: 7px; color: #D7DBE0; }
+    .field label span { color: var(--orange); }
+    .prefs-hint { color: var(--blue); font-size: .78rem; font-weight: 600; margin-left: 6px; transition: color .2s; }
+    .prefs-hint.err { color: var(--danger); }
+    .field input[type="text"], .field input[type="number"], .field select, .field input[type="tel"] {
+      width: 100%; background: #14161a; border: 1px solid var(--border);
+      color: var(--text); border-radius: 10px; padding: 13px 14px; font-size: .98rem; font-family: inherit;
+      outline: none; transition: border .2s, box-shadow .2s;
+    }
+    .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,229,255,.14); }
+    .field select { appearance: none; -webkit-appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; }
+    .field select option { background: #14161a; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pill-group { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { position: relative; }
+    .pill input { position: absolute; opacity: 0; pointer-events: none; }
+    .pill .pill-label, .day-pill label {
+      display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface-2);
+      color: var(--muted); font-size: .86rem; font-weight: 600;
+      padding: 10px 16px; border-radius: 999px; transition: .18s; user-select: none;
+    }
+    .pill input:checked + .pill-label { background: rgba(255,87,34,.14); border-color: var(--orange); color: var(--orange); }
+    .day-pill input { position: absolute; opacity: 0; pointer-events: none; }
+    .day-pill input:checked + label { background: rgba(0,229,255,.14); border-color: var(--blue); color: var(--blue); }
+    .form-errors { display: none; background: rgba(255,82,82,.09); border: 1px solid rgba(255,82,82,.4); color: #FFB4B4; border-radius: 10px; padding: 12px 16px; font-size: .9rem; margin-bottom: 16px; }
+    .form-errors.show { display: block; }
+    .form-errors li { margin-left: 18px; list-style: disc; }
+    .btn-block { width: 100%; margin-top: 6px; padding: 16px; font-size: 1.04rem; }
+
+    .info-list { display: flex; flex-direction: column; gap: 18px; margin-top: 26px; }
+    .info-item { display: flex; gap: 16px; }
+    .info-item .ico {
+      flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px;
+      background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.22);
+      display: grid; place-items: center; color: var(--blue);
+    }
+    .info-item h4 { font-size: 1rem; margin-bottom: 3px; }
+    .info-item p { color: var(--muted); font-size: .9rem; }
+
+    /* ---------- Generated plan / Paywall ---------- */
+    .gen-panel { display: none; margin-top: 30px; }
+    .gen-panel.show { display: block; animation: fadeUp .5s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    .gen-success {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.4);
+      border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
+    }
+    .gen-success svg { flex: 0 0 auto; }
+    .gen-success strong { font-size: 1.02rem; }
+    .gen-success span { color: var(--muted); font-size: .9rem; }
+    .gen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .gen-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+    .gen-card h4 { font-size: .82rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
+    .gen-card p { font-size: 1.05rem; font-weight: 700; }
+    .gen-card p small { display: block; color: var(--muted); font-weight: 500; font-size: .84rem; margin-top: 4px; }
+    .gen-card .accent-orange { color: var(--orange); }
+    .gen-card .accent-blue { color: var(--blue); }
+    .lock-note {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: linear-gradient(135deg, rgba(255,87,34,.1), rgba(0,229,255,.08));
+      border: 1px dashed rgba(255,255,255,.2); border-radius: 14px; padding: 20px;
+    }
+    .lock-note p { font-size: .95rem; color: #D7DBE0; margin-bottom: 10px; }
+    .lock-note p b { color: var(--text); }
+    .send-box {
+      margin-top: 18px;
+      background: linear-gradient(135deg, rgba(0,229,255,.07), rgba(255,87,34,.06));
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 22px;
+    }
+    .send-title { font-size: .98rem; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+    .send-title b { color: var(--blue); }
+    .send-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .send-actions .btn { flex: 1; min-width: 200px; }
+    .link-internal { color: var(--blue); font-size: .9rem; font-weight: 600; border-bottom: 1px dashed var(--blue); }
+
+    /* ---------- Pricing ---------- */
+    #planes { position: relative; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 44px; align-items: stretch; }
+    .price-card {
+      position: relative; display: flex; flex-direction: column;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; padding: 32px 28px; transition: transform .2s, box-shadow .25s;
+    }
+    .price-card:not(.featured):hover { transform: translateY(-6px); box-shadow: 0 24px 50px rgba(0,0,0,.4); }
+    .price-card.featured {
+      background: linear-gradient(180deg, #232020, #1c1816 60%);
+      border: 1px solid var(--orange);
+      box-shadow: 0 0 0 1px rgba(255,87,34,.14), 0 24px 60px rgba(255,87,34,.16);
+      transform: scale(1.045);
+    }
+    .featured-badge {
+      position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+      background: var(--orange); color: #0B0B0B; font-weight: 800; font-size: .74rem;
+      letter-spacing: .12em; padding: 7px 18px; border-radius: 999px; white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(255,87,34,.45);
+    }
+    .plan-name { font-size: 1.12rem; font-weight: 700; }
+    .plan-tag {
+      display: inline-block; margin-top: 8px; font-size: .72rem; font-weight: 700;
+      color: var(--blue); background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.3);
+      padding: 4px 12px; border-radius: 999px;
+    }
+    .plan-price { margin: 22px 0 4px; }
+    .plan-price .cur { font-size: 1.05rem; color: var(--muted); font-weight: 600; }
+    .plan-price .amount { font-size: 2.6rem; font-weight: 800; font-family: 'Montserrat'; line-height: 1; }
+    .plan-price .per { font-size: .95rem; color: var(--muted); font-weight: 600; }
+    .featured .plan-price .amount { color: var(--orange); }
+    .price-sub { color: var(--muted); font-size: .86rem; margin-bottom: 6px; }
+    .price-total { color: var(--text); font-size: .9rem; font-weight: 600; margin-bottom: 18px; }
+    .plan-features { flex: 1; display: flex; flex-direction: column; gap: 11px; margin: 8px 0 24px; }
+    .plan-features li { display: flex; gap: 10px; font-size: .9rem; color: #CDD2D8; align-items: flex-start; }
+    .plan-features svg { flex: 0 0 auto; margin-top: 2px; }
+    .featured .plan-features li { color: var(--text); }
+    .btn-plan {
+      width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; font-size: .98rem;
+      border: 0; cursor: pointer; transition: transform .15s, box-shadow .2s;
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+    }
+    .btn-plan:hover { transform: translateY(-2px); }
+    .featured .btn-plan { background: var(--orange); color: #0B0B0B; }
+    .featured .btn-plan:hover { box-shadow: 0 12px 32px rgba(255,87,34,.4); }
+    .plans-footnote {
+      margin-top: 34px; text-align: center;
+      background: rgba(255,255,255,.03); border: 1px dashed var(--border);
+      border-radius: 12px; padding: 16px 20px; color: var(--muted); font-size: .88rem;
+    }
+    .payment-note {
+      margin-top: 32px; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+      font-size: 1.08rem; font-weight: 700; color: var(--text);
+      background: linear-gradient(135deg, rgba(255,87,34,.14), rgba(0,229,255,.1));
+      border: 1px solid rgba(255,87,34,.45);
+      border-radius: 14px; padding: 18px 24px;
+      box-shadow: 0 10px 30px rgba(255,87,34,.08);
+    }
+    .payment-note svg { flex: 0 0 auto; color: var(--orange); }
+    .payment-wa {
+      background: linear-gradient(90deg, var(--orange), var(--blue));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      font-weight: 800; text-decoration: underline;
+      text-decoration-color: rgba(255,87,34,.45); text-underline-offset: 4px;
+    }
+    .payment-wa:hover { filter: brightness(1.2); }
+
+    /* ---------- Contact ---------- */
+    .contact-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+    .contact-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 30px; display: flex; gap: 18px; align-items: flex-start; transition: border .2s, transform .2s;
+    }
+    .contact-card:hover { transform: translateY(-4px); border-color: var(--blue); }
+    .contact-card .ico {
+      flex: 0 0 52px; width: 52px; height: 52px; border-radius: 14px;
+      background: rgba(255,87,34,.1); border: 1px solid rgba(255,87,34,.28);
+      display: grid; place-items: center; color: var(--orange);
+    }
+    .contact-card h3 { font-size: 1.12rem; margin-bottom: 6px; }
+    .contact-card p { color: var(--muted); font-size: .92rem; }
+
+    /* ---------- Footer ---------- */
+    footer { border-top: 1px solid var(--border); padding: 34px 0 max(34px, env(safe-area-inset-bottom, 0px)); margin-top: 40px; }
+    .footer-grid { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .footer-grid p { color: var(--muted); font-size: .86rem; }
+    .footer-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-family: 'Montserrat', sans-serif; }
+    .footer-tagline { color: var(--muted); font-weight: 600; font-size: .9rem; font-family: 'Inter', sans-serif; }
+    .footer-brand .brand-name { font-size: clamp(1rem, 2.6vw, 1.2rem); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 960px) {
+      .hero-grid, .eval-wrap, .contact-wrap { grid-template-columns: 1fr; }
+      .avatar-card { justify-self: center; margin-top: 20px; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
+      .price-card.featured { transform: none; }
+    }
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .hamburger { display: block; }
+      .mobile-menu.open { display: block; }
+      .nav { height: 64px; }
+      .day-pill label, .pill .pill-label { min-height: 46px; align-items: center; }
+      .field input[type="text"], .field input[type="number"], .field input[type="tel"], .field select { font-size: 16px; }
+      .row-3 { grid-template-columns: 1fr 1fr; }
+      .row-3 .span-2 { grid-column: span 2; }
+      .row-2 { grid-template-columns: 1fr; }
+      .gen-grid { grid-template-columns: 1fr; }
+      .section { padding: 68px 0; }
+      .hero { padding: 58px 0 72px; }
+      .chip-1 { left: 2%; } .chip-2 { right: 2%; } .chip-3 { display: none; }
+    }
+    @media (max-width: 460px) {
+      .row-3 { grid-template-columns: 1fr; }
+      .row-3 .span-2 { grid-column: span 1; }
+      .avatar-inner { font-size: 6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#inicio" aria-label="nocito.coach">
+        <span class="brand-name">nocito.coach</span>
+      </a>
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="#inicio">Sobre mí</a>
+        <a href="#evaluacion">Ingresar datos</a>
+        <a href="#planes">Planes y precios</a>
+        <a href="#contacto">Contacto</a>
+        <a class="nav-cta" href="#evaluacion">Comencemos</a>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="container mobile-menu" id="mobileMenu">
+      <a href="#inicio">Sobre mí</a>
+      <a href="#evaluacion">Ingresar datos</a>
+      <a href="#planes">Planes y precios</a>
+      <a href="#contacto">Contacto</a>
+      <a class="nav-cta" href="#evaluacion" style="display:inline-block;margin-top:14px;">Comencemos</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="inicio">
+      <div class="container hero-grid">
+        <div>
+          <span class="badge-hero">Entrenamiento + Nutrición personalizada</span>
+          <h1>Transforma tu cuerpo con <span class="grad-text">ciencia y experiencia real</span></h1>
+          <p class="lead">
+            Mi nombre es <b>Jose</b>, tengo 50 años y llevo más de 15 años entrenando intensamente en el gimnasio.
+            A lo largo de los años me he formado a través de cursos, charlas y lecturas especializadas
+            sobre musculación, hipertrofia, pérdida de grasa y nutrición deportiva. Actualmente finalizo mi
+            certificación como Personal Trainer en <b>idaClass Academy</b>. Mi objetivo es acompañarte a lograr tu
+            mejor versión física de forma <b>eficiente, segura y adaptada a tu estilo de vida</b>.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#evaluacion">Comencemos</a>
+            <a class="btn btn-outline" href="#planes">Ver planes y precios</a>
+          </div>
+        </div>
+
+        <div class="avatar-card">
+          <div class="avatar-ring"><div class="avatar-inner">J</div></div>
+          <div class="avatar-chip chip-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
+            Certificación Personal Training
+          </div>
+          <div class="avatar-chip chip-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2"><path d="M4 17l4-4 4 4 4-4 4 4"/><path d="M4 12l4-4 4 4 4-4 4 4"/></svg>
+            Hipertrofia y pérdida de grasa
+          </div>
+          <div class="avatar-chip chip-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            Plan 100% a tu medida
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FORMULARIO DIAGNÓSTICO ============ -->
+    <section class="section" id="evaluacion" style="padding-top:40px;">
+      <div class="container">
+        <span class="section-label">Diagnóstico</span>
+        <h2 class="section-title">Evaluá tu caso y recibí un <span class="grad-text">plan sugerido</span></h2>
+        <p class="section-sub">Completá tus datos y en segundos obtendrás un resumen de la rutina que mejor se adapta a tu objetivo, tu experiencia y tu disponibilidad semanal.</p>
+
+        <div class="eval-wrap">
+          <form id="evalForm" class="form-card" novalidate>
+            <h3>Ingresá tus datos</h3>
+            <p>Los datos se usan solo para diseñar tu plan sugerido y armar el mensaje de WhatsApp.</p>
+
+            <div class="form-errors" id="formErrors"></div>
+
+            <div class="field">
+              <label for="name">Nombre completo <span>*</span></label>
+              <input type="text" id="name" placeholder="Ej: Martín Gómez" autocomplete="name">
+            </div>
+
+            <div class="field">
+              <label for="contact">WhatsApp o Email <span>*</span></label>
+              <input type="text" id="contact" placeholder="Ej: +54 9 11 5555 5555 o tu@email.com" autocomplete="email">
+            </div>
+
+            <div class="row-3">
+              <div class="field">
+                <label for="age">Edad <span>*</span></label>
+                <input type="number" id="age" min="14" max="90" placeholder="30">
+              </div>
+              <div class="field">
+                <label for="height">Altura (cm) <span>*</span></label>
+                <input type="number" id="height" min="130" max="230" placeholder="175">
+              </div>
+              <div class="field">
+                <label for="weight">Peso (kg) <span>*</span></label>
+                <input type="number" id="weight" min="35" max="250" step="0.1" placeholder="80">
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="objective">Objetivo principal <span>*</span></label>
+                <select id="objective">
+                  <option value="" disabled selected>Seleccioná tu objetivo</option>
+                  <option value="ganar-masa">Ganar masa muscular</option>
+                  <option value="perder-grasa">Perder grasa corporal</option>
+                  <option value="recomposicion">Recomposición corporal</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="experience">Experiencia en el gimnasio <span>*</span></label>
+                <select id="experience">
+                  <option value="" disabled selected>Seleccioná tu nivel</option>
+                  <option value="principiante">Principiante</option>
+                  <option value="intermedio">Intermedio</option>
+                  <option value="avanzado">Avanzado</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Días disponibles para entrenar <span>*</span></label>
+              <div class="pill-group day-pill">
+                <div class="day-pill"><input type="radio" name="days" value="3" id="d3"><label for="d3">3 días</label></div>
+                <div class="day-pill"><input type="radio" name="days" value="4" id="d4"><label for="d4">4 días</label></div>
+                <div class="day-pill"><input type="radio" name="days" value="5" id="d5"><label for="d5">5 días</label></div>
+                <div class="day-pill"><input type="radio" name="days" value="6" id="d6"><label for="d6">6 días</label></div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Preferencias alimentarias / Restricciones (opcional) <span class="prefs-hint" id="prefsHint">Máximo 2</span></label>
+              <div class="pill-group">
+                <div class="pill"><input type="checkbox" id="p-omnivoro" value="Omnívoro"><label class="pill-label" for="p-omnivoro">Omnívoro</label></div>
+                <div class="pill"><input type="checkbox" id="p-vegetariano" value="Vegetariano"><label class="pill-label" for="p-vegetariano">Vegetariano</label></div>
+                <div class="pill"><input type="checkbox" id="p-vegano" value="Vegano"><label class="pill-label" for="p-vegano">Vegano</label></div>
+                <div class="pill"><input type="checkbox" id="p-celiaco" value="Celíaco"><label class="pill-label" for="p-celiaco">Celíaco</label></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Generar Plan Sugerido</button>
+          </form>
+
+          <div>
+            <div class="info-list">
+              <div class="info-item">
+                <div class="ico">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 6l14 12M19 6L5 18"/></svg>
+                </div>
+                <div>
+                  <h4>Rutina alineada a tu nivel</h4>
+                  <p>Principiante, intermedio y avanzado tienen frecuencias y selección de ejercicios distintas.</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="ico">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5l12 14H4zM20 5v14"/></svg>
+                </div>
+                <div>
+                  <h4>Enfoque según tu objetivo</h4>
+                  <p>Hipertrofia, pérdida de grasa o recomposición: cada objetivo modifica series, repes y cardio.</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="ico">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div>
+                  <h4>Nutrición adaptada a vos</h4>
+                  <p>Omnívoro, vegetariano, celíaco o keto: la pauta se ajusta a tus restricciones alimentarias.</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="ico">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div>
+                  <h4>Seguimiento por WhatsApp</h4>
+                  <p>Tus ajustes semanales y la comunicación directa conmigo se resuelven rápido y simple.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos recibidos: el plan viaja directo a Jose -->
+        <div class="gen-panel" id="genPanel">
+          <div class="gen-success">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
+            <div><strong>Datos recibidos correctamente</strong><br><span>Tu plan quedó registrado. Elegí tu asesoría y al abonar enviá el comprobante a Jose por WhatsApp o email.</span></div>
+          </div>
+
+          <div class="lock-note">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2" style="flex:0 0 auto;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div>
+<p><b>Tu rutina y tu plan de alimentación se entregan personalmente al confirmar el pago.</b><br>
+Al elegir tu plan y abonar, enviás el comprobante con tus datos. Jose confirma y te hace llegar tu rutina y tu pauta nutricional.</p>
+            </div>
+          </div>
+
+          <div class="send-box">
+            <p class="send-title">Ya abonaste? Enviá tu comprobante y tus datos a Jose</p>
+            <div class="send-actions">
+              <button class="btn btn-primary" id="sendWhatsappBtn" type="button">Enviar por WhatsApp</button>
+              <button class="btn btn-outline" id="sendEmailBtn" type="button">Enviar por Email</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PLANES Y PRECIOS ============ -->
+    <section class="section" id="planes" style="padding-top:40px;">
+      <div class="container">
+        <div style="text-align:center;">
+          <span class="section-label" style="justify-content:center;">Planes y asesorías</span>
+          <h2 class="section-title">Elegí tu plan de <span class="grad-text">seguimiento personalizado</span></h2>
+          <p class="section-sub" style="margin-inline:auto;">El plan sugerido ya está generado. Desbloqueá el acceso completo eligiendo el plan que mejor se ajuste a tu objetivo, con precios y bonificaciones en pesos argentinos.</p>
+        </div>
+
+        <div class="pricing-grid">
+
+          <!-- Plan 1 -->
+          <article class="price-card">
+            <div>
+              <h3 class="plan-name">Plan Inicial</h3>
+              <span class="plan-tag">Ideal para empezar</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">55.000</span> <span class="per">ARS · pago único</span></div>
+              <p class="price-sub">1 mes</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Evaluación diagnóstica inicial</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina 100% personalizada (PDF imprimible A4)</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Ajustes semanales y seguimiento vía WhatsApp</li>
+            </ul>
+            <button class="btn-plan" data-plan="0">Elegir este plan</button>
+          </article>
+
+          <!-- Plan 2 -->
+          <article class="price-card">
+            <div>
+              <h3 class="plan-name">Plan Transformación</h3>
+              <span class="plan-tag">~10% de ahorro</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">49.500</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Total en 1 pago de <b>$99.000 ARS</b></p>
+              <p class="price-total">2 meses de seguimiento</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Todo lo del Plan Inicial</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Ajustes progresivos de cargas</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Soporte continuo por 60 días</li>
+            </ul>
+            <button class="btn-plan" data-plan="1">Elegir este plan</button>
+          </article>
+
+          <!-- Plan 3 DESTACADO -->
+          <article class="price-card featured">
+            <span class="featured-badge">MÁS POPULAR</span>
+            <div>
+              <h3 class="plan-name">Plan Hábito &amp; Resultados</h3>
+              <span class="plan-tag">~20% de ahorro · Mejor valor</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">44.000</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Total en 1 pago de <b>$132.000 ARS</b></p>
+              <p class="price-total">3 meses completos de transformación</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Todo lo anterior por 90 días completos</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Cobro por adelantado con descuento garantizado</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Seguimiento de la escala de esfuerzo</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Dos videollamadas por semana</li>
+            </ul>
+            <button class="btn-plan" data-plan="2">Elegir este plan</button>
+          </article>
+        </div>
+
+        <p class="payment-note">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+          Una vez hecho el pago, enviar comprobante al número de Whatsapp
+          <a class="payment-wa" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20te%20env%C3%ADo%20el%20comprobante%20de%20mi%20pago." target="_blank" rel="noopener">+54 9 2616 22-4718</a>
+        </p>
+        <p class="plans-footnote">Los planes multimes se abonan al contado o en 1 pago mediante transferencia/tarjeta al momento de inscribirse para asegurar la bonificación.</p>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTO ============ -->
+    <section class="section" id="contacto" style="padding-top:40px;">
+      <div class="container">
+        <span class="section-label">Contacto</span>
+        <h2 class="section-title">Hablemos de tu <span class="grad-text">transformación</span></h2>
+        <p class="section-sub">Resolvé tus dudas directamente por WhatsApp o escribime por correo. Respondo personalmente, sin intermediarios.</p>
+
+        <div class="contact-wrap">
+          <a class="contact-card" id="whatsappLinkMain" href="#" target="_blank" rel="noopener">
+            <div class="ico">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <h3>WhatsApp directo</h3>
+              <p>Escribime y arrancamos con tu evaluación gratuita.</p>
+            </div>
+          </a>
+          <a class="contact-card" id="emailLinkMain" href="mailto:" target="_blank" rel="noopener">
+            <div class="ico">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+            </div>
+            <div>
+              <h3>Correo electrónico</h3>
+              <p>Para consultas detalladas o coordinación de pagos por transferencia.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <span class="brand-name">nocito.coach</span>
+        <span class="footer-tagline">· Jose, Personal Trainer</span>
+      </div>
+      <p>@2026 <span id="yearFoot"></span> nocito.coach · Entrenamiento y nutrición personalizada</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var WHATSAPP_NUMBER = "5492616224718";
+      var EMAIL = "jose@nocito.coach";
+
+      /* ---------- Links de pago Mercado Pago (Checkout Pro) ---------- */
+      var PAYMENT_LINKS = [
+        "https://mpago.li/1xgj3x3",
+        "https://mpago.li/1QXUD4v",
+        "https://mpago.li/2ixPES8"
+      ];
+      var PLAN_NAMES = [
+        "Plan Inicial (1 Mes) - $55.000 ARS",
+        "Plan Transformación (2 Meses) - $99.000 ARS",
+        "Plan Hábito & Resultados (3 Meses) - $132.000 ARS"
+      ];
+
+      var OBJECTIVE_LABELS = {
+        "ganar-masa": "Ganar masa muscular",
+        "perder-grasa": "Perder grasa corporal",
+        "recomposicion": "Recomposición corporal"
+      };
+      var EXPERIENCE_LABELS = {
+        "principiante": "Principiante",
+        "intermedio": "Intermedio",
+        "avanzado": "Avanzado"
+      };
+
+      var FOCUS = {
+        "ganar-masa": "Hipertrofia Aislada",
+        "perder-grasa": "Hipertrofia + Quema de grasa",
+        "recomposicion": "Recomposición Corporal"
+      };
+
+      function repsFor(obj) {
+        if (obj === "perder-grasa") return "10-15";
+        if (obj === "ganar-masa") return "8-12";
+        return "8-12";
+      }
+      function cardioNote(obj) {
+        if (obj === "perder-grasa") return 20;
+        if (obj === "recomposicion") return 10;
+        return 0;
+      }
+
+      function pushExercises(o, dIndex) {
+        var r = repsFor(o);
+        var c = cardioNote(o);
+        var list = [
+          ["Press banca con barra", "4", r, "90"],
+          ["Press inclinado con mancuernas", "3", r, "75"],
+          ["Aperturas con mancuernas", "3", "12-15", "60"],
+          ["Press militar con barra", "3", r, "75"],
+          ["Elevaciones laterales con mancuernas", "3", "12-15", "60"],
+          ["Extensiones de tríceps en polea", "3", r, "60"],
+        ];
+        if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
+        return list;
+      }
+
+      function pullExercises(o) {
+        var r = repsFor(o);
+        var c = cardioNote(o);
+        var list = [
+          ["Dominadas asistidas o jalón al pecho", "4", r, "90"],
+          ["Remo con barra", "4", r, "90"],
+          ["Remo sentado en polea agarre angosto", "3", r, "75"],
+          ["Jalón al frente agarre abierto", "3", r, "75"],
+          ["Curl con barra", "3", r, "60"],
+          ["Curl martillo alternado", "3", "10-12", "60"],
+        ];
+        if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
+        return list;
+      }
+
+      function legsExercises(o) {
+        var r = repsFor(o);
+        var c = cardioNote(o);
+        var list = [
+          ["Sentadilla con barra", "4", r, "120"],
+          ["Prensa 45°", "4", r, "90"],
+          ["Peso muerto rumano", "3", "8-10", "90"],
+          ["Extensión de cuádriceps", "3", r, "60"],
+          ["Curl femoral acostado", "3", r, "60"],
+          ["Elevación de gemelos de pie", "4", "12-15", "45"],
+        ];
+        if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
+        return list;
+      }
+
+      function upperExercises(o) {
+        var r = repsFor(o);
+        var list = [
+          ["Press banca con barra", "4", r, "90"],
+          ["Dominadas o jalón al pecho", "4", r, "90"],
+          ["Press inclinado con mancuernas", "3", r, "75"],
+          ["Remo con barra", "3", r, "90"],
+          ["Press militar", "3", r, "75"],
+          ["Curl con barra + Extensión de tríceps en polea", "3", r, "60"],
+        ];
+        return list;
+      }
+
+      function lowerExercises(o) {
+        var r = repsFor(o);
+        var c = cardioNote(o);
+        var list = [
+          ["Sentadilla con barra", "4", r, "120"],
+          ["Peso muerto rumano", "4", "8-10", "90"],
+          ["Prensa 45°", "3", r, "90"],
+          ["Extensión de cuádriceps", "3", r, "60"],
+          ["Curl femoral acostado", "3", r, "60"],
+          ["Elevación de gemelos sentado", "4", "12-15", "45"],
+        ];
+        if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
+        return list;
+      }
+
+      function fullBodyExercises(o, variant) {
+        var r = repsFor(o);
+        var c = cardioNote(o);
+        var list;
+        if (variant === "A") {
+          list = [
+            ["Sentadilla con barra", "3", r, "90"],
+            ["Press banca con barra", "3", r, "90"],
+            ["Remo con barra", "3", r, "90"],
+            ["Press militar", "2", r, "75"],
+            ["Extensión de tríceps en polea", "2", r, "60"],
+            ["Plancha abdominal", "3", "45-60 seg", "45"],
+          ];
+        } else {
+          list = [
+            ["Peso muerto rumano", "3", r, "120"],
+            ["Press inclinado con mancuernas", "3", r, "90"],
+            ["Dominadas o jalón al pecho", "3", r, "90"],
+            ["Curl de bíceps", "2", r, "60"],
+            ["Curl femoral acostado", "3", r, "60"],
+            ["Elevación de piernas colgado", "3", "10-15", "45"],
+          ];
+        }
+        if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
+        return list;
+      }
+
+      function chestExercises(o) { return pushExercises(o, 0).slice(0, 4); }
+      function backExercises(o) { return pullExercises(o).slice(0, 4); }
+      function shoulderExercises(o) {
+        var r = repsFor(o);
+        return [
+          ["Press militar con barra", "4", r, "90"],
+          ["Elevaciones laterales", "4", "12-15", "60"],
+          ["Pájaros (deltoides posterior)", "3", "12-15", "60"],
+          ["Elevaciones frontales", "3", "10-12", "60"],
+        ];
+      }
+      function armsExercises(o) {
+        var r = repsFor(o);
+        return [
+          ["Curl con barra", "4", r, "60"],
+          ["Curl martillo alternado", "3", "10-12", "60"],
+          ["Extensión de tríceps en polea con soga", "4", r, "60"],
+          ["Fondos en banco", "3", "10-15", "60"],
+          ["Curl en banco Scott", "3", r, "60"],
+          ["Extensión de tríceps por encima de la cabeza", "3", r, "60"],
+        ];
+      }
+
+      function buildRoutine(objetivo, experiencia, dias) {
+        var o = objetivo, exp = experiencia, d = Number(dias);
+        var r = repsFor(o);
+        var days = [];
+        var splitName = "";
+
+        if (exp === "principiante") {
+          if (d === 3) {
+            splitName = "Full Body A / B / C";
+            days = [
+              { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
+              { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+              { name: "Día 3 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
+            ];
+          } else if (d === 4) {
+            splitName = "Upper / Lower ×2";
+            days = [
+              { name: "Día 1 · Upper A", focus: "Tren superior", items: upperExercises(o) },
+              { name: "Día 2 · Lower A", focus: "Tren inferior", items: lowerExercises(o) },
+              { name: "Día 3 · Upper B", focus: "Tren superior · Variantes", items: upperExercises(o) },
+              { name: "Día 4 · Lower B", focus: "Tren inferior · Variantes", items: lowerExercises(o) },
+            ];
+          } else if (d === 5) {
+            splitName = "Full Body + Upper / Lower mix";
+            days = [
+              { name: "Día 1 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+              { name: "Día 2 · Upper", focus: "Tren superior", items: upperExercises(o) },
+              { name: "Día 3 · Full Body B", focus: "Cuerpo completo", items: fullBodyExercises(o, "B") },
+              { name: "Día 4 · Lower", focus: "Tren inferior", items: lowerExercises(o) },
+              { name: "Día 5 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+            ];
+          } else {
+            splitName = "Upper / Lower alternado";
+            days = [
+              { name: "Día 1 · Upper A", focus: "Tren superior", items: upperExercises(o) },
+              { name: "Día 2 · Lower A", focus: "Tren inferior", items: lowerExercises(o) },
+              { name: "Día 3 · Upper B", focus: "Tren superior · Variantes", items: upperExercises(o) },
+              { name: "Día 4 · Lower B", focus: "Tren inferior · Variantes", items: lowerExercises(o) },
+              { name: "Día 5 · Upper A", focus: "Tren superior", items: upperExercises(o) },
+              { name: "Día 6 · Lower A", focus: "Tren inferior", items: lowerExercises(o) },
+            ];
+          }
+        } else if (exp === "intermedio") {
+          if (d === 3) {
+            splitName = "Push / Pull / Legs";
+            days = [
+              { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
+              { name: "Día 2 · Pull", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 3 · Legs", focus: "Piernas · Glúteos", items: legsExercises(o) },
+            ];
+          } else if (d === 4) {
+            splitName = "Upper / Lower ×2";
+            days = [
+              { name: "Día 1 · Upper A", focus: "Tren superior intenso", items: upperExercises(o) },
+              { name: "Día 2 · Lower A", focus: "Tren inferior intenso", items: lowerExercises(o) },
+              { name: "Día 3 · Upper B", focus: "Tren superior · Variantes", items: upperExercises(o) },
+              { name: "Día 4 · Lower B", focus: "Tren inferior · Variantes", items: lowerExercises(o) },
+            ];
+          } else if (d === 5) {
+            splitName = "Push / Pull / Legs + Upper / Lower";
+            days = [
+              { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
+              { name: "Día 2 · Pull", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 3 · Legs", focus: "Piernas · Glúteos", items: legsExercises(o) },
+              { name: "Día 4 · Upper", focus: "Tren superior", items: upperExercises(o) },
+              { name: "Día 5 · Lower", focus: "Tren inferior", items: lowerExercises(o) },
+            ];
+          } else {
+            splitName = "Push / Pull / Legs ×2";
+            days = [
+              { name: "Día 1 · Push A", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
+              { name: "Día 2 · Pull A", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 3 · Legs A", focus: "Piernas · Glúteos", items: legsExercises(o) },
+              { name: "Día 4 · Push B", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
+              { name: "Día 5 · Pull B", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 6 · Legs B", focus: "Piernas · Glúteos", items: legsExercises(o) },
+            ];
+          }
+        } else {
+          if (d === 3) {
+            splitName = "Push / Pull / Legs · Intensivo";
+            days = [
+              { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
+              { name: "Día 2 · Pull", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 3 · Legs", focus: "Piernas · Glúteos", items: legsExercises(o) },
+            ];
+          } else if (d === 4) {
+            splitName = "Upper / Lower ×2 Avanzado";
+            days = [
+              { name: "Día 1 · Upper A", focus: "Tren superior con sobrecarga", items: upperExercises(o) },
+              { name: "Día 2 · Lower A", focus: "Tren inferior con sobrecarga", items: lowerExercises(o) },
+              { name: "Día 3 · Upper B", focus: "Tren superior con sobrecarga", items: upperExercises(o) },
+              { name: "Día 4 · Lower B", focus: "Tren inferior con sobrecarga", items: lowerExercises(o) },
+            ];
+          } else if (d === 5) {
+            splitName = "Weider · Pecho / Espalda / Piernas / Hombros / Brazos";
+            days = [
+              { name: "Día 1 · Pecho + Abdomen", focus: "Pecho · Core", items: chestExercises(o).concat([["Plancha con peso", "3", "45-60 seg", "45"]]) },
+              { name: "Día 2 · Espalda", focus: "Espalda · Dorsales", items: backExercises(o) },
+              { name: "Día 3 · Piernas", focus: "Piernas · Glúteos", items: legsExercises(o) },
+              { name: "Día 4 · Hombros + Trampa", focus: "Hombros · Deltoides", items: shoulderExercises(o) },
+              { name: "Día 5 · Brazos + Cardio", focus: "Bíceps · Tríceps", items: armsExercises(o) },
+            ];
+          } else {
+            splitName = "Push / Pull / Legs ×2 · Avanzado";
+            days = [
+              { name: "Día 1 · Push A", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
+              { name: "Día 2 · Pull A", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 3 · Legs A", focus: "Piernas · Glúteos", items: legsExercises(o) },
+              { name: "Día 4 · Push B", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
+              { name: "Día 5 · Pull B", focus: "Espalda · Bíceps", items: pullExercises(o) },
+              { name: "Día 6 · Legs B", focus: "Piernas · Glúteos", items: legsExercises(o) },
+            ];
+          }
+        }
+
+        var label = d + " Días " + splitName + " / Enfoque: " + FOCUS[o];
+        return { label: label, days: days, splitName: splitName };
+      }
+
+      function buildNutrition(objetivo, weight, prefs) {
+        var w = Number(weight) || 75;
+        var cal, prot, cg, gr;
+        if (objetivo === "ganar-masa") {
+          cal = Math.round(w * 36); prot = Math.round(w * 1.9); cg = Math.round(w * 4.5); gr = Math.round(w * 0.9);
+        } else if (objetivo === "perder-grasa") {
+          cal = Math.round(w * 26); prot = Math.round(w * 2.2); cg = Math.round(w * 2.2); gr = Math.round(w * 0.9);
+        } else {
+          cal = Math.round(w * 31); prot = Math.round(w * 2.1); cg = Math.round(w * 3.2); gr = Math.round(w * 0.9);
+        }
+
+        var meat;
+        if (prefs.indexOf("Vegano") !== -1) {
+          meat = "Soja texturizada, legumbres, quinoa, tofu, tempeh y proteína vegetal";
+        } else if (prefs.indexOf("Vegetariano") !== -1) {
+          meat = "Tofu, tempeh, legumbres, proteína vegetal, huevos y lácteos";
+        } else {
+          meat = "Pollo, carne magra, pescado, huevos y lácteos";
+        }
+        var carbsNote = prefs.indexOf("Celíaco") !== -1 ? " (solo alimentos sin TACC: arroz, papa, batata, quinoa, avena certificada)" : "";
+
+        return {
+          cal: cal, prot: prot, carbs: cg, fat: gr,
+          proteinSources: meat + carbsNote,
+          meals: [
+            [ "Desayuno", "Avena/pan integral" + (meat.indexOf("Tofu") !== -1 ? carbsNote : "") + " + proteína + fruta y frutos secos" ],
+            [ "Almuerzo", "Porción de proteína + arroz/papa/batata o legumbres + vegetales + aceite de oliva" ],
+            [ "Merienda", "Yogur griego o licuado con proteína + banana + 1 porción de frutos secos" ],
+            [ "Cena", "Proteína + vegetales abundantes + grasa saludable (palta/aceite)" ]
+          ]
+        };
+      }
+
+      /* ---------- UI helpers ---------- */
+      function $id(id) { return document.getElementById(id); }
+
+      function getPreferenceList() {
+        var prefs = [];
+        ["p-omnivoro", "p-vegetariano", "p-vegano", "p-celiaco"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el && el.checked) prefs.push(el.value);
+        });
+        if (prefs.length === 0) prefs.push("Omnívoro");
+        return prefs;
+      }
+
+      function getCheckedPrefs() {
+        return document.querySelectorAll('.pill input[type="checkbox"]:checked');
+      }
+
+      document.querySelectorAll('.pill input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener("change", function () {
+          var checked = getCheckedPrefs();
+          if (checked.length > 2) {
+            cb.checked = false;
+            var hint = document.getElementById("prefsHint");
+            hint.textContent = "Máximo 2 opciones";
+            hint.classList.add("err");
+            setTimeout(function () {
+              hint.textContent = "Máximo 2";
+              hint.classList.remove("err");
+            }, 1600);
+          }
+        });
+      });
+
+      function getDays() {
+        var checked = document.querySelector('input[name="days"]:checked');
+        return checked ? checked.value : "";
+      }
+
+      function cleanErrors() {
+        var box = $id("formErrors");
+        box.classList.remove("show");
+        box.innerHTML = "";
+      }
+
+      function showError(msg) {
+        var box = $id("formErrors");
+        box.innerHTML = "";
+        msg.forEach(function (m) {
+          var li = document.createElement("li");
+          li.textContent = m;
+          box.appendChild(li);
+        });
+        box.classList.add("show");
+      }
+
+      /* ---------- Form submit ---------- */
+      var form = $id("evalForm");
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        cleanErrors();
+
+        var name = $id("name").value.trim();
+        var contact = $id("contact").value.trim();
+        var age = $id("age").value.trim();
+        var height = $id("height").value.trim();
+        var weight = $id("weight").value.trim();
+        var objective = $id("objective").value;
+        var experience = $id("experience").value;
+        var days = getDays();
+
+        var errors = [];
+        if (!name) errors.push("Ingresá tu nombre completo.");
+        if (!contact) errors.push("Ingresá tu WhatsApp o email.");
+        if (!age) errors.push("Ingresá tu edad.");
+        if (!height) errors.push("Ingresá tu altura en cm.");
+        if (!weight) errors.push("Ingresá tu peso en kg.");
+        if (!objective) errors.push("Seleccioná tu objetivo principal.");
+        if (!experience) errors.push("Seleccioná tu experiencia en el gimnasio.");
+        if (!days) errors.push("Seleccioná cuántos días podés entrenar.");
+
+        if (errors.length) { showError(errors); return; }
+
+        var prefs = getPreferenceList();
+        var routine = buildRoutine(objective, experience, days);
+        var nutrition = buildNutrition(objective, weight, prefs);
+
+        var bmi = (Number(weight) / Math.pow(Number(height) / 100, 2)).toFixed(1);
+
+        var payload = {
+          fecha: new Date().toISOString().slice(0, 10),
+          name: name,
+          contact: contact,
+          age: Number(age),
+          height: Number(height),
+          weight: Number(weight),
+          objective: OBJECTIVE_LABELS[objective],
+          objectiveKey: objective,
+          experience: EXPERIENCE_LABELS[experience],
+          experienceKey: experience,
+          days: Number(days),
+          prefs: prefs,
+          bmi: bmi,
+          routineLabel: routine.label,
+          routine: routine,
+          nutrition: nutrition
+        };
+
+        try { localStorage.setItem("nocito_plan", JSON.stringify(payload)); } catch (err) { /* sin almacenamiento */ }
+
+        $id("genPanel").classList.add("show");
+
+        setTimeout(function () {
+          $id("planes").scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 350);
+      });
+
+      /* ---------- Validación + pago Mercado Pago ---------- */
+      function readDiagnostic() {
+        return {
+          name: $id("name").value.trim(),
+          contact: $id("contact").value.trim(),
+          age: $id("age").value.trim(),
+          weight: $id("weight").value.trim(),
+          height: $id("height").value.trim(),
+          objective: $id("objective").value,
+          experience: $id("experience").value,
+          days: getDays(),
+          prefs: getPreferenceList(),
+          savedAt: new Date().toISOString()
+        };
+      }
+
+      function validateDiagnostic(req) {
+        var errors = [];
+        if (!req.name) errors.push("Ingresá tu nombre completo.");
+        if (!req.contact) errors.push("Ingresá tu WhatsApp o email.");
+        if (!req.age) errors.push("Ingresá tu edad.");
+        if (!req.weight) errors.push("Ingresá tu peso en kg.");
+        if (!req.height) errors.push("Ingresá tu altura en cm.");
+        if (!req.objective) errors.push("Seleccioná tu objetivo principal.");
+        return errors;
+      }
+
+      document.querySelectorAll(".btn-plan").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var planIndex = Number(btn.getAttribute("data-plan"));
+          var data = readDiagnostic();
+          var errors = validateDiagnostic(data);
+
+          if (errors.length) {
+            showError(errors);
+            $id("evaluacion").scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+
+          try {
+            localStorage.setItem("nocito_diagnostico", JSON.stringify(data));
+            localStorage.setItem("nocito_pagado", "true");
+            localStorage.setItem("nocito_plan_elegido", PLAN_NAMES[planIndex]);
+          } catch (err) {}
+
+          window.open(PAYMENT_LINKS[planIndex], "_blank", "noopener");
+        });
+      });
+
+      /* ---------- Envío del plan completo a Jose ---------- */
+      function savedPlan() {
+        try { return JSON.parse(localStorage.getItem("nocito_plan") || "null"); } catch (err) { return null; }
+      }
+
+      function planToText(p, planName) {
+        var L = [];
+        L.push("Hola Jose! Te env\u00edo el comprobante de mi pago y mis datos.");
+        L.push("");
+        L.push("*NOMBRE:* " + p.name);
+        L.push("*CONTACTO:* " + p.contact);
+        L.push("*PLAN ELEGIDO:* " + (planName || "A confirmar"));
+        L.push("*EDAD / PESO / ALTURA:* " + p.age + " a\u00f1os \u00b7 " + p.weight + " kg \u00b7 " + p.height + " cm");
+        L.push("*OBJETIVO:* " + p.objective);
+        L.push("*EXPERIENCIA:* " + p.experience + " \u00b7 " + p.days + " d\u00edas/semana");
+        L.push("*PREFERENCIAS:* " + (p.prefs || []).join(", "));
+        L.push("*IMC:* " + p.bmi + " \u00b7 *RUTINA SUGERIDA:* " + p.routineLabel);
+        L.push("");
+        L.push("Adjunto el comprobante. Cuando confirmes el pago, hac\u00e9me llegar mi rutina y mi plan de alimentaci\u00f3n. Gracias!");
+        return L.join("\n");
+      }
+
+      function needForm() {
+        showError(["Primero complet\u00e1 tus datos en el formulario de diagn\u00f3stico para generar tu plan."]);
+        $id("evaluacion").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      $id("sendWhatsappBtn").addEventListener("click", function (ev) {
+        ev.preventDefault();
+        var p = savedPlan();
+        if (!p) { needForm(); return; }
+        var txt = planToText(p, localStorage.getItem("nocito_plan_elegido") || "");
+        window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(txt), "_blank", "noopener");
+      });
+
+      $id("sendEmailBtn").addEventListener("click", function (ev) {
+        ev.preventDefault();
+        var p = savedPlan();
+        if (!p) { needForm(); return; }
+        var txt = planToText(p, localStorage.getItem("nocito_plan_elegido") || "");
+        var subject = encodeURIComponent("Plan y comprobante - " + p.name + " - nocito.coach");
+        window.location.href = "mailto:" + EMAIL + "?subject=" + subject + "&body=" + encodeURIComponent(txt);
+      });
+
+      $id("whatsappLinkMain").addEventListener("click", function (ev) {
+        ev.preventDefault();
+        var msg = "Hola José, me interesan tus planes de entrenamiento y nutrición, como puedo empezar?";
+        window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
+      });
+
+      $id("emailLinkMain").setAttribute("href", "mailto:" + EMAIL);
+
+      /* ---------- Mobile menu ---------- */
+      var burger = $id("hamburger");
+      var menu = $id("mobileMenu");
+      burger.addEventListener("click", function () {
+        var open = menu.classList.toggle("open");
+        burger.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      menu.querySelectorAll("a").forEach(function (a) {
+        a.addEventListener("click", function () { menu.classList.remove("open"); });
+      });
+
+      $id("yearFoot").textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>
