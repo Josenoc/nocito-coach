@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resend, DESTINATION_EMAIL, SENDER_EMAIL } from "@/app/lib/resend";
+import { getResend, DESTINATION_EMAIL, SENDER_EMAIL } from "@/app/lib/resend";
 import { getRoutine, confirmPlan } from "@/app/lib/store";
 import { parsePayload, renderRoutineHtml, renderRoutineText } from "@/app/lib/routine";
 
@@ -79,6 +79,7 @@ export async function POST(req: Request) {
   const text = renderRoutineText(payload);
 
   try {
+    const resend = getResend();
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
       to: DESTINATION_EMAIL,
