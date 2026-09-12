@@ -18,6 +18,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Falta el nombre del cliente" }, { status: 400 });
   }
 
-  const ref = saveRoutine(o);
+  const ref = await saveRoutine(o);
   return NextResponse.json({ ok: true, ref });
 }

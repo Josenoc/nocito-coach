@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "sin referencia" }, { status: 400 });
   }
 
-  const raw = getRoutine(ref);
+  const raw = await getRoutine(ref);
   const payload = parsePayload(raw);
   if (!payload) {
     console.error("Routine no encontrada para ref:", ref);
@@ -95,6 +95,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 
-  if (ref) confirmPlan(ref);
+  if (ref) await confirmPlan(ref);
   return NextResponse.json({ ok: true });
 }

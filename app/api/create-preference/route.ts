@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Plan inválido" }, { status: 400 });
   }
 
-  const saved = clientRef ? getRoutine(clientRef) : undefined;
+  const saved = clientRef ? await getRoutine(clientRef) : undefined;
   const savedObj = saved ?? {};
   const name =
     (typeof savedObj.name === "string" && savedObj.name) ||
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     "Cliente";
   const contact = savedObj.contact ?? diagnostic.contact ?? "";
 
-  if (clientRef) attachPlan(clientRef, plan.name);
+  if (clientRef) await attachPlan(clientRef, plan.name);
 
   const base = siteBaseUrl();
   const encodedName = encodeURIComponent(name);
