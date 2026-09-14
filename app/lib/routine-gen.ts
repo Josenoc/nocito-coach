@@ -48,6 +48,14 @@ function asStringArray(value: unknown): string[] {
   return [];
 }
 
+function metaString(meta: Meta, camel: string, snake: string): string {
+  return asString(meta[camel]) || asString(meta[snake]);
+}
+
+function metaNumber(meta: Meta, camel: string, snake: string, fallback = 0): number {
+  return asNumber(meta[camel] ?? meta[snake], fallback);
+}
+
 function repsFor(obj: string): string {
   if (obj === "perder-grasa") return "10-15";
   if (obj === "ganar-masa") return "8-12";
@@ -358,15 +366,15 @@ export function buildNutrition(
 }
 
 export function generatePayload(meta: Meta): ClientPayload | null {
-  const name = asString(meta.name);
+  const name = metaString(meta, "name", "name");
   if (!name) return null;
 
-  const objectiveKey = asString(meta.objectiveKey);
-  const experienceKey = asString(meta.experienceKey);
-  const days = asNumber(meta.days, 3);
-  const weight = asNumber(meta.weight, 75);
-  const height = asNumber(meta.height, 0);
-  const age = asNumber(meta.age, 0);
+  const objectiveKey = metaString(meta, "objectiveKey", "objective_key");
+  const experienceKey = metaString(meta, "experienceKey", "experience_key");
+  const days = metaNumber(meta, "days", "days", 3);
+  const weight = metaNumber(meta, "weight", "weight", 75);
+  const height = metaNumber(meta, "height", "height", 0);
+  const age = metaNumber(meta, "age", "age", 0);
   const prefsRaw = asStringArray(meta.prefs);
   const prefs =
     prefsRaw.length > 0
@@ -385,12 +393,12 @@ export function generatePayload(meta: Meta): ClientPayload | null {
       ? (weight / Math.pow(height / 100, 2)).toFixed(1)
       : "";
 
-  const planName = asString(meta.planName);
+  const planName = metaString(meta, "planName", "plan_name");
 
   return {
-    fecha: asString(meta.fecha, new Date().toISOString().slice(0, 10)),
+    fecha: metaString(meta, "fecha", "fecha") || new Date().toISOString().slice(0, 10),
     name,
-    contact: asString(meta.contact),
+    contact: metaString(meta, "contact", "contact"),
     age,
     height,
     weight,

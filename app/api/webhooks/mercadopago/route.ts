@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getResend, getDestinationEmail, SENDER_EMAIL } from "@/app/lib/resend";
 import { generatePayload } from "@/app/lib/routine-gen";
 import { renderRoutineHtml, renderRoutineText } from "@/app/lib/routine";
+import { renderRoutinePdf } from "@/app/lib/routine-pdf";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
   const subject = `PAGO CONFIRMADO - Rutina de ${payload.name}`;
 
   try {
+    const pdf = await renderRoutinePdf(payload);
     const resend = getResend();
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
@@ -75,6 +77,12 @@ export async function POST(req: Request) {
       subject,
       html: renderRoutineHtml(payload),
       text: renderRoutineText(payload),
+      attachments: [
+        {
+          filename: `Rutina ${payload.name}.pdf`,
+          content: pdf.toString("base64"),
+        },
+      ],
     });
     if (result.error) {
       console.error("[webhook] Resend error:", result.error);
