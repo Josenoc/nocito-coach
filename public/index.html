@@ -563,7 +563,7 @@
         <div class="gen-panel" id="genPanel">
           <div class="gen-success">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
-            <div><strong>Solicitud enviada correctamente</strong><br><span>José ya recibió tu plan por email. Ahora elegí tu plan abajo y aboná para recibir tu rutina y tu pauta nutricional.</span></div>
+            <div><strong>Tu plan está listo</strong><br><span>Elegí tu plan abajo y aboná. En cuanto Mercado Pago confirme el pago, tu rutina y tu pauta nutricional llegan por email automáticamente.</span></div>
           </div>
 
           <div class="lock-note">
@@ -1123,28 +1123,12 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         var submitBtn = form.querySelector('button[type="submit"]');
         if (submitBtn) submitBtn.disabled = true;
 
-        fetch("/api/send-request", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(parseJson)
-          .then(function (r) {
-            if (!r.ok || !r.body || !r.body.ok) {
-              var detail = (r.body && r.body.error) || "El servidor respondió con error HTTP " + r.status + ".";
-              throw new Error(detail);
-            }
-            $id("genPanel").classList.add("show");
-            setTimeout(function () {
-              $id("planes").scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 350);
-          })
-          .catch(function (err) {
-            showError([err.message || "No se pudo enviar tu plan. Intentalo de nuevo."]);
-          })
-          .finally(function () {
-            if (submitBtn) submitBtn.disabled = false;
-          });
+        $id("genPanel").classList.add("show");
+        setTimeout(function () {
+          $id("planes").scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 350);
+
+        if (submitBtn) submitBtn.disabled = false;
       });
 
       /* ---------- Validación + pago Mercado Pago ---------- */
@@ -1183,11 +1167,6 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           if (errors.length) {
             showError(errors);
             $id("evaluacion").scrollIntoView({ behavior: "smooth", block: "start" });
-            return;
-          }
-
-          if (planIndex === 0) {
-            window.open("https://mpago.li/2JWU7Fb", "_blank", "noopener");
             return;
           }
 
