@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { getResend, DESTINATION_EMAIL, SENDER_EMAIL } from "@/app/lib/resend";
+import {
+  getResend,
+  getDestinationEmail,
+  SENDER_EMAIL,
+} from "@/app/lib/resend";
 import {
   parsePayload,
   renderRoutineHtml,
@@ -34,24 +38,23 @@ export async function POST(req: Request) {
     const resend = getResend();
     const result = await resend.emails.send({
       from: SENDER_EMAIL,
-      to: DESTINATION_EMAIL,
+      to: getDestinationEmail(),
       subject,
       html,
       text,
     });
     if (result.error) {
-      console.error("[send-request] Resend error:", result.error);
-      return NextResponse.json(
-        { ok: false, error: "No se pudo enviar tu plan por email." },
-        { status: 500 }
-      );
+      const r = result.error as unknown;
+      const msg =
+        r && typeof r === "object" && "message" in r
+          ? String((r as { message: unknown }).message)
+          : String(r);
+      return NextResponse.json({ ok: false, error: msg }, { status: 500 });
     }
   } catch (err) {
-    console.error("[send-request] Resend send error:", err);
-    return NextResponse.json(
-      { ok: false, error: "No se pudo enviar tu plan por email. Intentalo de nuevo." },
-      { status: 500 }
-    );
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[send-request]", err);
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

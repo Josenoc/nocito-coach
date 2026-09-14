@@ -1,7 +1,10 @@
 import { Resend } from "resend";
 
-export const DESTINATION_EMAIL = process.env.DESTINATION_EMAIL ?? "";
-export const SENDER_EMAIL = "Onboarding <onboarding@resend.dev>";
+export const SENDER_EMAIL = "onboarding@resend.dev";
+
+export function getDestinationEmail(): string {
+  return process.env.DESTINATION_EMAIL ?? "";
+}
 
 let resendClient: Resend | null = null;
 
