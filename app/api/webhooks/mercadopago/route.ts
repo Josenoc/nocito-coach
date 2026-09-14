@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
-import { getResend, getDestinationEmail, SENDER_EMAIL } from "@/app/lib/resend";
-import { generatePayload } from "@/app/lib/routine-gen";
-import { renderRoutineHtml, renderRoutineText } from "@/app/lib/routine";
-import { renderRoutinePdf } from "@/app/lib/routine-pdf";
+import { kv } from "@vercel/kv";
+import { sendRoutineForPaymentId } from "@/app/lib/process-payment";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const TOKEN = process.env.MP_ACCESS_TOKEN || "";
+const KV_KEY = "paidRoutineProcessed";
+
+function kvConfigured() {
+  return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
 
 export async function GET() {
   return NextResponse.json({ ok: true });
@@ -34,63 +36,39 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  let payment: Record<string, unknown>;
-  try {
-    const resp = await fetch(
-      `https://api.mercadopago.com/v1/payments/${paymentId}`,
-      {
-        headers: { Authorization: `Bearer ${TOKEN}` },
-      }
-    );
-    if (!resp.ok) {
-      console.error(`[webhook] MP API status ${resp.status}`);
-      return NextResponse.json({ ok: false }, { status: 502 });
+  let alreadyProcessed = false;
+  if (kvConfigured()) {
+    try {
+      alreadyProcessed = Boolean(
+        await kv.sismember(KV_KEY, String(paymentId))
+      );
+    } catch (err) {
+      console.error("[webhook] KV:", err);
     }
-    payment = (await resp.json()) as Record<string, unknown>;
+  }
+  if (alreadyProcessed) {
+    return NextResponse.json({ ok: true, duplicate: true });
+  }
+
+  let result;
+  try {
+    result = await sendRoutineForPaymentId(String(paymentId));
   } catch (err) {
-    console.error("[webhook] MP API fetch:", err);
+    console.error("[webhook]", err);
     return NextResponse.json({ ok: false }, { status: 502 });
   }
 
-  if (payment.status !== "approved") {
-    return NextResponse.json({ ok: true, status: payment.status });
+  if (!result.ok) {
+    console.error("[webhook]", result.error);
+    return NextResponse.json({ ok: false, error: result.error }, { status: 502 });
   }
 
-  const metadata = (payment.metadata ?? {}) as Record<string, unknown>;
-  const payload = generatePayload(metadata);
-  if (!payload) {
-    console.error("[webhook] sin datos del alumno en metadata, pago", paymentId);
-    return NextResponse.json(
-      { ok: false, error: "sin datos del alumno en metadata" },
-      { status: 400 }
-    );
-  }
-
-  const subject = `PAGO CONFIRMADO - Rutina de ${payload.name}`;
-
-  try {
-    const pdf = await renderRoutinePdf(payload);
-    const resend = getResend();
-    const result = await resend.emails.send({
-      from: SENDER_EMAIL,
-      to: getDestinationEmail(),
-      subject,
-      html: renderRoutineHtml(payload),
-      text: renderRoutineText(payload),
-      attachments: [
-        {
-          filename: `Rutina ${payload.name}.pdf`,
-          content: pdf.toString("base64"),
-        },
-      ],
-    });
-    if (result.error) {
-      console.error("[webhook] Resend error:", result.error);
-      return NextResponse.json({ ok: false }, { status: 502 });
+  if (!result.skipped && kvConfigured()) {
+    try {
+      await kv.sadd(KV_KEY, String(paymentId));
+    } catch (err) {
+      console.error("[webhook] KV sadd:", err);
     }
-  } catch (err) {
-    console.error("[webhook] Resend send:", err);
-    return NextResponse.json({ ok: false }, { status: 502 });
   }
 
   return NextResponse.json({ ok: true });

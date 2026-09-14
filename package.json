@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@vercel/kv": "^3.0.0",
     "mercadopago": "^2.0.0",
     "next": "^15.1.6",
     "pdfkit": "^0.20.2",
