@@ -499,10 +499,10 @@
             <div class="field">
               <label>Días disponibles para entrenar <span>*</span></label>
               <div class="pill-group day-pill">
+                <div class="day-pill"><input type="radio" name="days" value="2" id="d2"><label for="d2">2 días</label></div>
                 <div class="day-pill"><input type="radio" name="days" value="3" id="d3"><label for="d3">3 días</label></div>
                 <div class="day-pill"><input type="radio" name="days" value="4" id="d4"><label for="d4">4 días</label></div>
                 <div class="day-pill"><input type="radio" name="days" value="5" id="d5"><label for="d5">5 días</label></div>
-                <div class="day-pill"><input type="radio" name="days" value="6" id="d6"><label for="d6">6 días</label></div>
               </div>
             </div>
 
@@ -859,7 +859,13 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         var splitName = "";
 
         if (exp === "principiante") {
-          if (d === 3) {
+          if (d === 2) {
+            splitName = "Full Body A / B";
+            days = [
+              { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
+              { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+            ];
+          } else if (d === 3) {
             splitName = "Full Body A / B / C";
             days = [
               { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
@@ -895,7 +901,13 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             ];
           }
         } else if (exp === "intermedio") {
-          if (d === 3) {
+          if (d === 2) {
+            splitName = "Full Body A / B";
+            days = [
+              { name: "Día 1 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+              { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+            ];
+          } else if (d === 3) {
             splitName = "Push / Pull / Legs";
             days = [
               { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
@@ -931,7 +943,13 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             ];
           }
         } else {
-          if (d === 3) {
+          if (d === 2) {
+            splitName = "Full Body A / B Intensivo";
+            days = [
+              { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Sobrecarga", items: fullBodyExercises(o, "A") },
+              { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+            ];
+          } else if (d === 3) {
             splitName = "Push / Pull / Legs · Intensivo";
             days = [
               { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },

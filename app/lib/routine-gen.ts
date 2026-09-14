@@ -209,7 +209,13 @@ export function buildRoutine(
   let splitName = "";
 
   if (exp === "principiante") {
-    if (d === 3) {
+    if (d === 2) {
+      splitName = "Full Body A / B";
+      days = [
+        { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
+        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+      ];
+    } else if (d === 3) {
       splitName = "Full Body A / B / C";
       days = [
         { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
@@ -245,7 +251,13 @@ export function buildRoutine(
       ];
     }
   } else if (exp === "intermedio") {
-    if (d === 3) {
+    if (d === 2) {
+      splitName = "Full Body A / B";
+      days = [
+        { name: "Día 1 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+      ];
+    } else if (d === 3) {
       splitName = "Push / Pull / Legs";
       days = [
         { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
@@ -281,7 +293,13 @@ export function buildRoutine(
       ];
     }
   } else {
-    if (d === 3) {
+    if (d === 2) {
+      splitName = "Full Body A / B Intensivo";
+      days = [
+        { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Sobrecarga", items: fullBodyExercises(o, "A") },
+        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+      ];
+    } else if (d === 3) {
       splitName = "Push / Pull / Legs · Intensivo";
       days = [
         { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
