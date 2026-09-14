@@ -75,9 +75,8 @@ export async function POST(req: Request) {
     macroFat: nutrition.fat,
   };
 
-  const host = process.env.VERCEL_URL || "localhost:3000";
   const base = siteBaseUrl();
-  const notificationUrl = `https://${host}/api/webhooks/mercadopago`;
+  const notificationUrl = `${base}/api/webhooks/mercadopago`;
 
   let initPoint: string | undefined;
   try {

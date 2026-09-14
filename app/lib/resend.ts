@@ -3,7 +3,7 @@ import { Resend } from "resend";
 export const SENDER_EMAIL = "onboarding@resend.dev";
 
 export function getDestinationEmail(): string {
-  return process.env.DESTINATION_EMAIL ?? "";
+  return (process.env.DESTINATION_EMAIL ?? "").toLowerCase();
 }
 
 let resendClient: Resend | null = null;
