@@ -1186,6 +1186,11 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             return;
           }
 
+          if (planIndex === 0) {
+            window.open("https://mpago.li/2JWU7Fb", "_blank", "noopener");
+            return;
+          }
+
           var original = btn.textContent;
           btn.disabled = true;
           btn.textContent = "Procesando pago...";
