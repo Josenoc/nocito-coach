@@ -1,3 +1,12 @@
+import {
+  repsForObjetivo,
+  reglasDeCarga,
+  CREATINA_NOTA,
+  PROTEINA_DISTRIBUCIÓN,
+  CHO_POST_ENTRENO,
+  GRASAS_NOTA,
+} from "./sources";
+
 import type {
   ClientPayload,
   RoutineData,
@@ -88,9 +97,7 @@ function metaNumber(meta: Meta, camel: string, snake: string, fallback = 0): num
 }
 
 function repsFor(obj: string): string {
-  if (obj === "perder-grasa") return "10-15";
-  if (obj === "ganar-masa") return "8-12";
-  return "8-12";
+  return repsForObjetivo(obj);
 }
 
 function cardioNote(obj: string): number {
@@ -233,7 +240,7 @@ export function buildRoutine(
   experiencia: string,
   dias: number,
   prioridad = ""
-): { label: string; splitName: string; days: RoutineDay[] } {
+): { label: string; splitName: string; days: RoutineDay[]; reglas: string[] } {
   const o = objetivo;
   const exp = experiencia;
   const d = Number(dias);
@@ -373,7 +380,7 @@ export function buildRoutine(
   const prio = PRIORITY_LABELS[prioridad];
   const label =
     d + " Días " + splitName + " / Enfoque: " + FOCUS[o] + (prio ? " · Prioridad: " + prio : "");
-  return { label, days, splitName };
+  return { label, days, splitName, reglas: reglasDeCarga(o, exp, d) };
 }
 
 export function buildNutrition(
@@ -416,12 +423,31 @@ export function buildNutrition(
       ? " (solo alimentos sin TACC: arroz, papa, batata, quinoa, avena certificada)"
       : "";
 
+  const sugerencias: string[] = [];
+  if (objetivo === "recomposicion") {
+    sugerencias.push(PROTEINA_DISTRIBUCIÓN, GRASAS_NOTA);
+  } else if (objetivo === "ganar-masa") {
+    sugerencias.push(
+      "Proteína: 1,7-2 g/kg por día (aprox. " + Math.round(w * 1.85) + " g), repartida en cada comida.",
+      CHO_POST_ENTRENO
+    );
+  } else {
+    sugerencias.push(
+      "Proteína: 2-2,2 g/kg por día para sostener masa muscular en déficit (aprox. " +
+        Math.round(w * 2.1) +
+        " g).",
+      GRASAS_NOTA
+    );
+  }
+  sugerencias.push(CREATINA_NOTA);
+
   return {
     cal,
     prot,
     carbs: cg,
     fat: gr,
     proteinSources: meat + carbsNote,
+    sugerencias,
     meals: [
       ["Desayuno", "Avena/pan integral" + (meat.indexOf("Tofu") !== -1 ? carbsNote : "") + " + proteína + fruta y frutos secos"],
       ["Almuerzo", "Porción de proteína + arroz/papa/batata o legumbres + vegetales + aceite de oliva"],

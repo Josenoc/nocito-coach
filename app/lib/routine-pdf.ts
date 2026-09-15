@@ -1,4 +1,5 @@
 import type { ClientPayload } from "./routine";
+import { SOURCES_CITATION } from "./sources";
 import PDFDocument from "pdfkit";
 
 const DARK = "#0B0B0B";
@@ -38,6 +39,22 @@ export function renderRoutinePdf(p: ClientPayload): Promise<Buffer> {
         characterSpacing: 1,
       });
     y += 28;
+  }
+
+  function bulletList(lines: string[], indent = 0) {
+    const left = doc.page.margins.left + indent;
+    const w = pageWidth - indent;
+    for (const line of lines) {
+      const h = doc.heightOfString(line, { width: w - 12 });
+      if (y + h + 4 > doc.page.height - doc.page.margins.bottom) newPage();
+      doc
+        .fillColor("#111111")
+        .font("Helvetica")
+        .fontSize(9)
+        .text("•  " + line, left, y, { width: w - 12 });
+      y += h + 4;
+    }
+    y += 8;
   }
 
   function section(title: string) {
@@ -209,6 +226,17 @@ export function renderRoutinePdf(p: ClientPayload): Promise<Buffer> {
   }
   y += 4;
 
+  if (p.routine.reglas && p.routine.reglas.length) {
+    section("REGLAS DE CARGA");
+    bulletList(p.routine.reglas);
+    if (y > doc.page.height - doc.page.margins.bottom - 44) newPage();
+  }
+  if (p.nutrition.sugerencias && p.nutrition.sugerencias.length) {
+    section("NUTRICIÓN Y SUPLEMENTACIÓN");
+    bulletList(p.nutrition.sugerencias);
+    if (y > doc.page.height - doc.page.margins.bottom - 44) newPage();
+  }
+
   section("PLAN DE COMIDAS");
   const mealCols = [110, pageWidth - 110];
   tableHead(mealCols, ["COMIDA", "SUGERENCIA"]);
@@ -228,6 +256,19 @@ export function renderRoutinePdf(p: ClientPayload): Promise<Buffer> {
     .font("Helvetica")
     .text(
       `Generado el ${clean(p.fecha)} · Pago confirmado automáticamente por Mercado Pago.`,
+      doc.page.margins.left,
+      y,
+      { width: pageWidth }
+    );
+  y += doc.heightOfString(
+    `Generado el ${clean(p.fecha)} · Pago confirmado automáticamente por Mercado Pago.`,
+    { width: pageWidth }
+  ) + 3;
+  doc
+    .fillColor("#888888")
+    .fontSize(7)
+    .text(
+      `Fuentes de referencia: ${SOURCES_CITATION}.`,
       doc.page.margins.left,
       y,
       { width: pageWidth }

@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Jose · Personal Trainer — Asesorías personalizadas de entrenamiento y nutrición. Transformá tu cuerpo con ciencia y experiencia real.">
-  <meta name="theme-color" content="#121212">
+  <meta name="theme-color" content="#0A0A0A">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="nocito.coach">
   <meta name="format-detection" content="telephone=no">
-  <link rel="manifest" href="data:application/manifest+json,&#123;&quot;name&quot;:&quot;nocito.coach&quot;,&quot;short_name&quot;:&quot;nocito&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#121212&quot;,&quot;theme_color&quot;:&quot;#121212&quot;,&quot;start_url&quot;:&quot;index.html&quot;&#125;">
+  <link rel="manifest" href="data:application/manifest+json,&#123;&quot;name&quot;:&quot;nocito.coach&quot;,&quot;short_name&quot;:&quot;nocito&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0A0A0A&quot;,&quot;theme_color&quot;:&quot;#0A0A0A&quot;,&quot;start_url&quot;:&quot;index.html&quot;&#125;">
   <title>nocito.coach | Jose · Personal Trainer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23121212'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%23FF5722'>J</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23121212'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%23FFC400'>J</text></svg>">
   <style>
     :root {
-      --bg: #121212;
+      --bg: #0A0A0A;
       --surface: #1E1E1E;
       --surface-2: #26292C;
       --border: #33373B;
@@ -187,28 +187,6 @@
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,87,34,.4); }
     .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
-    .avatar-card { justify-self: end; position: relative; width: min(360px, 100%); }
-    .avatar-ring {
-      aspect-ratio: 1; border-radius: 50%;
-      padding: 6px;
-      background: conic-gradient(from 200deg, var(--orange), var(--blue), var(--orange));
-      box-shadow: 0 0 80px rgba(255,87,34,.28);
-    }
-    .avatar-inner {
-      width: 100%; height: 100%; border-radius: 50%;
-      background: radial-gradient(circle at 30% 25%, #2a2e33, #14161a 70%);
-      display: grid; place-items: center;
-      font-family: 'Montserrat'; font-weight: 800; font-size: 8rem; color: rgba(255,87,34,.28);
-    }
-    .avatar-chip {
-      position: absolute; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; padding: 10px 14px; font-size: .82rem; box-shadow: 0 10px 30px rgba(0,0,0,.45);
-      display: flex; align-items: center; gap: 8px; white-space: nowrap;
-    }
-    .avatar-chip svg { flex: 0 0 auto; }
-    .chip-1 { top: 6%; left: -8%; }
-    .chip-2 { bottom: 12%; right: -6%; }
-    .chip-3 { bottom: 40%; left: -16%; }
 
     /* ---------- Form ---------- */
     .eval-wrap { display: block; }
@@ -445,7 +423,6 @@
       .form-cols { grid-template-columns: 1fr; }
       .form-col { background: none; border: 0; border-radius: 0; padding: 0; }
       .info-list { grid-template-columns: 1fr; margin-top: 30px; }
-      .avatar-card { justify-self: center; margin-top: 20px; }
       .pricing-grid { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
       .price-card.featured { transform: none; }
     }
@@ -462,12 +439,284 @@
       .gen-grid { grid-template-columns: 1fr; }
       .section { padding: 68px 0; }
       .hero { padding: 58px 0 72px; }
-      .chip-1 { left: 2%; } .chip-2 { right: 2%; } .chip-3 { display: none; }
     }
     @media (max-width: 460px) {
       .row-3 { grid-template-columns: 1fr; }
       .row-3 .span-2 { grid-column: span 1; }
-      .avatar-inner { font-size: 6rem; }
+    }
+  </style>
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --surface: #101010;
+      --surface-2: #161616;
+      --border: #242424;
+      --orange: #FFC400;
+      --orange-soft: #FFD94A;
+      --blue: #FFC400;
+      --text: #EDEDED;
+      --muted: #8F8F8F;
+      --ok: #34D399;
+      --danger: #FF5252;
+      --radius: 8px;
+    }
+    html { scroll-padding-top: 100px; }
+    h1, h2, h3, h4 { text-transform: uppercase; letter-spacing: -.02em; }
+    .container { width: min(1200px, 92%); position: relative; z-index: 1; }
+    .section { position: relative; padding: 120px 0; }
+    .section::before {
+      content: attr(data-index);
+      position: absolute; top: 8px; right: max(14px, 3vw);
+      font-family: 'Montserrat', sans-serif; font-weight: 800;
+      font-size: clamp(7rem, 20vw, 15rem); line-height: 1;
+      color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.07);
+      pointer-events: none;
+    }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 14px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .28em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
+    }
+    .section-label::before { content: ""; width: 34px; height: 1px; background: var(--orange); border-radius: 0; }
+    .section-label .sec-num { font-size: 1rem; color: var(--orange); }
+    .section-title { font-size: clamp(2.3rem, 5vw, 4rem); line-height: .98; margin-bottom: 18px; }
+    .section-sub { font-size: 1.05rem; max-width: 600px; }
+
+    header { background: rgba(10,10,10,.6); }
+    header.glass {
+      background: rgba(10,10,10,.88);
+      backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,.5);
+    }
+    .nav { height: 84px; }
+    .brand-name {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 1.5rem; letter-spacing: -.02em;
+      background: none; -webkit-background-clip: initial; background-clip: initial; color: #fff;
+    }
+    .brand-name::after { content: ""; width: 9px; height: 9px; background: var(--orange); }
+    .nav-links { gap: 34px; }
+    .nav-links a {
+      font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--muted); position: relative; padding: 6px 2px;
+    }
+    .nav-links a::after { content: ""; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; background: var(--orange); transition: width .25s ease; }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      background: transparent; color: var(--orange);
+      border: 1px solid rgba(255,196,0,.4); border-radius: 6px;
+      font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; padding: 12px 20px;
+    }
+    .nav-cta:hover { background: var(--orange); color: #0A0A0A; box-shadow: none; transform: none; }
+
+    .hero { padding: clamp(70px, 9vw, 120px) 0 clamp(80px, 11vw, 150px); }
+    .hero::before {
+      background:
+        radial-gradient(900px 600px at 12% 0%, rgba(255,196,0,.1), transparent 60%),
+        radial-gradient(700px 520px at 100% 18%, rgba(255,255,255,.05), transparent 55%);
+    }
+    .hero::after {
+      background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 70px 70px;
+      mask-image: radial-gradient(900px 600px at 55% 25%, black, transparent);
+    }
+    .hero-photo { opacity: .5; mask-image: linear-gradient(90deg, transparent 0%, black 45%, black 100%); }
+    .hero-rail {
+      position: absolute; right: max(12px, 1.6vw); top: 50%; transform: translateY(-50%);
+      z-index: 3; display: none;
+    }
+    .hero-rail span {
+      writing-mode: vertical-rl; font-size: .66rem; letter-spacing: .42em;
+      text-transform: uppercase; color: var(--muted); font-weight: 600;
+    }
+    @media (min-width: 960px) { .hero-rail { display: block; } }
+    .badge-hero {
+      background: rgba(255,196,0,.06); border-color: rgba(255,196,0,.35); color: var(--orange);
+      font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 700;
+      border-radius: 0; padding: 8px 16px; margin-bottom: 26px;
+    }
+    .badge-hero::before { background: var(--orange); box-shadow: 0 0 14px var(--orange); }
+    .hero h1 { font-size: clamp(2.6rem, 6.8vw, 5.4rem); line-height: .96; letter-spacing: -.03em; margin-bottom: 26px; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-grid > div { max-width: 860px; }
+    .hero p.lead { font-size: 1.02rem; color: var(--muted); max-width: 540px; }
+    .grad-text {
+      background: linear-gradient(90deg, #fff, var(--orange) 40%, #fff);
+      background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: gradShift 6s ease infinite;
+    }
+    .hero-actions { margin-top: 40px; }
+
+    .btn { border-radius: 6px; font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; padding: 17px 30px; }
+    .btn-primary { background: var(--orange); color: #0A0A0A; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255,196,0,.28); }
+    .btn-outline { border-color: rgba(255,255,255,.22); color: var(--text); border-radius: 6px; }
+    .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
+
+    .form-card {
+      background: linear-gradient(180deg, #131313, #0D0D0D);
+      border-color: rgba(255,255,255,.1); border-radius: 10px; padding: 42px;
+    }
+    .form-card h3 { font-size: 1.05rem; letter-spacing: .12em; }
+    .form-card > p { color: var(--muted); font-size: .86rem; }
+    .form-col { border-radius: 10px; border-color: rgba(255,255,255,.08); background: rgba(255,255,255,.02); }
+    .field label { font-size: .76rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .field label span { color: var(--orange); }
+    .field input[type="text"], .field input[type="number"], .field select, .field input[type="tel"] {
+      background: #0D0D0D; border-color: rgba(255,255,255,.12); border-radius: 6px;
+      padding: 14px 15px; font-size: .98rem;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,196,0,.15);
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23FFC400' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>");
+      background-repeat: no-repeat; background-position: right 14px center; background-size: 14px 14px;
+      padding-right: 44px;
+    }
+    .pill .pill-label, .day-pill label {
+      border-radius: 4px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase;
+      border-color: rgba(255,255,255,.14); background: var(--surface); color: var(--muted);
+      padding: 11px 18px;
+    }
+    .pill input:checked + .pill-label { background: var(--orange); border-color: var(--orange); color: #0A0A0A; font-weight: 700; }
+    .day-pill input:checked + label { background: transparent; border-color: var(--orange); color: var(--orange); }
+    .prefs-hint { color: var(--orange); }
+    .btn-block { background: var(--orange); color: #0A0A0A; border-radius: 6px; letter-spacing: .14em; text-transform: uppercase; font-size: .82rem; min-height: 56px; }
+    .form-errors { border-radius: 8px; }
+
+    .info-item { gap: 18px; }
+    .info-item .ico { border-radius: 6px; background: rgba(255,196,0,.06); border-color: rgba(255,196,0,.28); color: var(--orange); }
+    .info-item h4 { font-size: .96rem; letter-spacing: .06em; }
+    .info-item p { color: var(--muted); font-size: .88rem; }
+
+    .gen-dash {
+      background: linear-gradient(165deg, rgba(255,196,0,.06), rgba(255,255,255,.02)), var(--surface);
+      border-color: rgba(255,196,0,.4); border-radius: 12px;
+    }
+    .gen-dash::before { background: linear-gradient(90deg, var(--orange), #fff, var(--orange)); }
+    @keyframes genGlow {
+      from { box-shadow: 0 0 0 1px rgba(255,196,0,.16), 0 18px 50px rgba(0,0,0,.5); border-color: rgba(255,196,0,.4); }
+      to { box-shadow: 0 0 0 1px rgba(255,196,0,.3), 0 18px 50px rgba(0,0,0,.5), 0 0 40px rgba(255,196,0,.2); border-color: rgba(255,196,0,.6); }
+    }
+    .gen-stat { border-radius: 8px; border-top-color: var(--orange); }
+    .gen-stat small { letter-spacing: .16em; text-transform: uppercase; }
+    .gen-success { border-radius: 8px; }
+    .gen-grid { gap: 18px; }
+    .gen-card { border-radius: 8px; }
+    .lock-note { background: linear-gradient(135deg, rgba(255,196,0,.07), rgba(255,255,255,.02)); border-color: rgba(255,255,255,.18); border-style: solid; border-radius: 10px; }
+    .send-box { background: linear-gradient(135deg, rgba(255,196,0,.05), rgba(255,255,255,.02)); border-color: rgba(255,255,255,.12); }
+    .send-title b { color: var(--orange); }
+    .link-internal { color: var(--orange); border-bottom-color: var(--orange); }
+
+    .pricing-grid { gap: 18px; margin-top: 60px; }
+    .price-card {
+      border-radius: 10px; border-color: rgba(255,255,255,.1);
+      background: linear-gradient(180deg, #121212, #0D0D0D); padding: 36px 30px;
+    }
+    .price-card:not(.featured):hover {
+      transform: translateY(-5px);
+      border-color: var(--orange);
+      box-shadow: 0 30px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,196,0,.14);
+    }
+    .price-card.featured {
+      background: linear-gradient(180deg, #1A1508, #120F05);
+      border-color: rgba(255,196,0,.55);
+      box-shadow: 0 0 0 1px rgba(255,196,0,.1), 0 30px 70px rgba(0,0,0,.5);
+      transform: none;
+    }
+    .price-card.featured:hover { transform: translateY(-5px); border-color: var(--orange); }
+    .featured-badge {
+      border-radius: 0; background: var(--orange); color: #0A0A0A;
+      letter-spacing: .18em; font-size: .68rem; font-weight: 800;
+      box-shadow: 0 10px 24px rgba(255,196,0,.3);
+    }
+    .plan-name { font-size: 1.02rem; letter-spacing: .04em; }
+    .plan-tag {
+      color: var(--orange); background: rgba(255,196,0,.08); border-color: rgba(255,196,0,.3);
+      border-radius: 0; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase;
+    }
+    .plan-price .amount { font-size: clamp(2rem, 4.6vw, 2.7rem); }
+    .featured .plan-price .amount { color: var(--orange); }
+    .plan-features li { color: #CFCFCF; }
+    .plan-features svg { stroke: var(--orange); }
+    .btn-plan {
+      border-radius: 6px; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase;
+      background: var(--surface); border-color: rgba(255,255,255,.14); color: var(--text);
+    }
+    .btn-plan:hover { transform: translateY(-2px); border-color: var(--orange); }
+    .featured .btn-plan { background: transparent; border-color: rgba(255,196,0,.5); color: var(--orange); }
+    .featured .btn-plan:hover { background: var(--orange); color: #0A0A0A; box-shadow: 0 12px 30px rgba(255,196,0,.3); }
+    .payment-note {
+      background: linear-gradient(135deg, rgba(255,196,0,.1), rgba(255,255,255,.03));
+      border-color: rgba(255,196,0,.45); border-radius: 10px; font-size: 1rem;
+    }
+    .payment-note svg { stroke: var(--orange); }
+    .payment-wa {
+      background: none; color: var(--orange); text-decoration: none;
+      border-bottom: 1px solid var(--orange); text-decoration-thickness: auto;
+    }
+    .plans-footnote { background: rgba(255,255,255,.02); border-color: rgba(255,255,255,.14); border-style: solid; border-radius: 8px; }
+
+    .contact-card {
+      border-radius: 10px; background: linear-gradient(180deg, #121212, #0D0D0D);
+      border-color: rgba(255,255,255,.1);
+    }
+    .contact-card:hover {
+      transform: translateY(-5px); border-color: var(--orange);
+      box-shadow: 0 26px 54px rgba(0,0,0,.55), 0 0 0 1px rgba(255,196,0,.12);
+    }
+    .contact-card .ico { border-radius: 6px; background: rgba(255,196,0,.08); border-color: rgba(255,196,0,.3); color: var(--orange); }
+    .contact-card:hover .ico { background: var(--orange); color: #0A0A0A; box-shadow: 0 0 24px rgba(255,196,0,.3); }
+    .contact-card h3 { font-size: 1.05rem; letter-spacing: .05em; }
+
+    footer { border-top-color: rgba(255,255,255,.1); padding: 48px 0 max(48px, env(safe-area-inset-bottom, 0px)); }
+    .footer-brand { font-size: 1.9rem; letter-spacing: -.02em; }
+    .footer-tagline { color: var(--muted); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; }
+
+    .marquee {
+      overflow: hidden; padding: 16px 0;
+      border-top: 1px solid rgba(255,255,255,.1); border-bottom: 1px solid rgba(255,255,255,.1);
+      background: #0D0D0D;
+    }
+    .marquee-track { display: flex; width: max-content; animation: mq 34s linear infinite; }
+    .marquee-track span {
+      font-family: 'Montserrat', sans-serif; font-weight: 800;
+      font-size: 1rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); white-space: nowrap; padding: 0 18px;
+    }
+    .marquee-track span::after { content: "*"; color: var(--orange); margin-left: 36px; }
+    @keyframes mq { to { transform: translateX(-50%); } }
+
+    .cursor-ring, .cursor-dot { position: fixed; top: 0; left: 0; border-radius: 50%; pointer-events: none; opacity: 0; z-index: 9999; }
+    .cursor-ring { width: 38px; height: 38px; border: 1px solid rgba(255,196,0,.55); }
+    .cursor-dot { width: 6px; height: 6px; background: var(--orange); }
+    body.has-cursor .cursor-ring, body.has-cursor .cursor-dot { opacity: 1; }
+    body.has-cursor .cursor-ring.grow { width: 64px; height: 64px; border-color: rgba(255,196,0,.9); transition: width .25s ease, height .25s ease; }
+
+    body::after {
+      content: ""; position: fixed; inset: 0; z-index: 9998; pointer-events: none; opacity: .05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    @media (min-width: 961px) {
+      .form-col:last-child .btn-block { margin-top: 32px; }
+    }
+    @media (max-width: 960px) {
+      .form-col { background: none; border: 0; border-radius: 0; padding: 0; }
+      .section { padding: 84px 0; }
+      .section::before { font-size: 6rem; top: 4px; }
+    }
+    @media (max-width: 760px) {
+      .nav { height: 64px; }
+      .hero { padding: 58px 0 72px; }
+      .brand-name { font-size: 1.2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track { animation: none; }
     }
   </style>
 </head>
@@ -499,16 +748,26 @@
     </div>
   </header>
 
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Fuerza</span><span>Hipertrofia</span><span>Nutrición personalizada</span><span>Recomposición</span><span>Constancia</span><span>Fuerza</span><span>Hipertrofia</span><span>Nutrición personalizada</span><span>Recomposición</span><span>Constancia</span>
+    </div>
+  </div>
+
   <main>
 
     <!-- ============ HERO ============ -->
     <section class="hero" id="inicio">
       <div class="hero-photo" aria-hidden="true"></div>
       <div class="hero-particles" aria-hidden="true"></div>
+      <div class="hero-rail" aria-hidden="true"><span>Fuerza — Nutrición — Constancia</span></div>
       <div class="container hero-grid">
         <div>
           <span class="badge-hero">Entrenamiento + Nutrición personalizada</span>
-          <h1>Transforma tu cuerpo con <span class="grad-text">ciencia y experiencia real</span></h1>
+          <h1>Transforma tu<br>
+            cuerpo con<br>
+            <span class="grad-text">ciencia real<br>
+            y experiencia</span></h1>
           <p class="lead">
             Hola, soy Jose y hace más de 15 años que mi pasión es entrenar la fuerza y la hipertrofia.
             Mi filosofía es simple: el entrenamiento debe adaptarse a tu vida y no al revés. No creo en
@@ -523,29 +782,13 @@
             <a class="btn btn-outline" href="#planes">Ver planes y precios</a>
           </div>
         </div>
-
-        <div class="avatar-card">
-          <div class="avatar-ring"><div class="avatar-inner">J</div></div>
-          <div class="avatar-chip chip-1">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.4 7.2 17l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
-            Certificación Personal Training
-          </div>
-          <div class="avatar-chip chip-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2"><path d="M4 17l4-4 4 4 4-4 4 4"/><path d="M4 12l4-4 4 4 4-4 4 4"/></svg>
-            Hipertrofia y pérdida de grasa
-          </div>
-          <div class="avatar-chip chip-3">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-            Plan 100% a tu medida
-          </div>
-        </div>
       </div>
     </section>
 
     <!-- ============ FORMULARIO DIAGNÓSTICO ============ -->
-    <section class="section" id="evaluacion" style="padding-top:40px;">
+    <section class="section" id="evaluacion" data-index="01" >
       <div class="container reveal">
-        <span class="section-label">Diagnóstico</span>
+        <span class="section-label"><span class="sec-num">01</span> Diagnóstico</span>
         <h2 class="section-title">Evaluá tu caso y recibí un <span class="grad-text">plan sugerido</span></h2>
         <p class="section-sub">Completá tus datos y en segundos obtendrás un resumen de la rutina que mejor se adapta a tu objetivo, tu experiencia y tu disponibilidad semanal.</p>
 
@@ -712,10 +955,10 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
     </section>
 
     <!-- ============ PLANES Y PRECIOS ============ -->
-    <section class="section" id="planes" style="padding-top:40px;">
+    <section class="section" id="planes" data-index="02" >
       <div class="container reveal">
         <div style="text-align:center;">
-          <span class="section-label" style="justify-content:center;">Planes y asesorías</span>
+          <span class="section-label" style="justify-content:center;"><span class="sec-num">02</span> Planes y asesorías</span>
           <h2 class="section-title">Elegí tu plan de <span class="grad-text">seguimiento personalizado</span></h2>
           <p class="section-sub" style="margin-inline:auto;">El plan sugerido ya está generado. Desbloqueá el acceso completo eligiendo el plan que mejor se ajuste a tu objetivo, con precios y bonificaciones en pesos argentinos.</p>
         </div>
@@ -781,7 +1024,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             <div>
               <h3 class="plan-name">Full Presencial</h3>
               <span class="plan-tag">Entrenamiento 1 a 1 en persona</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">126.000</span> <span class="per">ARS / mes</span></div>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">105.000</span> <span class="per">ARS / mes</span></div>
               <p class="price-sub">Renovable mes a mes</p>
               <p class="price-total">Seguimiento completo conmigo en gimnasio</p>
             </div>
@@ -805,9 +1048,9 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
     </section>
 
     <!-- ============ CONTACTO ============ -->
-    <section class="section" id="contacto" style="padding-top:40px;">
+    <section class="section" id="contacto" data-index="03" >
       <div class="container reveal">
-        <span class="section-label">Contacto</span>
+        <span class="section-label"><span class="sec-num">03</span> Contacto</span>
         <h2 class="section-title">Hablemos de tu <span class="grad-text">transformación</span></h2>
         <p class="section-sub">Resolvé tus dudas directamente por WhatsApp o escribime por correo. Respondo personalmente, sin intermediarios.</p>
 
@@ -835,6 +1078,12 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
     </section>
   </main>
 
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Fuerza</span><span>Hipertrofia</span><span>Nutrición personalizada</span><span>Recomposición</span><span>Constancia</span><span>Fuerza</span><span>Hipertrofia</span><span>Nutrición personalizada</span><span>Recomposición</span><span>Constancia</span>
+    </div>
+  </div>
+
   <footer>
     <div class="container footer-grid">
       <div class="footer-brand">
@@ -844,6 +1093,9 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       <p>@2026 <span id="yearFoot"></span> nocito.coach · Entrenamiento y nutrición personalizada</p>
     </div>
   </footer>
+
+  <div id="cursorRing" class="cursor-ring" aria-hidden="true"></div>
+  <div id="cursorDot" class="cursor-dot" aria-hidden="true"></div>
 
   <script>
     (function () {
@@ -1521,7 +1773,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       /* ---------- Hero particles ---------- */
       var particlesHost = document.querySelector(".hero-particles");
       if (particlesHost && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        var PARTICLE_COLORS = ["#FF5722", "#00E5FF", "#FF7A4D", "#6FEFFF"];
+        var PARTICLE_COLORS = ["#FFC400", "#FFE07A", "#FFF3C4", "#FFD94A"];
         for (var pi = 0; pi < 26; pi++) {
           var p = document.createElement("span");
           p.className = "particle";
@@ -1546,6 +1798,59 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       onScrollGlass();
 
       $id("yearFoot").textContent = new Date().getFullYear();
+    })();
+  </script>
+
+  <script>
+    (function () {
+      "use strict";
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      var heroPhoto = document.querySelector(".hero-photo");
+      if (heroPhoto && !reduced) {
+        var tickingPhoto = false;
+        function onScrollPhoto() {
+          if (tickingPhoto) return;
+          tickingPhoto = true;
+          window.requestAnimationFrame(function () {
+            tickingPhoto = false;
+            var y = Math.min(window.scrollY, 1500);
+            heroPhoto.style.transform = "translate3d(0," + (y * 0.16).toFixed(1) + "px,0) scale(1.06)";
+          });
+        }
+        document.addEventListener("scroll", onScrollPhoto, { passive: true });
+      }
+
+      var finePointer = window.matchMedia("(pointer: fine)").matches;
+      if (finePointer && !reduced) {
+        var ring = document.getElementById("cursorRing");
+        var dot = document.getElementById("cursorDot");
+        document.body.classList.add("has-cursor");
+        var rx = -120, ry = -120, tx = -120, ty = -120, runningCursor = false;
+        function lerpCursor() {
+          rx += (tx - rx) * 0.16;
+          ry += (ty - ry) * 0.16;
+          ring.style.transform = "translate3d(" + rx.toFixed(1) + "px," + ry.toFixed(1) + "px,0) translate(-50%,-50%)";
+          dot.style.transform = "translate3d(" + tx.toFixed(1) + "px," + ty.toFixed(1) + "px,0) translate(-50%,-50%)";
+          if (Math.abs(tx - rx) > 0.5 || Math.abs(ty - ry) > 0.5) {
+            window.requestAnimationFrame(lerpCursor);
+          } else {
+            runningCursor = false;
+          }
+        }
+        document.addEventListener("pointermove", function (e) {
+          tx = e.clientX;
+          ty = e.clientY;
+          if (!runningCursor) {
+            runningCursor = true;
+            window.requestAnimationFrame(lerpCursor);
+          }
+        }, { passive: true });
+        document.addEventListener("mouseover", function (e) {
+          var hit = e.target.closest("a, button, input, select, textarea, .pill, .day-pill");
+          ring.classList.toggle("grow", !!hit);
+        }, { passive: true });
+      }
     })();
   </script>
 </body>

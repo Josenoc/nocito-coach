@@ -22,7 +22,7 @@ export const PLANS: Plan[] = [
   {
     key: "presencial",
     name: "Full Presencial (Mensual)",
-    price: 126000,
+    price: 105000,
     months: 1,
   },
 ];
