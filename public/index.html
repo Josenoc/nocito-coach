@@ -211,7 +211,10 @@
     .chip-3 { bottom: 40%; left: -16%; }
 
     /* ---------- Form ---------- */
-    .eval-wrap { display: grid; grid-template-columns: .85fr 1.15fr; gap: 44px; align-items: start; }
+    .eval-wrap { display: block; }
+    .form-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+    .form-col { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 26px; }
+    .form-col:last-child .btn-block { margin-top: 26px; }
     .form-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 34px;
@@ -250,7 +253,7 @@
     .form-errors li { margin-left: 18px; list-style: disc; }
     .btn-block { width: 100%; margin-top: 6px; padding: 16px; font-size: 1.04rem; }
 
-    .info-list { display: flex; flex-direction: column; gap: 18px; margin-top: 26px; }
+    .info-list { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 44px; margin-top: 46px; }
     .info-item { display: flex; gap: 16px; }
     .info-item .ico {
       flex: 0 0 46px; width: 46px; height: 46px; border-radius: 12px;
@@ -439,6 +442,9 @@
     /* ---------- Responsive ---------- */
     @media (max-width: 960px) {
       .hero-grid, .eval-wrap, .contact-wrap { grid-template-columns: 1fr; }
+      .form-cols { grid-template-columns: 1fr; }
+      .form-col { background: none; border: 0; border-radius: 0; padding: 0; }
+      .info-list { grid-template-columns: 1fr; margin-top: 30px; }
       .avatar-card { justify-self: center; margin-top: 20px; }
       .pricing-grid { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
       .price-card.featured { transform: none; }
@@ -550,94 +556,100 @@
 
             <div class="form-errors" id="formErrors"></div>
 
-            <div class="field">
-              <label for="name">Nombre completo <span>*</span></label>
-              <input type="text" id="name" placeholder="Ej: Martín Gómez" autocomplete="name">
-            </div>
+            <div class="form-cols">
+              <div class="form-col reveal">
+                <div class="field">
+                  <label for="name">Nombre completo <span>*</span></label>
+                  <input type="text" id="name" placeholder="Ej: Martín Gómez" autocomplete="name">
+                </div>
 
-            <div class="field">
-              <label for="contact">WhatsApp o Email <span>*</span></label>
-              <input type="text" id="contact" placeholder="Ej: +54 9 11 5555 5555 o tu@email.com" autocomplete="email">
-            </div>
+                <div class="field">
+                  <label for="contact">WhatsApp o Email <span>*</span></label>
+                  <input type="text" id="contact" placeholder="Ej: +54 9 11 5555 5555 o tu@email.com" autocomplete="email">
+                </div>
 
-            <div class="row-3">
-              <div class="field">
-                <label for="age">Edad <span>*</span></label>
-                <input type="number" id="age" min="14" max="90" placeholder="30">
+                <div class="row-3">
+                  <div class="field">
+                    <label for="age">Edad <span>*</span></label>
+                    <input type="number" id="age" min="14" max="90" placeholder="30">
+                  </div>
+                  <div class="field">
+                    <label for="height">Altura (cm) <span>*</span></label>
+                    <input type="number" id="height" min="130" max="230" placeholder="175">
+                  </div>
+                  <div class="field">
+                    <label for="weight">Peso (kg) <span>*</span></label>
+                    <input type="number" id="weight" min="35" max="250" step="0.1" placeholder="80">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Sexo <span>*</span></label>
+                  <div class="pill-group day-pill">
+                    <div class="day-pill"><input type="radio" name="sex" value="Masculino" id="sex-m"><label for="sex-m">Masculino</label></div>
+                    <div class="day-pill"><input type="radio" name="sex" value="Femenino" id="sex-f"><label for="sex-f">Femenino</label></div>
+                  </div>
+                </div>
+
+                <div class="row-2">
+                  <div class="field">
+                    <label for="objective">Objetivo principal <span>*</span></label>
+                    <select id="objective">
+                      <option value="" disabled selected>Seleccioná tu objetivo</option>
+                      <option value="ganar-masa">Ganar masa muscular</option>
+                      <option value="perder-grasa">Perder grasa corporal</option>
+                      <option value="recomposicion">Recomposición corporal</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="experience">Experiencia en el gimnasio <span>*</span></label>
+                    <select id="experience">
+                      <option value="" disabled selected>Seleccioná tu nivel</option>
+                      <option value="principiante">Principiante</option>
+                      <option value="intermedio">Intermedio</option>
+                      <option value="avanzado">Avanzado</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div class="field">
-                <label for="height">Altura (cm) <span>*</span></label>
-                <input type="number" id="height" min="130" max="230" placeholder="175">
-              </div>
-              <div class="field">
-                <label for="weight">Peso (kg) <span>*</span></label>
-                <input type="number" id="weight" min="35" max="250" step="0.1" placeholder="80">
+
+              <div class="form-col reveal reveal-d1">
+                <div class="field">
+                  <label>Prioridad <span>*</span></label>
+                  <div class="pill-group day-pill">
+                    <div class="day-pill"><input type="radio" name="priority" value="tren-superior" id="prio-up"><label for="prio-up">Tren superior</label></div>
+                    <div class="day-pill"><input type="radio" name="priority" value="tren-inferior" id="prio-low"><label for="prio-low">Tren inferior</label></div>
+                    <div class="day-pill"><input type="radio" name="priority" value="cuerpo-completo" id="prio-full"><label for="prio-full">Cuerpo completo</label></div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Días disponibles para entrenar <span>*</span></label>
+                  <div class="pill-group day-pill">
+                    <div class="day-pill"><input type="radio" name="days" value="2" id="d2"><label for="d2">2 días</label></div>
+                    <div class="day-pill"><input type="radio" name="days" value="3" id="d3"><label for="d3">3 días</label></div>
+                    <div class="day-pill"><input type="radio" name="days" value="4" id="d4"><label for="d4">4 días</label></div>
+                    <div class="day-pill"><input type="radio" name="days" value="5" id="d5"><label for="d5">5 días</label></div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Preferencias alimentarias / Restricciones (opcional) <span class="prefs-hint" id="prefsHint">Máximo 2</span></label>
+                  <div class="pill-group">
+                    <div class="pill"><input type="checkbox" id="p-omnivoro" value="Omnívoro"><label class="pill-label" for="p-omnivoro">Omnívoro</label></div>
+                    <div class="pill"><input type="checkbox" id="p-vegetariano" value="Vegetariano"><label class="pill-label" for="p-vegetariano">Vegetariano</label></div>
+                    <div class="pill"><input type="checkbox" id="p-vegano" value="Vegano"><label class="pill-label" for="p-vegano">Vegano</label></div>
+                    <div class="pill"><input type="checkbox" id="p-celiaco" value="Celíaco"><label class="pill-label" for="p-celiaco">Celíaco</label></div>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Generar Plan Sugerido</button>
               </div>
             </div>
-
-            <div class="field">
-              <label>Sexo <span>*</span></label>
-              <div class="pill-group day-pill">
-                <div class="day-pill"><input type="radio" name="sex" value="Masculino" id="sex-m"><label for="sex-m">Masculino</label></div>
-                <div class="day-pill"><input type="radio" name="sex" value="Femenino" id="sex-f"><label for="sex-f">Femenino</label></div>
-              </div>
-            </div>
-
-            <div class="row-2">
-              <div class="field">
-                <label for="objective">Objetivo principal <span>*</span></label>
-                <select id="objective">
-                  <option value="" disabled selected>Seleccioná tu objetivo</option>
-                  <option value="ganar-masa">Ganar masa muscular</option>
-                  <option value="perder-grasa">Perder grasa corporal</option>
-                  <option value="recomposicion">Recomposición corporal</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="experience">Experiencia en el gimnasio <span>*</span></label>
-                <select id="experience">
-                  <option value="" disabled selected>Seleccioná tu nivel</option>
-                  <option value="principiante">Principiante</option>
-                  <option value="intermedio">Intermedio</option>
-                  <option value="avanzado">Avanzado</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Prioridad <span>*</span></label>
-              <div class="pill-group day-pill">
-                <div class="day-pill"><input type="radio" name="priority" value="tren-superior" id="prio-up"><label for="prio-up">Tren superior</label></div>
-                <div class="day-pill"><input type="radio" name="priority" value="tren-inferior" id="prio-low"><label for="prio-low">Tren inferior</label></div>
-                <div class="day-pill"><input type="radio" name="priority" value="cuerpo-completo" id="prio-full"><label for="prio-full">Cuerpo completo</label></div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Días disponibles para entrenar <span>*</span></label>
-              <div class="pill-group day-pill">
-                <div class="day-pill"><input type="radio" name="days" value="2" id="d2"><label for="d2">2 días</label></div>
-                <div class="day-pill"><input type="radio" name="days" value="3" id="d3"><label for="d3">3 días</label></div>
-                <div class="day-pill"><input type="radio" name="days" value="4" id="d4"><label for="d4">4 días</label></div>
-                <div class="day-pill"><input type="radio" name="days" value="5" id="d5"><label for="d5">5 días</label></div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Preferencias alimentarias / Restricciones (opcional) <span class="prefs-hint" id="prefsHint">Máximo 2</span></label>
-              <div class="pill-group">
-                <div class="pill"><input type="checkbox" id="p-omnivoro" value="Omnívoro"><label class="pill-label" for="p-omnivoro">Omnívoro</label></div>
-                <div class="pill"><input type="checkbox" id="p-vegetariano" value="Vegetariano"><label class="pill-label" for="p-vegetariano">Vegetariano</label></div>
-                <div class="pill"><input type="checkbox" id="p-vegano" value="Vegano"><label class="pill-label" for="p-vegano">Vegano</label></div>
-                <div class="pill"><input type="checkbox" id="p-celiaco" value="Celíaco"><label class="pill-label" for="p-celiaco">Celíaco</label></div>
-              </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block">Generar Plan Sugerido</button>
           </form>
 
           <div>
-            <div class="info-list">
+            <div class="info-list reveal">
               <div class="info-item">
                 <div class="ico">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 6l14 12M19 6L5 18"/></svg>
