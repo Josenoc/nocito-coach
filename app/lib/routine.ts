@@ -1,5 +1,3 @@
-import { SOURCES_CITATION } from "./sources";
-
 export type ExerciseItem = [string, string, string, string];
 
 export type RoutineDay = {
@@ -12,7 +10,6 @@ export type RoutineData = {
   label: string;
   splitName: string;
   days: RoutineDay[];
-  reglas?: string[];
 };
 
 export type NutritionData = {
@@ -21,7 +18,6 @@ export type NutritionData = {
   carbs: number;
   fat: number;
   proteinSources: string;
-  sugerencias?: string[];
   meals: [string, string][];
 };
 
@@ -96,7 +92,6 @@ export function parsePayload(value: unknown): ClientPayload | null {
     routine: {
       label: asString(routine.label),
       splitName: asString(routine.splitName),
-      reglas: Array.isArray(routine.reglas) ? (routine.reglas as unknown[]).map(String) : undefined,
       days: Array.isArray(routine.days)
         ? (routine.days as unknown[])
             .map((d) => asObject(d))
@@ -124,9 +119,6 @@ export function parsePayload(value: unknown): ClientPayload | null {
       carbs: asNumber(nutrition.carbs),
       fat: asNumber(nutrition.fat),
       proteinSources: asString(nutrition.proteinSources),
-      sugerencias: Array.isArray(nutrition.sugerencias)
-        ? (nutrition.sugerencias as unknown[]).map(String)
-        : undefined,
       meals: Array.isArray(nutrition.meals)
         ? (nutrition.meals as unknown[]).map((m) => {
             const r = Array.isArray(m) ? m : [];
@@ -166,27 +158,6 @@ function macrosBlock(p: ClientPayload): string {
     `<p style="margin:0;">Proteínas: <b>${p.nutrition.prot} g</b> · Carbohidratos: <b>${p.nutrition.carbs} g</b> · Grasas: <b>${p.nutrition.fat} g</b></p>`,
     `<p style="margin:0;">Fuentes de proteína sugeridas: ${esc(p.nutrition.proteinSources)}</p>`,
   ].join("\n");
-}
-
-function settingsBlock(p: ClientPayload): string {
-  const parts: string[] = [];
-  if (p.routine.reglas && p.routine.reglas.length) {
-    parts.push(
-      `<h3 style="margin:18px 0 6px;color:#111;">REGLAS DE CARGA</h3>`,
-      `<div style="background:#f7f7f7;border-left:3px solid #ff8a65;padding:10px 14px;font-size:13px;color:#111;line-height:1.55;">${p.routine.reglas
-        .map((r) => "• " + esc(r))
-        .join("<br>")}</div>`
-    );
-  }
-  if (p.nutrition.sugerencias && p.nutrition.sugerencias.length) {
-    parts.push(
-      `<h3 style="margin:18px 0 6px;color:#111;">NUTRICIÓN Y SUPLEMENTACIÓN</h3>`,
-      `<div style="background:#f0f9f2;border-left:3px solid #8af0a8;padding:10px 14px;font-size:13px;color:#111;line-height:1.55;">${p.nutrition.sugerencias
-        .map((s) => "• " + esc(s))
-        .join("<br>")}</div>`
-    );
-  }
-  return parts.join("\n");
 }
 
 function routineBlocks(p: ClientPayload): string[] {
@@ -235,12 +206,10 @@ export function renderRoutineHtml(p: ClientPayload): string {
     `<h3 style="margin:0 0 6px;color:#111;">DATOS DEL CLIENTE</h3>`,
     `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;font-size:13px;color:#111;">${clientDataBlock(p).join("\n")}</table>`,
     macrosBlock(p),
-    settingsBlock(p),
     routineBlocks(p).join("\n"),
     mealsBlock(p),
     `<hr style="border:none;border-top:1px solid #ddd;margin:22px 0;">`,
     `<p style="font-size:12px;color:#555;margin:0;">Generado el ${esc(p.fecha)} · Pago confirmado automáticamente por Mercado Pago.</p>`,
-    `<p style="font-size:11px;color:#888;margin:6px 0 0;">Fuentes de referencia: ${esc(SOURCES_CITATION)}.</p>`,
     `</div>`,
     `</div>`,
   ].join("\n");
@@ -272,16 +241,6 @@ export function renderRoutineText(p: ClientPayload): string {
   );
   L.push("- Fuentes de proteína: " + p.nutrition.proteinSources);
   L.push("");
-  if (p.routine.reglas && p.routine.reglas.length) {
-    L.push("REGLAS DE CARGA:");
-    for (const r of p.routine.reglas) L.push("- " + r);
-    L.push("");
-  }
-  if (p.nutrition.sugerencias && p.nutrition.sugerencias.length) {
-    L.push("NUTRICIÓN Y SUPLEMENTACIÓN:");
-    for (const s of p.nutrition.sugerencias) L.push("- " + s);
-    L.push("");
-  }
   for (const day of p.routine.days) {
     L.push(day.name.toUpperCase() + (day.focus ? " — " + day.focus : ""));
     for (const row of day.items) {
@@ -295,6 +254,5 @@ export function renderRoutineText(p: ClientPayload): string {
   }
   L.push("");
   L.push("Generado el " + p.fecha + " · Pago confirmado automáticamente por Mercado Pago.");
-  L.push("Fuentes de referencia: " + SOURCES_CITATION + ".");
   return L.join("\n");
 }
