@@ -148,11 +148,14 @@ export function renderRoutinePdf(p: ClientPayload): Promise<Buffer> {
   section("DATOS DEL CLIENTE");
   labelValue("NOMBRE", clean(p.name));
   labelValue("CONTACTO", clean(p.contact));
+  labelValue("SEXO", clean(p.sex || "No especificado"));
   labelValue("EDAD / PESO / ALTURA", `${p.age} años · ${p.weight} kg · ${p.height} cm`);
   labelValue("OBJETIVO", clean(p.objective));
   labelValue("EXPERIENCIA", `${clean(p.experience)} · ${p.days} días/semana`);
   labelValue("PREFERENCIAS", clean((p.prefs || []).join(", ") || "Omnívoro"));
-  labelValue("IMC", clean(p.bmi));
+  labelValue("IMC", clean(p.bmi) + (p.imcCategory ? " — " + clean(p.imcCategory) : ""));
+  labelValue("TMB", p.tmb ? `${p.tmb} kcal/día` : "—");
+  labelValue("GET (TDEE)", p.tdee ? `${p.tdee} kcal/día` : "—");
   y += 6;
 
   section("MACROS DIARIOS");

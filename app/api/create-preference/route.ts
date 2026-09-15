@@ -43,6 +43,7 @@ export async function POST(req: Request) {
 
   const name = asString(diagnostic.name, "Cliente");
   const contact = asString(diagnostic.contact);
+  const sex = asString(diagnostic.sex, "Masculino");
   const objectiveKey = asString(diagnostic.objective);
   const experienceKey = asString(diagnostic.experience);
   const days = asNumber(diagnostic.days, 3);
@@ -53,11 +54,24 @@ export async function POST(req: Request) {
   const prefs = prefsRaw.length > 0 ? prefsRaw : ["Omnívoro"];
   const fecha = asString(diagnostic.fecha, new Date().toISOString().slice(0, 10));
 
-  const nutrition = buildNutrition(objectiveKey, weight, prefs);
+  let tmb = 0;
+  if (sex === "Femenino") {
+    tmb = 10 * weight + 6.25 * height - 5 * age - 161;
+  } else {
+    tmb = 10 * weight + 6.25 * height - 5 * age + 5;
+  }
+  let actFactor = 1.2;
+  if (days >= 5) actFactor = 1.725;
+  else if (days >= 3) actFactor = 1.55;
+  else actFactor = 1.375;
+  const tdee = Math.round(tmb * actFactor);
+
+  const nutrition = buildNutrition(objectiveKey, weight, prefs, tdee);
 
   const metadata: Record<string, string | number> = {
     name,
     contact,
+    sex,
     age,
     height,
     weight,

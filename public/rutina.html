@@ -199,6 +199,7 @@
 
         html += "<div class='client-grid'>";
         html += "<div class='client-cell'><small>Cliente</small><strong>" + esc(p.name) + "</strong></div>";
+        html += "<div class='client-cell'><small>Sexo</small><strong>" + esc(p.sex || "No especificado") + "</strong></div>";
         html += "<div class='client-cell'><small>Edad</small><strong>" + esc(p.age) + " años</strong></div>";
         html += "<div class='client-cell'><small>Altura</small><strong>" + esc(p.height) + " cm</strong></div>";
         html += "<div class='client-cell'><small>Peso</small><strong>" + esc(p.weight) + " kg</strong></div>";
@@ -206,6 +207,8 @@
         html += "<div class='client-cell'><small>Experiencia</small><strong>" + esc(p.experience) + "</strong></div>";
         html += "<div class='client-cell'><small>Días / semana</small><strong>" + esc(p.days) + "</strong></div>";
         html += "<div class='client-cell'><small>IMC</small><strong>" + esc(p.bmi) + " · " + bmiRange(p.bmi) + "</strong></div>";
+        html += "<div class='client-cell'><small>TMB</small><strong>" + (p.tmb ? esc(p.tmb) + " kcal/día" : "—") + "</strong></div>";
+        html += "<div class='client-cell'><small>GET (TDEE)</small><strong>" + (p.tdee ? esc(p.tdee) + " kcal/día" : "—") + "</strong></div>";
         html += "</div>";
 
         html += "<h2 class='block-title'>Rutina recomendada</h2>";
@@ -280,12 +283,17 @@
           fecha: "2026-09-12",
           name: "Martín Gómez (demo)",
           contact: "+54 9 11 5555 5555",
+          sex: "Masculino",
           age: 32, height: 178, weight: 86,
           objective: "Recomposición corporal", objectiveKey: "recomposicion",
           experience: "Intermedio", experienceKey: "intermedio",
           days: 4,
           prefs: ["Omnívoro"],
           bmi: "27.1",
+          imcCategory: "Sobrepeso",
+          tmb: 1818,
+          tdee: 2818,
+          activityFactor: 1.55,
           routineLabel: "4 Días Upper / Lower ×2 / Enfoque: Recomposición Corporal",
           routine: {
             splitName: "Upper / Lower ×2",
@@ -325,7 +333,7 @@
             ]
           },
           nutrition: {
-            cal: 2666, prot: 181, carbs: 275, fat: 77,
+            cal: 2818, prot: 172, carbs: 377, fat: 69,
             proteinSources: "Pollo, carne magra, pescado, huevos y lácteos",
             meals: [
               ["Desayuno", "Avena/pan integral + proteína + fruta y frutos secos"],

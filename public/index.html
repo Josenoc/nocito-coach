@@ -475,6 +475,14 @@
               </div>
             </div>
 
+            <div class="field">
+              <label>Sexo <span>*</span></label>
+              <div class="pill-group day-pill">
+                <div class="day-pill"><input type="radio" name="sex" value="Masculino" id="sex-m"><label for="sex-m">Masculino</label></div>
+                <div class="day-pill"><input type="radio" name="sex" value="Femenino" id="sex-f"><label for="sex-f">Femenino</label></div>
+              </div>
+            </div>
+
             <div class="row-2">
               <div class="field">
                 <label for="objective">Objetivo principal <span>*</span></label>
@@ -990,10 +998,17 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         return { label: label, days: days, splitName: splitName };
       }
 
-      function buildNutrition(objetivo, weight, prefs) {
+      function buildNutrition(objetivo, weight, prefs, tdee) {
         var w = Number(weight) || 75;
         var cal, prot, cg, gr;
-        if (objetivo === "ganar-masa") {
+        if (tdee) {
+          if (objetivo === "ganar-masa") { cal = Math.round(tdee * 1.10); }
+          else if (objetivo === "perder-grasa") { cal = Math.round(tdee * 0.80); }
+          else { cal = tdee; }
+          prot = Math.round(w * 2.0);
+          gr = Math.round(Math.max(w * 0.8, 40));
+          cg = Math.round(Math.max((cal - prot * 4 - gr * 9) / 4, 0));
+        } else if (objetivo === "ganar-masa") {
           cal = Math.round(w * 36); prot = Math.round(w * 1.9); cg = Math.round(w * 4.5); gr = Math.round(w * 0.9);
         } else if (objetivo === "perder-grasa") {
           cal = Math.round(w * 26); prot = Math.round(w * 2.2); cg = Math.round(w * 2.2); gr = Math.round(w * 0.9);
@@ -1069,6 +1084,34 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         return checked ? checked.value : "";
       }
 
+      function getSex() {
+        var checked = document.querySelector('input[name="sex"]:checked');
+        return checked ? checked.value : "";
+      }
+
+      function getActFactor(days) {
+        if (days >= 5) return 1.725;
+        if (days >= 3) return 1.55;
+        return 1.375;
+      }
+
+      function calcTmb(sex, age, height, weight) {
+        var w = Number(weight) || 75, h = Number(height) || 175, a = Number(age) || 30;
+        if (sex === "Femenino") return Math.round(10 * w + 6.25 * h - 5 * a - 161);
+        return Math.round(10 * w + 6.25 * h - 5 * a + 5);
+      }
+
+      function calcTdee(tmb, days) {
+        return Math.round(tmb * getActFactor(days));
+      }
+
+      function bmiCategory(imc) {
+        if (imc < 18.5) return "Bajo peso";
+        if (imc < 25) return "Normal";
+        if (imc < 30) return "Sobrepeso";
+        return "Obesidad";
+      }
+
       function cleanErrors() {
         var box = $id("formErrors");
         box.classList.remove("show");
@@ -1097,6 +1140,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         var age = $id("age").value.trim();
         var height = $id("height").value.trim();
         var weight = $id("weight").value.trim();
+        var sex = getSex();
         var objective = $id("objective").value;
         var experience = $id("experience").value;
         var days = getDays();
@@ -1107,6 +1151,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         if (!age) errors.push("Ingresá tu edad.");
         if (!height) errors.push("Ingresá tu altura en cm.");
         if (!weight) errors.push("Ingresá tu peso en kg.");
+        if (!sex) errors.push("Seleccioná tu sexo.");
         if (!objective) errors.push("Seleccioná tu objetivo principal.");
         if (!experience) errors.push("Seleccioná tu experiencia en el gimnasio.");
         if (!days) errors.push("Seleccioná cuántos días podés entrenar.");
@@ -1115,14 +1160,18 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
 
         var prefs = getPreferenceList();
         var routine = buildRoutine(objective, experience, days);
-        var nutrition = buildNutrition(objective, weight, prefs);
+        var tmb = calcTmb(sex, Number(age), Number(height), Number(weight));
+        var tdee = calcTdee(tmb, Number(days));
+        var nutrition = buildNutrition(objective, weight, prefs, tdee);
 
         var bmi = (Number(weight) / Math.pow(Number(height) / 100, 2)).toFixed(1);
+        var imcCategory = bmiCategory(Number(bmi));
 
         var payload = {
           fecha: new Date().toISOString().slice(0, 10),
           name: name,
           contact: contact,
+          sex: sex,
           age: Number(age),
           height: Number(height),
           weight: Number(weight),
@@ -1133,6 +1182,10 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           days: Number(days),
           prefs: prefs,
           bmi: bmi,
+          imcCategory: imcCategory,
+          tmb: tmb,
+          tdee: tdee,
+          activityFactor: getActFactor(Number(days)),
           routineLabel: routine.label,
           routine: routine,
           nutrition: nutrition
@@ -1156,6 +1209,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         return {
           name: $id("name").value.trim(),
           contact: $id("contact").value.trim(),
+          sex: getSex(),
           age: $id("age").value.trim(),
           weight: $id("weight").value.trim(),
           height: $id("height").value.trim(),
@@ -1174,6 +1228,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         if (!req.age) errors.push("Ingresá tu edad.");
         if (!req.weight) errors.push("Ingresá tu peso en kg.");
         if (!req.height) errors.push("Ingresá tu altura en cm.");
+        if (!req.sex) errors.push("Seleccioná tu sexo.");
         if (!req.objective) errors.push("Seleccioná tu objetivo principal.");
         return errors;
       }

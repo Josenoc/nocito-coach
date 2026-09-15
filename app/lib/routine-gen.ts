@@ -343,11 +343,23 @@ export function buildRoutine(
 export function buildNutrition(
   objetivo: string,
   weight: unknown,
-  prefs: string[]
+  prefs: string[],
+  tdee?: number
 ): NutritionData {
   const w = Number(weight) || 75;
   let cal: number, prot: number, cg: number, gr: number;
-  if (objetivo === "ganar-masa") {
+  if (tdee) {
+    if (objetivo === "ganar-masa") {
+      cal = Math.round(tdee * 1.10);
+    } else if (objetivo === "perder-grasa") {
+      cal = Math.round(tdee * 0.80);
+    } else {
+      cal = tdee;
+    }
+    prot = Math.round(w * 2.0);
+    gr = Math.round(Math.max(w * 0.8, 40));
+    cg = Math.round(Math.max((cal - prot * 4 - gr * 9) / 4, 0));
+  } else if (objetivo === "ganar-masa") {
     cal = Math.round(w * 36); prot = Math.round(w * 1.9); cg = Math.round(w * 4.5); gr = Math.round(w * 0.9);
   } else if (objetivo === "perder-grasa") {
     cal = Math.round(w * 26); prot = Math.round(w * 2.2); cg = Math.round(w * 2.2); gr = Math.round(w * 0.9);
@@ -404,12 +416,38 @@ export function generatePayload(meta: Meta): ClientPayload | null {
 
   const objective = OBJECTIVE_LABELS[objectiveKey] ?? (objectiveKey || "Sin objetivo");
   const experience = EXPERIENCE_LABELS[experienceKey] ?? (experienceKey || "Sin experiencia");
-  const routine = buildRoutine(objectiveKey, experienceKey, days);
-  const nutrition = buildNutrition(objectiveKey, weight, prefs);
-  const bmi =
+
+  const sex = metaString(meta, "sex", "sex") || "Masculino";
+
+  const imc =
     height > 0
       ? (weight / Math.pow(height / 100, 2)).toFixed(1)
       : "";
+  let imcCategory = "";
+  if (height > 0) {
+    const imcNum = weight / Math.pow(height / 100, 2);
+    if (imcNum < 18.5) imcCategory = "Bajo peso";
+    else if (imcNum < 25) imcCategory = "Normal";
+    else if (imcNum < 30) imcCategory = "Sobrepeso";
+    else imcCategory = "Obesidad";
+  }
+
+  let tmb = 0;
+  if (sex === "Femenino") {
+    tmb = 10 * weight + 6.25 * height - 5 * age - 161;
+  } else {
+    tmb = 10 * weight + 6.25 * height - 5 * age + 5;
+  }
+
+  let actFactor = 1.2;
+  if (days >= 5) actFactor = 1.725;
+  else if (days >= 3) actFactor = 1.55;
+  else actFactor = 1.375;
+
+  const tdee = Math.round(tmb * actFactor);
+
+  const routine = buildRoutine(objectiveKey, experienceKey, days);
+  const nutrition = buildNutrition(objectiveKey, weight, prefs, tdee);
 
   const planName = metaString(meta, "planName", "plan_name");
 
@@ -417,6 +455,7 @@ export function generatePayload(meta: Meta): ClientPayload | null {
     fecha: metaString(meta, "fecha", "fecha") || new Date().toISOString().slice(0, 10),
     name,
     contact: metaString(meta, "contact", "contact"),
+    sex,
     age,
     height,
     weight,
@@ -424,7 +463,11 @@ export function generatePayload(meta: Meta): ClientPayload | null {
     experience,
     days,
     prefs,
-    bmi,
+    bmi: imc,
+    imcCategory,
+    tmb: Math.round(tmb),
+    tdee,
+    activityFactor: actFactor,
     routineLabel: routine.label,
     routine: routine as RoutineData,
     nutrition,

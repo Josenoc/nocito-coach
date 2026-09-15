@@ -25,6 +25,7 @@ export type ClientPayload = {
   fecha?: string;
   name: string;
   contact: string;
+  sex?: string;
   age: number;
   height: number;
   weight: number;
@@ -33,6 +34,10 @@ export type ClientPayload = {
   days: number;
   prefs: string[];
   bmi: string;
+  imcCategory?: string;
+  tmb?: number;
+  tdee?: number;
+  activityFactor?: number;
   routineLabel: string;
   routine: RoutineData;
   nutrition: NutritionData;
@@ -76,6 +81,11 @@ export function parsePayload(value: unknown): ClientPayload | null {
     days: asNumber(o.days),
     prefs: Array.isArray(o.prefs) ? o.prefs.map(String) : [],
     bmi: asString(o.bmi),
+    sex: asString(o.sex),
+    imcCategory: asString(o.imcCategory),
+    tmb: asNumber(o.tmb),
+    tdee: asNumber(o.tdee),
+    activityFactor: asNumber(o.activityFactor),
     routineLabel: asString(o.routineLabel),
     routine: {
       label: asString(routine.label),
@@ -125,11 +135,14 @@ function clientDataBlock(p: ClientPayload): string[] {
   return [
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;width:180px;"><b>NOMBRE</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.name)}</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>CONTACTO</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.contact)}</td></tr>`,
+    `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>SEXO</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.sex || "No especificado")}</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>EDAD / PESO / ALTURA</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${p.age} años · ${p.weight} kg · ${p.height} cm</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>OBJETIVO</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.objective)}</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>EXPERIENCIA</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.experience)} · ${p.days} días/semana</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>PREFERENCIAS</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc((p.prefs || []).join(", ") || "Omnívoro")}</td></tr>`,
-    `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>IMC</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.bmi)}</td></tr>`,
+    `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>IMC</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.bmi)}${p.imcCategory ? " — " + esc(p.imcCategory) : ""}</td></tr>`,
+    `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>TMB</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${p.tmb ? p.tmb + " kcal/día" : "—"}</td></tr>`,
+    `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>GET (TDEE)</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${p.tdee ? p.tdee + " kcal/día" : "—"}</td></tr>`,
   ];
 }
 
@@ -209,10 +222,13 @@ export function renderRoutineText(p: ClientPayload): string {
   L.push("- Nombre: " + p.name);
   L.push("- Contacto: " + p.contact);
   L.push("- Edad/Peso/Altura: " + p.age + " años / " + p.weight + " kg / " + p.height + " cm");
+  L.push("- Sexo: " + (p.sex || "No especificado"));
   L.push("- Objetivo: " + p.objective);
   L.push("- Experiencia: " + p.experience + " · " + p.days + " días/semana");
   L.push("- Preferencias: " + (p.prefs.join(", ") || "Omnívoro"));
-  L.push("- IMC: " + p.bmi);
+  L.push("- IMC: " + p.bmi + (p.imcCategory ? " — " + p.imcCategory : ""));
+  L.push("- TMB: " + (p.tmb ? p.tmb + " kcal/día" : "—"));
+  L.push("- GET (TDEE): " + (p.tdee ? p.tdee + " kcal/día" : "—"));
   L.push("");
   L.push("Rutina sugerida: " + p.routineLabel);
   L.push("MACROS DIARIOS (kcal " + p.nutrition.cal + "):");
