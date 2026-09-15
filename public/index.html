@@ -718,6 +718,24 @@
     @media (prefers-reduced-motion: reduce) {
       .marquee-track { animation: none; }
     }
+
+    .hero-particles.paused .particle { animation-play-state: paused; }
+
+    /* ---------- Rendimiento en móvil / táctil ---------- */
+    @media (hover: none), (pointer: coarse), (max-width: 760px) {
+      html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+      a, button, input, select, textarea, .pill, .day-pill label { touch-action: manipulation; }
+      * { -webkit-tap-highlight-color: transparent; }
+
+      header, header.glass {
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        background: rgba(10,10,10,.96);
+      }
+
+      .price-card { will-change: auto; }
+      .price-card:not(.featured):hover, .price-card.featured:hover,
+      .contact-card:hover { transform: none; }
+    }
   </style>
 </head>
 <body>
@@ -1071,6 +1089,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             <div>
               <h3>Correo electrónico</h3>
               <p>Para consultas detalladas o coordinación de pagos por transferencia.</p>
+              <p style="color:var(--orange);font-weight:600;margin-top:6px;">nocito.coach@gmail.com</p>
             </div>
           </a>
         </div>
@@ -1102,7 +1121,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       "use strict";
 
       var WHATSAPP_NUMBER = "5492616224718";
-      var EMAIL = "jose@nocito.coach";
+      var EMAIL = "nocito.coach@gmail.com";
 
       var OBJECTIVE_LABELS = {
         "ganar-masa": "Ganar masa muscular",
@@ -1774,7 +1793,9 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       var particlesHost = document.querySelector(".hero-particles");
       if (particlesHost && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         var PARTICLE_COLORS = ["#FFC400", "#FFE07A", "#FFF3C4", "#FFD94A"];
-        for (var pi = 0; pi < 26; pi++) {
+        var compact = window.matchMedia("(max-width: 760px)").matches;
+        var particleCount = compact ? 12 : 26;
+        for (var pi = 0; pi < particleCount; pi++) {
           var p = document.createElement("span");
           p.className = "particle";
           var size = 3 + Math.random() * 6;
@@ -1787,6 +1808,18 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           p.style.animationDelay = (-Math.random() * 15).toFixed(2) + "s";
           particlesHost.appendChild(p);
         }
+        var heroEl = document.querySelector(".hero");
+        var heroVisible = true;
+        function syncParticlePlayState() {
+          particlesHost.classList.toggle("paused", !heroVisible || document.hidden);
+        }
+        if (heroEl && "IntersectionObserver" in window) {
+          new IntersectionObserver(function (entries) {
+            heroVisible = entries[0].isIntersecting;
+            syncParticlePlayState();
+          }, { threshold: 0 }).observe(heroEl);
+        }
+        document.addEventListener("visibilitychange", syncParticlePlayState);
       }
 
       /* ---------- Navbar glassmorphism ---------- */
@@ -1805,9 +1838,11 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
     (function () {
       "use strict";
       var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      var compactView = window.matchMedia("(max-width: 760px)").matches;
 
       var heroPhoto = document.querySelector(".hero-photo");
-      if (heroPhoto && !reduced) {
+      if (heroPhoto && !reduced && finePointer && !compactView) {
         var tickingPhoto = false;
         function onScrollPhoto() {
           if (tickingPhoto) return;
@@ -1821,7 +1856,6 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         document.addEventListener("scroll", onScrollPhoto, { passive: true });
       }
 
-      var finePointer = window.matchMedia("(pointer: fine)").matches;
       if (finePointer && !reduced) {
         var ring = document.getElementById("cursorRing");
         var dot = document.getElementById("cursorDot");
