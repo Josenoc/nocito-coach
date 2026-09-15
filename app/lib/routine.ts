@@ -26,6 +26,7 @@ export type ClientPayload = {
   name: string;
   contact: string;
   sex?: string;
+  priority?: string;
   age: number;
   height: number;
   weight: number;
@@ -82,6 +83,7 @@ export function parsePayload(value: unknown): ClientPayload | null {
     prefs: Array.isArray(o.prefs) ? o.prefs.map(String) : [],
     bmi: asString(o.bmi),
     sex: asString(o.sex),
+    priority: asString(o.priority),
     imcCategory: asString(o.imcCategory),
     tmb: asNumber(o.tmb),
     tdee: asNumber(o.tdee),
@@ -138,6 +140,7 @@ function clientDataBlock(p: ClientPayload): string[] {
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>SEXO</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.sex || "No especificado")}</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>EDAD / PESO / ALTURA</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${p.age} años · ${p.weight} kg · ${p.height} cm</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>OBJETIVO</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.objective)}</td></tr>`,
+    `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>PRIORIDAD</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.priority || "Cuerpo completo")}</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>EXPERIENCIA</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.experience)} · ${p.days} días/semana</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>PREFERENCIAS</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc((p.prefs || []).join(", ") || "Omnívoro")}</td></tr>`,
     `<tr><td style="padding:6px 10px;border:1px solid #ddd;"><b>IMC</b></td><td style="padding:6px 10px;border:1px solid #ddd;">${esc(p.bmi)}${p.imcCategory ? " — " + esc(p.imcCategory) : ""}</td></tr>`,
@@ -224,6 +227,7 @@ export function renderRoutineText(p: ClientPayload): string {
   L.push("- Edad/Peso/Altura: " + p.age + " años / " + p.weight + " kg / " + p.height + " cm");
   L.push("- Sexo: " + (p.sex || "No especificado"));
   L.push("- Objetivo: " + p.objective);
+  L.push("- Prioridad: " + (p.priority || "Cuerpo completo"));
   L.push("- Experiencia: " + p.experience + " · " + p.days + " días/semana");
   L.push("- Preferencias: " + (p.prefs.join(", ") || "Omnívoro"));
   L.push("- IMC: " + p.bmi + (p.imcCategory ? " — " + p.imcCategory : ""));

@@ -6,18 +6,24 @@ export type Plan = {
 };
 
 export const PLANS: Plan[] = [
-  { key: "inicial", name: "Plan Inicial (1 Mes)", price: 300, months: 1 },
+  { key: "inicial", name: "Plan Inicial (1 Mes)", price: 45000, months: 1 },
   {
     key: "transformacion",
     name: "Plan Transformación (2 Meses)",
-    price: 99000,
+    price: 76000,
     months: 2,
   },
   {
     key: "habito",
     name: "Plan Hábito & Resultados (3 Meses)",
-    price: 132000,
+    price: 100500,
     months: 3,
+  },
+  {
+    key: "presencial",
+    name: "Full Presencial (Mensual)",
+    price: 126000,
+    months: 1,
   },
 ];
 

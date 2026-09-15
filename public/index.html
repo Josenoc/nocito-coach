@@ -248,7 +248,9 @@
 
     /* ---------- Pricing ---------- */
     #planes { position: relative; }
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin-top: 44px; align-items: stretch; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 44px; align-items: stretch; }
+    @media (max-width: 1080px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
     .price-card {
       position: relative; display: flex; flex-direction: column;
       background: var(--surface); border: 1px solid var(--border);
@@ -505,6 +507,15 @@
             </div>
 
             <div class="field">
+              <label>Prioridad <span>*</span></label>
+              <div class="pill-group day-pill">
+                <div class="day-pill"><input type="radio" name="priority" value="tren-superior" id="prio-up"><label for="prio-up">Tren superior</label></div>
+                <div class="day-pill"><input type="radio" name="priority" value="tren-inferior" id="prio-low"><label for="prio-low">Tren inferior</label></div>
+                <div class="day-pill"><input type="radio" name="priority" value="cuerpo-completo" id="prio-full"><label for="prio-full">Cuerpo completo</label></div>
+              </div>
+            </div>
+
+            <div class="field">
               <label>Días disponibles para entrenar <span>*</span></label>
               <div class="pill-group day-pill">
                 <div class="day-pill"><input type="radio" name="days" value="2" id="d2"><label for="d2">2 días</label></div>
@@ -603,7 +614,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             <div>
               <h3 class="plan-name">Plan Inicial</h3>
               <span class="plan-tag">Ideal para empezar</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">300</span> <span class="per">ARS · pago único</span></div>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">45.000</span> <span class="per">ARS · pago único</span></div>
               <p class="price-sub">1 mes</p>
             </div>
             <ul class="plan-features">
@@ -619,9 +630,9 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           <article class="price-card">
             <div>
               <h3 class="plan-name">Plan Transformación</h3>
-              <span class="plan-tag">~10% de ahorro</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">49.500</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">Total en 1 pago de <b>$99.000 ARS</b></p>
+              <span class="plan-tag">~15% de ahorro</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">38.000</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Total en 1 pago de <b>$76.000 ARS</b></p>
               <p class="price-total">2 meses de seguimiento</p>
             </div>
             <ul class="plan-features">
@@ -637,9 +648,9 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             <span class="featured-badge">MÁS POPULAR</span>
             <div>
               <h3 class="plan-name">Plan Hábito &amp; Resultados</h3>
-              <span class="plan-tag">~20% de ahorro · Mejor valor</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">44.000</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">Total en 1 pago de <b>$132.000 ARS</b></p>
+              <span class="plan-tag">~26% de ahorro · Mejor valor</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">33.500</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Total en 1 pago de <b>$100.500 ARS</b></p>
               <p class="price-total">3 meses completos de transformación</p>
             </div>
             <ul class="plan-features">
@@ -649,6 +660,25 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Dos videollamadas por semana</li>
             </ul>
             <button class="btn-plan" data-plan="2">Elegir este plan</button>
+          </article>
+
+          <!-- Plan 4 FULL PRESENCIAL -->
+          <article class="price-card featured">
+            <span class="featured-badge">PRESENCIAL</span>
+            <div>
+              <h3 class="plan-name">Full Presencial</h3>
+              <span class="plan-tag">Entrenamiento 1 a 1 en persona</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">126.000</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Renovable mes a mes</p>
+              <p class="price-total">Seguimiento completo conmigo en gimnasio</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Entrenamiento presencial guiado en tu gimnasio</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina personalizada con corrección de técnica en vivo</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan nutricional y ajustes semanales</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Comunicación directa por WhatsApp</li>
+            </ul>
+            <button class="btn-plan" data-plan="3">Elegir este plan</button>
           </article>
         </div>
 
@@ -724,6 +754,11 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         "ganar-masa": "Hipertrofia Aislada",
         "perder-grasa": "Hipertrofia + Quema de grasa",
         "recomposicion": "Recomposición Corporal"
+      };
+      var PRIORITY_LABELS = {
+        "tren-superior": "Tren superior",
+        "tren-inferior": "Tren inferior",
+        "cuerpo-completo": "Cuerpo completo"
       };
 
       function repsFor(obj) {
@@ -860,7 +895,23 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         ];
       }
 
-      function buildRoutine(objetivo, experiencia, dias) {
+      function applyPriority(days, prioridad) {
+        if (prioridad !== "tren-superior" && prioridad !== "tren-inferior") return;
+        var upperExtra = [["Aperturas con mancuernas", "3", "12-15", "60"], ["Pájaros (deltoides posterior)", "3", "12-15", "60"]];
+        var lowerExtra = [["Hip thrust", "3", "10-12", "90"], ["Elevación de talón de pie", "3", "12-15", "45"]];
+        var extras = prioridad === "tren-superior" ? upperExtra : lowerExtra;
+        for (var i = 0; i < days.length; i++) {
+          var text = days[i].name + " " + (days[i].focus || "");
+          var isUpper = /(Push|Pecho|Espalda|Upper|Tren superior|Cuerpo completo)/i.test(text);
+          var isLower = /(Legs|Pierna|Lower|Tren inferior|Cuerpo completo)/i.test(text);
+          if ((prioridad === "tren-superior" && isUpper && !isLower) ||
+              (prioridad === "tren-inferior" && isLower && !isUpper)) {
+            days[i].items = days[i].items.concat(extras);
+          }
+        }
+      }
+
+      function buildRoutine(objetivo, experiencia, dias, prioridad) {
         var o = objetivo, exp = experiencia, d = Number(dias);
         var r = repsFor(o);
         var days = [];
@@ -994,7 +1045,10 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           }
         }
 
-        var label = d + " Días " + splitName + " / Enfoque: " + FOCUS[o];
+        applyPriority(days, prioridad || "");
+
+        var prioLabel = PRIORITY_LABELS[prioridad] || "";
+        var label = d + " Días " + splitName + " / Enfoque: " + FOCUS[o] + (prioLabel ? " · Prioridad: " + prioLabel : "");
         return { label: label, days: days, splitName: splitName };
       }
 
@@ -1089,6 +1143,11 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         return checked ? checked.value : "";
       }
 
+      function getPriority() {
+        var checked = document.querySelector('input[name="priority"]:checked');
+        return checked ? checked.value : "";
+      }
+
       function getActFactor(days) {
         if (days >= 5) return 1.725;
         if (days >= 3) return 1.55;
@@ -1143,6 +1202,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         var sex = getSex();
         var objective = $id("objective").value;
         var experience = $id("experience").value;
+        var priority = getPriority();
         var days = getDays();
 
         var errors = [];
@@ -1153,13 +1213,14 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         if (!weight) errors.push("Ingresá tu peso en kg.");
         if (!sex) errors.push("Seleccioná tu sexo.");
         if (!objective) errors.push("Seleccioná tu objetivo principal.");
+        if (!priority) errors.push("Seleccioná tu prioridad.");
         if (!experience) errors.push("Seleccioná tu experiencia en el gimnasio.");
         if (!days) errors.push("Seleccioná cuántos días podés entrenar.");
 
         if (errors.length) { showError(errors); return; }
 
         var prefs = getPreferenceList();
-        var routine = buildRoutine(objective, experience, days);
+        var routine = buildRoutine(objective, experience, days, priority);
         var tmb = calcTmb(sex, Number(age), Number(height), Number(weight));
         var tdee = calcTdee(tmb, Number(days));
         var nutrition = buildNutrition(objective, weight, prefs, tdee);
@@ -1177,6 +1238,8 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           weight: Number(weight),
           objective: OBJECTIVE_LABELS[objective],
           objectiveKey: objective,
+          priority: PRIORITY_LABELS[priority] || "",
+          priorityKey: priority,
           experience: EXPERIENCE_LABELS[experience],
           experienceKey: experience,
           days: Number(days),
@@ -1215,6 +1278,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           height: $id("height").value.trim(),
           objective: $id("objective").value,
           experience: $id("experience").value,
+          priority: getPriority(),
           days: getDays(),
           prefs: getPreferenceList(),
           savedAt: new Date().toISOString()
@@ -1230,6 +1294,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
         if (!req.height) errors.push("Ingresá tu altura en cm.");
         if (!req.sex) errors.push("Seleccioná tu sexo.");
         if (!req.objective) errors.push("Seleccioná tu objetivo principal.");
+        if (!req.priority) errors.push("Seleccioná tu prioridad.");
         return errors;
       }
 

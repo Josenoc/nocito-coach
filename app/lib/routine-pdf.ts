@@ -151,6 +151,7 @@ export function renderRoutinePdf(p: ClientPayload): Promise<Buffer> {
   labelValue("SEXO", clean(p.sex || "No especificado"));
   labelValue("EDAD / PESO / ALTURA", `${p.age} años · ${p.weight} kg · ${p.height} cm`);
   labelValue("OBJETIVO", clean(p.objective));
+  labelValue("PRIORIDAD", clean(p.priority || "Cuerpo completo"));
   labelValue("EXPERIENCIA", `${clean(p.experience)} · ${p.days} días/semana`);
   labelValue("PREFERENCIAS", clean((p.prefs || []).join(", ") || "Omnívoro"));
   labelValue("IMC", clean(p.bmi) + (p.imcCategory ? " — " + clean(p.imcCategory) : ""));

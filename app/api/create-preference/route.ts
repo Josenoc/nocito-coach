@@ -46,6 +46,7 @@ export async function POST(req: Request) {
   const sex = asString(diagnostic.sex, "Masculino");
   const objectiveKey = asString(diagnostic.objective);
   const experienceKey = asString(diagnostic.experience);
+  const priorityKey = asString(diagnostic.priority);
   const days = asNumber(diagnostic.days, 3);
   const age = asNumber(diagnostic.age, 0);
   const height = asNumber(diagnostic.height, 0);
@@ -77,6 +78,7 @@ export async function POST(req: Request) {
     weight,
     objectiveKey,
     experienceKey,
+    priority: priorityKey,
     days,
     prefs: JSON.stringify(prefs),
     fecha,

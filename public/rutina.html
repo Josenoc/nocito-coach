@@ -204,6 +204,7 @@
         html += "<div class='client-cell'><small>Altura</small><strong>" + esc(p.height) + " cm</strong></div>";
         html += "<div class='client-cell'><small>Peso</small><strong>" + esc(p.weight) + " kg</strong></div>";
         html += "<div class='client-cell'><small>Objetivo</small><strong>" + esc(p.objective) + "</strong></div>";
+        html += "<div class='client-cell'><small>Prioridad</small><strong>" + esc(p.priority || "Cuerpo completo") + "</strong></div>";
         html += "<div class='client-cell'><small>Experiencia</small><strong>" + esc(p.experience) + "</strong></div>";
         html += "<div class='client-cell'><small>Días / semana</small><strong>" + esc(p.days) + "</strong></div>";
         html += "<div class='client-cell'><small>IMC</small><strong>" + esc(p.bmi) + " · " + bmiRange(p.bmi) + "</strong></div>";
@@ -286,6 +287,7 @@
           sex: "Masculino",
           age: 32, height: 178, weight: 86,
           objective: "Recomposición corporal", objectiveKey: "recomposicion",
+          priority: "Cuerpo completo", priorityKey: "cuerpo-completo",
           experience: "Intermedio", experienceKey: "intermedio",
           days: 4,
           prefs: ["Omnívoro"],
@@ -294,7 +296,7 @@
           tmb: 1818,
           tdee: 2818,
           activityFactor: 1.55,
-          routineLabel: "4 Días Upper / Lower ×2 / Enfoque: Recomposición Corporal",
+          routineLabel: "4 Días Upper / Lower ×2 / Enfoque: Recomposición Corporal · Prioridad: Cuerpo completo",
           routine: {
             splitName: "Upper / Lower ×2",
             days: [

@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ClientPayload,
   RoutineData,
   NutritionData,
@@ -9,7 +9,7 @@ import type {
 export const OBJECTIVE_LABELS: Record<string, string> = {
   "ganar-masa": "Ganar masa muscular",
   "perder-grasa": "Perder grasa corporal",
-  recomposicion: "Recomposición corporal",
+  recomposicion: "RecomposiciÃ³n corporal",
 };
 
 export const EXPERIENCE_LABELS: Record<string, string> = {
@@ -21,8 +21,39 @@ export const EXPERIENCE_LABELS: Record<string, string> = {
 const FOCUS: Record<string, string> = {
   "ganar-masa": "Hipertrofia Aislada",
   "perder-grasa": "Hipertrofia + Quema de grasa",
-  recomposicion: "Recomposición Corporal",
+  recomposicion: "RecomposiciÃ³n Corporal",
 };
+
+export const PRIORITY_LABELS: Record<string, string> = {
+  "tren-superior": "Tren superior",
+  "tren-inferior": "Tren inferior",
+  "cuerpo-completo": "Cuerpo completo",
+};
+
+const PRIORITY_EXTRA: Record<string, ExerciseItem[]> = {
+  "tren-superior": [
+    ["Aperturas con mancuernas", "3", "12-15", "60"],
+    ["PÃ¡jaros (deltoides posterior)", "3", "12-15", "60"],
+  ],
+  "tren-inferior": [
+    ["Hip thrust", "3", "10-12", "90"],
+    ["ElevaciÃ³n de talÃ³n de pie", "3", "12-15", "45"],
+  ],
+  "cuerpo-completo": [],
+};
+
+function applyPriority(days: RoutineDay[], prioridad: string): void {
+  const extras = PRIORITY_EXTRA[prioridad] ?? [];
+  if (!extras.length) return;
+  for (const day of days) {
+    const text = day.name + " " + (day.focus ?? "");
+    const isUpper = /(Push|Pecho|Espalda|Upper|Tren superior|Cuerpo completo)/i.test(text);
+    const isLower = /(Legs|Pierna|Lower|Tren inferior|Cuerpo completo)/i.test(text);
+    if (prioridad === "tren-superior" && isUpper && !isLower) day.items.push(...extras);
+    else if (prioridad === "tren-inferior" && isLower && !isUpper) day.items.push(...extras);
+    else if (prioridad === "cuerpo-completo" && isUpper && isLower) day.items.push(...extras);
+  }
+}
 
 type Meta = Record<string, unknown>;
 
@@ -77,7 +108,7 @@ function pushExercises(o: string, _dIndex: number): ExerciseItem[] {
     ["Aperturas con mancuernas", "3", "12-15", "60"],
     ["Press militar con barra", "3", r, "75"],
     ["Elevaciones laterales con mancuernas", "3", "12-15", "60"],
-    ["Extensiones de tríceps en polea", "3", r, "60"],
+    ["Extensiones de trÃ­ceps en polea", "3", r, "60"],
   ];
   if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
   return list;
@@ -87,10 +118,10 @@ function pullExercises(o: string): ExerciseItem[] {
   const r = repsFor(o);
   const c = cardioNote(o);
   const list: ExerciseItem[] = [
-    ["Dominadas asistidas o jalón al pecho", "4", r, "90"],
+    ["Dominadas asistidas o jalÃ³n al pecho", "4", r, "90"],
     ["Remo con barra", "4", r, "90"],
     ["Remo sentado en polea agarre angosto", "3", r, "75"],
-    ["Jalón al frente agarre abierto", "3", r, "75"],
+    ["JalÃ³n al frente agarre abierto", "3", r, "75"],
     ["Curl con barra", "3", r, "60"],
     ["Curl martillo alternado", "3", "10-12", "60"],
   ];
@@ -103,11 +134,11 @@ function legsExercises(o: string): ExerciseItem[] {
   const c = cardioNote(o);
   const list: ExerciseItem[] = [
     ["Sentadilla con barra", "4", r, "120"],
-    ["Prensa 45°", "4", r, "90"],
+    ["Prensa 45Â°", "4", r, "90"],
     ["Peso muerto rumano", "3", "8-10", "90"],
-    ["Extensión de cuádriceps", "3", r, "60"],
+    ["ExtensiÃ³n de cuÃ¡driceps", "3", r, "60"],
     ["Curl femoral acostado", "3", r, "60"],
-    ["Elevación de gemelos de pie", "4", "12-15", "45"],
+    ["ElevaciÃ³n de gemelos de pie", "4", "12-15", "45"],
   ];
   if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
   return list;
@@ -117,11 +148,11 @@ function upperExercises(o: string): ExerciseItem[] {
   const r = repsFor(o);
   return [
     ["Press banca con barra", "4", r, "90"],
-    ["Dominadas o jalón al pecho", "4", r, "90"],
+    ["Dominadas o jalÃ³n al pecho", "4", r, "90"],
     ["Press inclinado con mancuernas", "3", r, "75"],
     ["Remo con barra", "3", r, "90"],
     ["Press militar", "3", r, "75"],
-    ["Curl con barra + Extensión de tríceps en polea", "3", r, "60"],
+    ["Curl con barra + ExtensiÃ³n de trÃ­ceps en polea", "3", r, "60"],
   ];
 }
 
@@ -131,10 +162,10 @@ function lowerExercises(o: string): ExerciseItem[] {
   const list: ExerciseItem[] = [
     ["Sentadilla con barra", "4", r, "120"],
     ["Peso muerto rumano", "4", "8-10", "90"],
-    ["Prensa 45°", "3", r, "90"],
-    ["Extensión de cuádriceps", "3", r, "60"],
+    ["Prensa 45Â°", "3", r, "90"],
+    ["ExtensiÃ³n de cuÃ¡driceps", "3", r, "60"],
     ["Curl femoral acostado", "3", r, "60"],
-    ["Elevación de gemelos sentado", "4", "12-15", "45"],
+    ["ElevaciÃ³n de gemelos sentado", "4", "12-15", "45"],
   ];
   if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
   return list;
@@ -150,17 +181,17 @@ function fullBodyExercises(o: string, variant: string): ExerciseItem[] {
       ["Press banca con barra", "3", r, "90"],
       ["Remo con barra", "3", r, "90"],
       ["Press militar", "2", r, "75"],
-      ["Extensión de tríceps en polea", "2", r, "60"],
+      ["ExtensiÃ³n de trÃ­ceps en polea", "2", r, "60"],
       ["Plancha abdominal", "3", "45-60 seg", "45"],
     ];
   } else {
     list = [
       ["Peso muerto rumano", "3", r, "120"],
       ["Press inclinado con mancuernas", "3", r, "90"],
-      ["Dominadas o jalón al pecho", "3", r, "90"],
-      ["Curl de bíceps", "2", r, "60"],
+      ["Dominadas o jalÃ³n al pecho", "3", r, "90"],
+      ["Curl de bÃ­ceps", "2", r, "60"],
       ["Curl femoral acostado", "3", r, "60"],
-      ["Elevación de piernas colgado", "3", "10-15", "45"],
+      ["ElevaciÃ³n de piernas colgado", "3", "10-15", "45"],
     ];
   }
   if (c) list.push(["Cardio HIIT " + c + " min", "1", "3 rondas", "0"]);
@@ -180,7 +211,7 @@ function shoulderExercises(o: string): ExerciseItem[] {
   return [
     ["Press militar con barra", "4", r, "90"],
     ["Elevaciones laterales", "4", "12-15", "60"],
-    ["Pájaros (deltoides posterior)", "3", "12-15", "60"],
+    ["PÃ¡jaros (deltoides posterior)", "3", "12-15", "60"],
     ["Elevaciones frontales", "3", "10-12", "60"],
   ];
 }
@@ -190,17 +221,18 @@ function armsExercises(o: string): ExerciseItem[] {
   return [
     ["Curl con barra", "4", r, "60"],
     ["Curl martillo alternado", "3", "10-12", "60"],
-    ["Extensión de tríceps en polea con soga", "4", r, "60"],
+    ["ExtensiÃ³n de trÃ­ceps en polea con soga", "4", r, "60"],
     ["Fondos en banco", "3", "10-15", "60"],
     ["Curl en banco Scott", "3", r, "60"],
-    ["Extensión de tríceps por encima de la cabeza", "3", r, "60"],
+    ["ExtensiÃ³n de trÃ­ceps por encima de la cabeza", "3", r, "60"],
   ];
 }
 
 export function buildRoutine(
   objetivo: string,
   experiencia: string,
-  dias: number
+  dias: number,
+  prioridad = ""
 ): { label: string; splitName: string; days: RoutineDay[] } {
   const o = objetivo;
   const exp = experiencia;
@@ -212,131 +244,135 @@ export function buildRoutine(
     if (d === 2) {
       splitName = "Full Body A / B";
       days = [
-        { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
-        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+        { name: "DÃ­a 1 Â· Full Body A", focus: "Cuerpo completo Â· Compuestos", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 2 Â· Full Body B", focus: "Cuerpo completo Â· Variantes", items: fullBodyExercises(o, "B") },
       ];
     } else if (d === 3) {
       splitName = "Full Body A / B / C";
       days = [
-        { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
-        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
-        { name: "Día 3 · Full Body A", focus: "Cuerpo completo · Compuestos", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 1 Â· Full Body A", focus: "Cuerpo completo Â· Compuestos", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 2 Â· Full Body B", focus: "Cuerpo completo Â· Variantes", items: fullBodyExercises(o, "B") },
+        { name: "DÃ­a 3 Â· Full Body A", focus: "Cuerpo completo Â· Compuestos", items: fullBodyExercises(o, "A") },
       ];
     } else if (d === 4) {
-      splitName = "Upper / Lower ×2";
+      splitName = "Upper / Lower Ã—2";
       days = [
-        { name: "Día 1 · Upper A", focus: "Tren superior", items: upperExercises(o) },
-        { name: "Día 2 · Lower A", focus: "Tren inferior", items: lowerExercises(o) },
-        { name: "Día 3 · Upper B", focus: "Tren superior · Variantes", items: upperExercises(o) },
-        { name: "Día 4 · Lower B", focus: "Tren inferior · Variantes", items: lowerExercises(o) },
+        { name: "DÃ­a 1 Â· Upper A", focus: "Tren superior", items: upperExercises(o) },
+        { name: "DÃ­a 2 Â· Lower A", focus: "Tren inferior", items: lowerExercises(o) },
+        { name: "DÃ­a 3 Â· Upper B", focus: "Tren superior Â· Variantes", items: upperExercises(o) },
+        { name: "DÃ­a 4 Â· Lower B", focus: "Tren inferior Â· Variantes", items: lowerExercises(o) },
       ];
     } else if (d === 5) {
       splitName = "Full Body + Upper / Lower mix";
       days = [
-        { name: "Día 1 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
-        { name: "Día 2 · Upper", focus: "Tren superior", items: upperExercises(o) },
-        { name: "Día 3 · Full Body B", focus: "Cuerpo completo", items: fullBodyExercises(o, "B") },
-        { name: "Día 4 · Lower", focus: "Tren inferior", items: lowerExercises(o) },
-        { name: "Día 5 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 1 Â· Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 2 Â· Upper", focus: "Tren superior", items: upperExercises(o) },
+        { name: "DÃ­a 3 Â· Full Body B", focus: "Cuerpo completo", items: fullBodyExercises(o, "B") },
+        { name: "DÃ­a 4 Â· Lower", focus: "Tren inferior", items: lowerExercises(o) },
+        { name: "DÃ­a 5 Â· Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
       ];
     } else {
       splitName = "Upper / Lower alternado";
       days = [
-        { name: "Día 1 · Upper A", focus: "Tren superior", items: upperExercises(o) },
-        { name: "Día 2 · Lower A", focus: "Tren inferior", items: lowerExercises(o) },
-        { name: "Día 3 · Upper B", focus: "Tren superior · Variantes", items: upperExercises(o) },
-        { name: "Día 4 · Lower B", focus: "Tren inferior · Variantes", items: lowerExercises(o) },
-        { name: "Día 5 · Upper A", focus: "Tren superior", items: upperExercises(o) },
-        { name: "Día 6 · Lower A", focus: "Tren inferior", items: lowerExercises(o) },
+        { name: "DÃ­a 1 Â· Upper A", focus: "Tren superior", items: upperExercises(o) },
+        { name: "DÃ­a 2 Â· Lower A", focus: "Tren inferior", items: lowerExercises(o) },
+        { name: "DÃ­a 3 Â· Upper B", focus: "Tren superior Â· Variantes", items: upperExercises(o) },
+        { name: "DÃ­a 4 Â· Lower B", focus: "Tren inferior Â· Variantes", items: lowerExercises(o) },
+        { name: "DÃ­a 5 Â· Upper A", focus: "Tren superior", items: upperExercises(o) },
+        { name: "DÃ­a 6 Â· Lower A", focus: "Tren inferior", items: lowerExercises(o) },
       ];
     }
   } else if (exp === "intermedio") {
     if (d === 2) {
       splitName = "Full Body A / B";
       days = [
-        { name: "Día 1 · Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
-        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+        { name: "DÃ­a 1 Â· Full Body A", focus: "Cuerpo completo", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 2 Â· Full Body B", focus: "Cuerpo completo Â· Variantes", items: fullBodyExercises(o, "B") },
       ];
     } else if (d === 3) {
       splitName = "Push / Pull / Legs";
       days = [
-        { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
-        { name: "Día 2 · Pull", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 3 · Legs", focus: "Piernas · Glúteos", items: legsExercises(o) },
+        { name: "DÃ­a 1 Â· Push", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 0) },
+        { name: "DÃ­a 2 Â· Pull", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 3 Â· Legs", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
       ];
     } else if (d === 4) {
-      splitName = "Upper / Lower ×2";
+      splitName = "Upper / Lower Ã—2";
       days = [
-        { name: "Día 1 · Upper A", focus: "Tren superior intenso", items: upperExercises(o) },
-        { name: "Día 2 · Lower A", focus: "Tren inferior intenso", items: lowerExercises(o) },
-        { name: "Día 3 · Upper B", focus: "Tren superior · Variantes", items: upperExercises(o) },
-        { name: "Día 4 · Lower B", focus: "Tren inferior · Variantes", items: lowerExercises(o) },
+        { name: "DÃ­a 1 Â· Upper A", focus: "Tren superior intenso", items: upperExercises(o) },
+        { name: "DÃ­a 2 Â· Lower A", focus: "Tren inferior intenso", items: lowerExercises(o) },
+        { name: "DÃ­a 3 Â· Upper B", focus: "Tren superior Â· Variantes", items: upperExercises(o) },
+        { name: "DÃ­a 4 Â· Lower B", focus: "Tren inferior Â· Variantes", items: lowerExercises(o) },
       ];
     } else if (d === 5) {
       splitName = "Push / Pull / Legs + Upper / Lower";
       days = [
-        { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
-        { name: "Día 2 · Pull", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 3 · Legs", focus: "Piernas · Glúteos", items: legsExercises(o) },
-        { name: "Día 4 · Upper", focus: "Tren superior", items: upperExercises(o) },
-        { name: "Día 5 · Lower", focus: "Tren inferior", items: lowerExercises(o) },
+        { name: "DÃ­a 1 Â· Push", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 0) },
+        { name: "DÃ­a 2 Â· Pull", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 3 Â· Legs", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
+        { name: "DÃ­a 4 Â· Upper", focus: "Tren superior", items: upperExercises(o) },
+        { name: "DÃ­a 5 Â· Lower", focus: "Tren inferior", items: lowerExercises(o) },
       ];
     } else {
-      splitName = "Push / Pull / Legs ×2";
+      splitName = "Push / Pull / Legs Ã—2";
       days = [
-        { name: "Día 1 · Push A", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
-        { name: "Día 2 · Pull A", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 3 · Legs A", focus: "Piernas · Glúteos", items: legsExercises(o) },
-        { name: "Día 4 · Push B", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 0) },
-        { name: "Día 5 · Pull B", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 6 · Legs B", focus: "Piernas · Glúteos", items: legsExercises(o) },
+        { name: "DÃ­a 1 Â· Push A", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 0) },
+        { name: "DÃ­a 2 Â· Pull A", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 3 Â· Legs A", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
+        { name: "DÃ­a 4 Â· Push B", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 0) },
+        { name: "DÃ­a 5 Â· Pull B", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 6 Â· Legs B", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
       ];
     }
   } else {
     if (d === 2) {
       splitName = "Full Body A / B Intensivo";
       days = [
-        { name: "Día 1 · Full Body A", focus: "Cuerpo completo · Sobrecarga", items: fullBodyExercises(o, "A") },
-        { name: "Día 2 · Full Body B", focus: "Cuerpo completo · Variantes", items: fullBodyExercises(o, "B") },
+        { name: "DÃ­a 1 Â· Full Body A", focus: "Cuerpo completo Â· Sobrecarga", items: fullBodyExercises(o, "A") },
+        { name: "DÃ­a 2 Â· Full Body B", focus: "Cuerpo completo Â· Variantes", items: fullBodyExercises(o, "B") },
       ];
     } else if (d === 3) {
-      splitName = "Push / Pull / Legs · Intensivo";
+      splitName = "Push / Pull / Legs Â· Intensivo";
       days = [
-        { name: "Día 1 · Push", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
-        { name: "Día 2 · Pull", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 3 · Legs", focus: "Piernas · Glúteos", items: legsExercises(o) },
+        { name: "DÃ­a 1 Â· Push", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 1) },
+        { name: "DÃ­a 2 Â· Pull", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 3 Â· Legs", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
       ];
     } else if (d === 4) {
-      splitName = "Upper / Lower ×2 Avanzado";
+      splitName = "Upper / Lower Ã—2 Avanzado";
       days = [
-        { name: "Día 1 · Upper A", focus: "Tren superior con sobrecarga", items: upperExercises(o) },
-        { name: "Día 2 · Lower A", focus: "Tren inferior con sobrecarga", items: lowerExercises(o) },
-        { name: "Día 3 · Upper B", focus: "Tren superior con sobrecarga", items: upperExercises(o) },
-        { name: "Día 4 · Lower B", focus: "Tren inferior con sobrecarga", items: lowerExercises(o) },
+        { name: "DÃ­a 1 Â· Upper A", focus: "Tren superior con sobrecarga", items: upperExercises(o) },
+        { name: "DÃ­a 2 Â· Lower A", focus: "Tren inferior con sobrecarga", items: lowerExercises(o) },
+        { name: "DÃ­a 3 Â· Upper B", focus: "Tren superior con sobrecarga", items: upperExercises(o) },
+        { name: "DÃ­a 4 Â· Lower B", focus: "Tren inferior con sobrecarga", items: lowerExercises(o) },
       ];
     } else if (d === 5) {
-      splitName = "Weider · Pecho / Espalda / Piernas / Hombros / Brazos";
+      splitName = "Weider Â· Pecho / Espalda / Piernas / Hombros / Brazos";
       days = [
-        { name: "Día 1 · Pecho + Abdomen", focus: "Pecho · Core", items: chestExercises(o).concat([["Plancha con peso", "3", "45-60 seg", "45"]]) },
-        { name: "Día 2 · Espalda", focus: "Espalda · Dorsales", items: backExercises(o) },
-        { name: "Día 3 · Piernas", focus: "Piernas · Glúteos", items: legsExercises(o) },
-        { name: "Día 4 · Hombros + Trampa", focus: "Hombros · Deltoides", items: shoulderExercises(o) },
-        { name: "Día 5 · Brazos + Cardio", focus: "Bíceps · Tríceps", items: armsExercises(o) },
+        { name: "DÃ­a 1 Â· Pecho + Abdomen", focus: "Pecho Â· Core", items: chestExercises(o).concat([["Plancha con peso", "3", "45-60 seg", "45"]]) },
+        { name: "DÃ­a 2 Â· Espalda", focus: "Espalda Â· Dorsales", items: backExercises(o) },
+        { name: "DÃ­a 3 Â· Piernas", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
+        { name: "DÃ­a 4 Â· Hombros + Trampa", focus: "Hombros Â· Deltoides", items: shoulderExercises(o) },
+        { name: "DÃ­a 5 Â· Brazos + Cardio", focus: "BÃ­ceps Â· TrÃ­ceps", items: armsExercises(o) },
       ];
     } else {
-      splitName = "Push / Pull / Legs ×2 · Avanzado";
+      splitName = "Push / Pull / Legs Ã—2 Â· Avanzado";
       days = [
-        { name: "Día 1 · Push A", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
-        { name: "Día 2 · Pull A", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 3 · Legs A", focus: "Piernas · Glúteos", items: legsExercises(o) },
-        { name: "Día 4 · Push B", focus: "Pecho · Hombros · Tríceps", items: pushExercises(o, 1) },
-        { name: "Día 5 · Pull B", focus: "Espalda · Bíceps", items: pullExercises(o) },
-        { name: "Día 6 · Legs B", focus: "Piernas · Glúteos", items: legsExercises(o) },
+        { name: "DÃ­a 1 Â· Push A", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 1) },
+        { name: "DÃ­a 2 Â· Pull A", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 3 Â· Legs A", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
+        { name: "DÃ­a 4 Â· Push B", focus: "Pecho Â· Hombros Â· TrÃ­ceps", items: pushExercises(o, 1) },
+        { name: "DÃ­a 5 Â· Pull B", focus: "Espalda Â· BÃ­ceps", items: pullExercises(o) },
+        { name: "DÃ­a 6 Â· Legs B", focus: "Piernas Â· GlÃºteos", items: legsExercises(o) },
       ];
     }
   }
 
-  const label = d + " Días " + splitName + " / Enfoque: " + FOCUS[o];
+  applyPriority(days, prioridad);
+
+  const prio = PRIORITY_LABELS[prioridad];
+  const label =
+    d + " DÃ­as " + splitName + " / Enfoque: " + FOCUS[o] + (prio ? " Â· Prioridad: " + prio : "");
   return { label, days, splitName };
 }
 
@@ -369,14 +405,14 @@ export function buildNutrition(
 
   let meat: string;
   if (prefs.indexOf("Vegano") !== -1) {
-    meat = "Soja texturizada, legumbres, quinoa, tofu, tempeh y proteína vegetal";
+    meat = "Soja texturizada, legumbres, quinoa, tofu, tempeh y proteÃ­na vegetal";
   } else if (prefs.indexOf("Vegetariano") !== -1) {
-    meat = "Tofu, tempeh, legumbres, proteína vegetal, huevos y lácteos";
+    meat = "Tofu, tempeh, legumbres, proteÃ­na vegetal, huevos y lÃ¡cteos";
   } else {
-    meat = "Pollo, carne magra, pescado, huevos y lácteos";
+    meat = "Pollo, carne magra, pescado, huevos y lÃ¡cteos";
   }
   const carbsNote =
-    prefs.indexOf("Celíaco") !== -1
+    prefs.indexOf("CelÃ­aco") !== -1
       ? " (solo alimentos sin TACC: arroz, papa, batata, quinoa, avena certificada)"
       : "";
 
@@ -387,10 +423,10 @@ export function buildNutrition(
     fat: gr,
     proteinSources: meat + carbsNote,
     meals: [
-      ["Desayuno", "Avena/pan integral" + (meat.indexOf("Tofu") !== -1 ? carbsNote : "") + " + proteína + fruta y frutos secos"],
-      ["Almuerzo", "Porción de proteína + arroz/papa/batata o legumbres + vegetales + aceite de oliva"],
-      ["Merienda", "Yogur griego o licuado con proteína + banana + 1 porción de frutos secos"],
-      ["Cena", "Proteína + vegetales abundantes + grasa saludable (palta/aceite)"],
+      ["Desayuno", "Avena/pan integral" + (meat.indexOf("Tofu") !== -1 ? carbsNote : "") + " + proteÃ­na + fruta y frutos secos"],
+      ["Almuerzo", "PorciÃ³n de proteÃ­na + arroz/papa/batata o legumbres + vegetales + aceite de oliva"],
+      ["Merienda", "Yogur griego o licuado con proteÃ­na + banana + 1 porciÃ³n de frutos secos"],
+      ["Cena", "ProteÃ­na + vegetales abundantes + grasa saludable (palta/aceite)"],
     ],
   };
 }
@@ -401,6 +437,7 @@ export function generatePayload(meta: Meta): ClientPayload | null {
 
   const objectiveKey = metaString(meta, "objectiveKey", "objective_key");
   const experienceKey = metaString(meta, "experienceKey", "experience_key");
+  const priorityKey = metaString(meta, "priority", "priority") || "";
   const days = metaNumber(meta, "days", "days", 3);
   const weight = metaNumber(meta, "weight", "weight", 75);
   const height = metaNumber(meta, "height", "height", 0);
@@ -411,7 +448,7 @@ export function generatePayload(meta: Meta): ClientPayload | null {
       ? prefsRaw
       : (() => {
           const raw = asString(meta.prefsRaw);
-          return raw ? raw.split(", ").filter(Boolean) : ["Omnívoro"];
+          return raw ? raw.split(", ").filter(Boolean) : ["OmnÃ­voro"];
         })();
 
   const objective = OBJECTIVE_LABELS[objectiveKey] ?? (objectiveKey || "Sin objetivo");
@@ -446,7 +483,7 @@ export function generatePayload(meta: Meta): ClientPayload | null {
 
   const tdee = Math.round(tmb * actFactor);
 
-  const routine = buildRoutine(objectiveKey, experienceKey, days);
+  const routine = buildRoutine(objectiveKey, experienceKey, days, priorityKey);
   const nutrition = buildNutrition(objectiveKey, weight, prefs, tdee);
 
   const planName = metaString(meta, "planName", "plan_name");
@@ -456,6 +493,7 @@ export function generatePayload(meta: Meta): ClientPayload | null {
     name,
     contact: metaString(meta, "contact", "contact"),
     sex,
+    priority: PRIORITY_LABELS[priorityKey] || "",
     age,
     height,
     weight,
