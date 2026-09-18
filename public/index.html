@@ -542,10 +542,16 @@
     .hero-grid > div:first-child { max-width: 860px; }
     .hero-side { align-self: center; }
     .hero-motivation {
-      background: var(--surface); border: 1px solid rgba(255,255,255,.09);
-      border-right: 3px solid var(--orange);
+      position: relative; z-index: 2;
+      background: var(--surface); border: 1px solid var(--orange);
       max-width: 440px; margin: 0 auto;
       padding: 30px 32px;
+      transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease, border-color .28s ease;
+    }
+    .hero-motivation:hover {
+      transform: perspective(900px) translate3d(0,-10px,14px);
+      border-color: var(--orange-soft);
+      box-shadow: 0 0 0 1px rgba(255,196,0,.28), 0 34px 70px rgba(255,196,0,.3), 0 0 44px rgba(255,196,0,.24);
     }
     .hero-motivation p { margin: 0 0 16px; font-size: 1.05rem; line-height: 1.7; color: var(--muted); }
     .hero-motivation .hero-motivation-cta {
@@ -749,7 +755,7 @@
 
       .price-card { will-change: auto; }
       .price-card:not(.featured):hover, .price-card.featured:hover,
-      .contact-card:hover { transform: none; }
+      .contact-card:hover, .hero-motivation:hover { transform: none; }
     }
   </style>
 </head>
