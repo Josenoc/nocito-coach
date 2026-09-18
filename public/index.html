@@ -541,14 +541,23 @@
     .hero-grid { grid-template-columns: 1.15fr .85fr; }
     .hero-grid > div:first-child { max-width: 860px; }
     .badge-ailegal {
-      display: block;
-      background: var(--orange); color: #0A0A0A;
-      border: 2px solid var(--orange);
-      padding: 12px 16px;
-      font-size: .9rem; font-weight: 600; line-height: 1.5;
-      max-width: 760px; margin-bottom: 22px;
+      position: relative; z-index: 2;
+      overflow: hidden; white-space: nowrap;
+      background: #0D0D0D;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding: 9px 0;
     }
-    .badge-ailegal em { font-style: italic; font-weight: 700; }
+    .badge-ailegal-track { display: flex; width: max-content; animation: ailegalScroll 48s linear infinite; }
+    .badge-ailegal-track span {
+      padding-right: 48px; white-space: nowrap;
+      font-size: .68rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--muted); opacity: .8;
+    }
+    .badge-ailegal-track em { font-style: italic; }
+    @keyframes ailegalScroll { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .badge-ailegal-track { animation: none; }
+    }
     .hero-offer { align-self: center; }
     .hero p.lead { font-size: 1.02rem; color: var(--muted); max-width: 540px; }
     .grad-text {
@@ -791,9 +800,14 @@
       <div class="hero-photo" aria-hidden="true"></div>
       <div class="hero-particles" aria-hidden="true"></div>
       <div class="hero-rail" aria-hidden="true"><span>Fuerza — Nutrición — Constancia</span></div>
+      <div class="badge-ailegal" role="note">
+        <div class="badge-ailegal-track">
+          <span>Este sitio usa AI para generar planes y rutinas y las fuentes que utiliza es bibliografía académica exclusiva destinada a este fin, <em>(NO SE USAN FUENTES GENÉRICAS SIN RESPALDO SACADAS DE INTERNET)</em></span>
+          <span>Este sitio usa AI para generar planes y rutinas y las fuentes que utiliza es bibliografía académica exclusiva destinada a este fin, <em>(NO SE USAN FUENTES GENÉRICAS SIN RESPALDO SACADAS DE INTERNET)</em></span>
+        </div>
+      </div>
       <div class="container hero-grid">
         <div>
-          <span class="badge-ailegal">Este sitio usa AI para generar planes y rutinas y las fuentes que utiliza es bibliografía académica exclusiva destinada a este fin, <em>(NO SE USAN FUENTES GENÉRICAS SIN RESPALDO SACADAS DE INTERNET)</em></span>
           <span class="badge-hero">Entrenamiento + Nutrición personalizada</span>
           <h1>Transforma tu<br>
             cuerpo con<br>
