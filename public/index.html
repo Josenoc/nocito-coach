@@ -611,7 +611,7 @@
     .send-title b { color: var(--orange); }
     .link-internal { color: var(--orange); border-bottom-color: var(--orange); }
 
-    .pricing-grid { gap: 18px; margin-top: 60px; }
+    .pricing-grid { gap: 18px; margin-top: 60px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .price-card {
       border-radius: 10px; border-color: rgba(255,255,255,.1);
       background: linear-gradient(180deg, #121212, #0D0D0D); padding: 36px 30px;
@@ -983,7 +983,23 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
 
         <div class="pricing-grid">
 
-          <!-- Plan 1 -->
+          <!-- Plan 1 · RUT&NUT -->
+          <article class="price-card reveal">
+            <div>
+              <h3 class="plan-name">Rut&Nut</h3>
+              <span class="plan-tag">Solo rutina + plan nutricional</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">4.999</span> <span class="per">ARS · pago único</span></div>
+              <p class="price-sub">Sin seguimiento personalizado</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina 100% personalizada (PDF imprimible A4)</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Sin seguimiento ni ajustes</li>
+            </ul>
+            <button class="btn-plan" data-plan="0">Elegir este plan</button>
+          </article>
+
+          <!-- Plan 2 -->
           <article class="price-card reveal">
             <div>
               <h3 class="plan-name">Plan Inicial</h3>
@@ -997,10 +1013,10 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Ajustes semanales y seguimiento vía WhatsApp</li>
             </ul>
-            <button class="btn-plan" data-plan="0">Elegir este plan</button>
+            <button class="btn-plan" data-plan="1">Elegir este plan</button>
           </article>
 
-          <!-- Plan 2 -->
+          <!-- Plan 3 -->
           <article class="price-card reveal reveal-d1">
             <div>
               <h3 class="plan-name">Plan Transformación</h3>
@@ -1014,10 +1030,10 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Ajustes progresivos de cargas</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Soporte continuo por 60 días</li>
             </ul>
-            <button class="btn-plan" data-plan="1">Elegir este plan</button>
+            <button class="btn-plan" data-plan="2">Elegir este plan</button>
           </article>
 
-          <!-- Plan 3 DESTACADO -->
+          <!-- Plan 4 DESTACADO -->
           <article class="price-card featured reveal reveal-d2">
             <span class="featured-badge">MÁS POPULAR</span>
             <div>
@@ -1033,10 +1049,10 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Seguimiento de la escala de esfuerzo</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Dos videollamadas por semana</li>
             </ul>
-            <button class="btn-plan" data-plan="2">Elegir este plan</button>
+            <button class="btn-plan" data-plan="3">Elegir este plan</button>
           </article>
 
-          <!-- Plan 4 FULL PRESENCIAL -->
+          <!-- Plan 5 FULL PRESENCIAL -->
           <article class="price-card featured reveal reveal-d3">
             <span class="featured-badge">PRESENCIAL</span>
             <div>
@@ -1052,7 +1068,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan nutricional y ajustes semanales</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Comunicación directa por WhatsApp</li>
             </ul>
-            <button class="btn-plan" data-plan="3">Elegir este plan</button>
+            <button class="btn-plan" data-plan="4">Elegir este plan</button>
           </article>
         </div>
 
