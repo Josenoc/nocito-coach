@@ -698,7 +698,7 @@
     footer { border-top-color: rgba(255,255,255,.1); padding: 48px 0 max(48px, env(safe-area-inset-bottom, 0px)); }
     .footer-brand { font-size: 1.9rem; letter-spacing: -.02em; }
     .footer-tagline { color: var(--muted); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; }
-    .footer-logo { height: 64px; width: auto; object-fit: contain; margin-top: 10px; }
+    .footer-logo { height: 64px; width: auto; object-fit: contain; display: block; }
     .contact-logo { display: block; height: 76px; width: auto; object-fit: contain; margin: 36px auto 0; }
 
     .marquee {
@@ -1137,12 +1137,19 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
 
   <footer>
     <div class="container footer-grid">
-      <div class="footer-brand">
-        <span class="brand-name">nocito.coach</span>
-        <span class="footer-tagline">· Jose, Personal Trainer</span>
+      <div class="footer-side">
+        <img class="footer-logo" src="img/logo-nocitocoach.jpeg?v=4" alt="Logo nocito.coach">
       </div>
-      <p>@2026 <span id="yearFoot"></span> nocito.coach · Entrenamiento y nutrición personalizada</p>
-      <img class="footer-logo" src="img/logo-nocitocoach.jpeg?v=2" alt="Logo nocito.coach">
+      <div class="footer-center">
+        <div class="footer-brand">
+          <span class="brand-name">nocito.coach</span>
+          <span class="footer-tagline">· Jose, Personal Trainer</span>
+        </div>
+        <p>@2026 <span id="yearFoot"></span> nocito.coach · Entrenamiento y nutrición personalizada</p>
+      </div>
+      <div class="footer-side">
+        <img class="footer-logo" src="img/logo-nocitocoach.jpeg?v=4" alt="Logo nocito.coach">
+      </div>
     </div>
   </footer>
 
