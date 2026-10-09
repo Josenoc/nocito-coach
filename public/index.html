@@ -272,13 +272,19 @@
     @media (max-width: 760px) { .gen-stats { grid-template-columns: repeat(2, 1fr); } }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
     .gen-success {
-      display: flex; align-items: center; gap: 14px;
-      background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.4);
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: linear-gradient(135deg, rgba(0,229,255,.08), rgba(255,87,34,.06));
+      border: 1px solid rgba(255,196,0,.4);
       border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
     }
     .gen-success svg { flex: 0 0 auto; }
     .gen-success strong { font-size: 1.02rem; }
     .gen-success span { color: var(--muted); font-size: .9rem; }
+    .gen-guided-main { flex: 1 1 220px; min-width: 220px; }
+    .gen-guided-btn { flex: 0 0 auto; font-size: .72rem; letter-spacing: .14em; padding: 13px 22px; margin-left: auto; }
+    @media (max-width: 620px) {
+      .gen-guided-btn { margin-left: 0; width: 100%; justify-content: center; }
+    }
     .gen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     .gen-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
     .gen-card h4 { font-size: .82rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
@@ -627,6 +633,7 @@
     .gen-stat { border-radius: 8px; border-top-color: var(--orange); }
     .gen-stat small { letter-spacing: .16em; text-transform: uppercase; }
     .gen-success { border-radius: 8px; }
+    .gen-guided-btn { color: var(--orange); border-color: rgba(255,196,0,.4); }
     .gen-grid { gap: 18px; }
     .gen-card { border-radius: 8px; }
     .lock-note { background: linear-gradient(135deg, rgba(255,196,0,.07), rgba(255,255,255,.02)); border-color: rgba(255,255,255,.18); border-style: solid; border-radius: 10px; }
@@ -694,6 +701,57 @@
     .contact-card .ico { border-radius: 6px; background: rgba(255,196,0,.08); border-color: rgba(255,196,0,.3); color: var(--orange); }
     .contact-card:hover .ico { background: var(--orange); color: #0A0A0A; box-shadow: 0 0 24px rgba(255,196,0,.3); }
     .contact-card h3 { font-size: 1.05rem; letter-spacing: .05em; }
+
+    /* ---------- Casos de éxito / Testimonios ---------- */
+    .testi-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 60px; }
+    @media (max-width: 900px) { .testi-wrap { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 620px) { .testi-wrap { grid-template-columns: 1fr; } }
+    .testi-card {
+      background: linear-gradient(180deg, #121212, #0D0D0D); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px;
+      transition: transform .28s ease, border-color .28s ease, box-shadow .32s ease;
+    }
+    .testi-card:hover {
+      transform: translateY(-5px); border-color: var(--orange);
+      box-shadow: 0 26px 54px rgba(0,0,0,.55), 0 0 0 1px rgba(255,196,0,.12);
+    }
+    .testi-photo {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      aspect-ratio: 4/3; border-radius: 8px; overflow: hidden; min-height: 150px;
+      background: linear-gradient(135deg, #2A2A2A, #121212);
+      border: 1px solid rgba(255,196,0,.25);
+    }
+    .testi-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .testi-initial { font-size: 3.2rem; font-weight: 800; color: rgba(255,196,0,.35); letter-spacing: .05em; }
+    .testi-goal { color: var(--orange); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+    .testi-quote { position: relative; color: #CFCFCF; font-size: .95rem; line-height: 1.65; margin-bottom: 10px; }
+    .testi-quote::before { content: "“"; color: var(--orange); font-size: 1.7rem; line-height: 0; vertical-align: -8px; margin-right: 4px; }
+    .testi-name { color: var(--text); font-weight: 700; font-size: 1.02rem; }
+    .testi-cta { text-align: center; margin-top: 40px; color: var(--muted); font-size: 1rem; }
+
+    /* ---------- FAQ ---------- */
+    .faq-list { max-width: 780px; margin: 50px auto 0; display: grid; gap: 12px; }
+    .faq-item {
+      background: linear-gradient(180deg, #121212, #0D0D0D); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px; overflow: hidden; transition: border-color .25s ease;
+    }
+    .faq-item[open] { border-color: rgba(255,196,0,.5); }
+    .faq-item summary {
+      cursor: pointer; list-style: none; position: relative;
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 56px 20px 22px;
+      font-size: 1.02rem; font-weight: 600; color: var(--text);
+      transition: color .25s ease;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary:hover { color: var(--orange); }
+    .faq-item summary::after {
+      content: "+"; position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+      font-size: 1.5rem; font-weight: 400; color: var(--orange); transition: transform .28s ease;
+    }
+    .faq-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+    .faq-body { padding: 0 22px 20px; }
+    .faq-body p { color: var(--muted); font-size: .95rem; line-height: 1.7; }
 
     footer { border-top-color: rgba(255,255,255,.1); padding: 48px 0 max(48px, env(safe-area-inset-bottom, 0px)); }
     .footer-brand { font-size: 1.9rem; letter-spacing: -.02em; }
@@ -828,10 +886,10 @@
             <p>¿Empezaste el gimnasio y tuviste que dejarlo?, ¿Poco tiempo destinado a tu físico?. Se lo difícil que es mantener la constancia. Si dejaste de entrenar por el trabajo y las obligaciones cotidianas, es momento de cambiar la estrategia. Te ayudo a construir un plan sostenible y adaptable a tu disponibilidad horaria.</p>
             <p class="hero-motivation-cta">Contactame hoy por WhatsApp o correo para coordinar tu plan</p>
             <div class="hero-contact-btns">
-              <a class="btn btn-primary btn-icon" id="heroWhatsApp" href="#" target="_blank" rel="noopener">
+              <a class="btn btn-primary btn-icon" id="heroWhatsApp" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 Hablar por WhatsApp</a>
-              <a class="btn btn-outline btn-icon" id="heroMail" href="mailto:" target="_blank" rel="noopener">
+              <a class="btn btn-outline btn-icon" id="heroMail" href="mailto:nocito.coach@gmail.com" target="_blank" rel="noopener">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
                 Enviar un e-mail</a>
             </div>
@@ -992,16 +1050,17 @@
         <div class="gen-panel" id="genPanel">
           <div class="gen-dash">
             <div class="gen-stats" id="genStats"></div>
-            <div class="gen-success">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
-              <div><strong>Tu plan está listo</strong><br><span>Elegí tu plan abajo y aboná. En cuanto Mercado Pago confirme el pago, tu rutina y tu pauta nutricional llegan por email automáticamente.</span></div>
+            <div class="gen-success" id="genGuided">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
+              <div class="gen-guided-main"><strong>Tu diagnóstico está listo</strong><br><span>Estos son los valores de tu plan sugerido. Ahora elegí la asesoría que mejor se ajuste a tu objetivo.</span></div>
+              <a class="btn btn-outline gen-guided-btn" href="#planes">Ver planes y asesorías</a>
             </div>
 
             <div class="lock-note">
               <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2" style="flex:0 0 auto;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               <div>
-<p><b>Al confirmar el pago, José te envía tu rutina y tu pauta nutricional</b><br>
-Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y José te la hace llegar por email o WhatsApp.</p>
+<p><b>Elegí tu plan y aboná por Mercado Pago o transferencia</b><br>
+Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional por email o WhatsApp.</p>
               </div>
             </div>
           </div>
@@ -1025,7 +1084,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
             <div>
               <h3 class="plan-name">Rut&Nut</h3>
               <span class="plan-tag">Solo rutina + plan nutricional</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">50</span> <span class="per">ARS · pago único</span></div>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">25.000</span> <span class="per">ARS · pago único</span></div>
               <p class="price-sub">Sin seguimiento personalizado</p>
             </div>
             <ul class="plan-features">
@@ -1084,15 +1143,58 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       </div>
     </section>
 
-    <!-- ============ CONTACTO ============ -->
-    <section class="section" id="contacto" data-index="03" >
+    <!-- ============ CASOS DE ÉXITO / TESTIMONIOS ============ -->
+    <section class="section" id="casos" data-index="03" >
       <div class="container reveal">
-        <span class="section-label"><span class="sec-num">03</span> Contacto</span>
+        <span class="section-label"><span class="sec-num">03</span> Casos de éxito</span>
+        <h2 class="section-title">Historias reales, <span class="grad-text">resultados sostenidos</span></h2>
+        <p class="section-sub">Alumnos que confiaron en un plan adaptado a su vida y a su etapa. Las fotos son reemplazables: subí tus antes/después en <span style="white-space:nowrap;">.testi-photo</span>.</p>
+
+        <div class="testi-wrap">
+          <article class="testi-card reveal">
+            <!-- Reemplazar por: <img src="img/foto-juan.jpg" alt="Resultado de Juan"> -->
+            <div class="testi-photo"><span class="testi-initial">JM</span></div>
+            <div>
+              <p class="testi-goal">Objetivo: recomposición corporal</p>
+              <p class="testi-quote">En 5 meses mantuve mi masa muscular mientras bajaba grasa. José adaptó el plan a mi doble turno laboral y nunca me sentí obligado a seguir una rutina genérica.</p>
+              <p class="testi-name">Juan M.</p>
+            </div>
+          </article>
+
+          <article class="testi-card reveal reveal-d1">
+            <!-- Reemplazar por: <img src="img/foto-martina.jpg" alt="Resultado de Martina"> -->
+            <div class="testi-photo"><span class="testi-initial">MC</span></div>
+            <div>
+              <p class="testi-goal">Objetivo: ganar fuerza</p>
+              <p class="testi-quote">Empecé de cero y con una lesión de rodilla. La progresión cuidada me permitió entrenar sin dolor y hoy levanto pesos que nunca imaginé.</p>
+              <p class="testi-name">Martina C.</p>
+            </div>
+          </article>
+
+          <article class="testi-card reveal reveal-d2">
+            <!-- Reemplazar por: <img src="img/foto-diego.jpg" alt="Resultado de Diego"> -->
+            <div class="testi-photo"><span class="testi-initial">DA</span></div>
+            <div>
+              <p class="testi-goal">Objetivo: perder grasa corporal</p>
+              <p class="testi-quote">Sabía lo que tenía que hacer, pero no cómo sostenerlo. Con los ajustes semanales y el acompañamiento por WhatsApp por fin lo logré.</p>
+              <p class="testi-name">Diego A.</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="testi-cta">¿Querés ser el próximo caso de éxito? <a class="link-internal" href="#contacto">Contactame hoy</a></p>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTO ============ -->
+    <section class="section" id="contacto" data-index="04" >
+      <div class="container reveal">
+        <span class="section-label"><span class="sec-num">04</span> Contacto</span>
         <h2 class="section-title">Hablemos de tu <span class="grad-text">transformación</span></h2>
         <p class="section-sub">Resolvé tus dudas directamente por WhatsApp o escribime por correo. Respondo personalmente, sin intermediarios.</p>
 
         <div class="contact-wrap">
-          <a class="contact-card reveal" id="whatsappLinkMain" href="#" target="_blank" rel="noopener">
+          <a class="contact-card reveal" id="whatsappLinkMain" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
             <div class="ico">
               <img src="img/logo-nocitocoach.jpeg?v=2" alt="nocito.coach">
             </div>
@@ -1101,7 +1203,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
               <p>Escribime y arrancamos con tu evaluación gratuita.</p>
             </div>
           </a>
-          <a class="contact-card reveal reveal-d1" id="emailLinkMain" href="mailto:" target="_blank" rel="noopener">
+          <a class="contact-card reveal reveal-d1" id="emailLinkMain" href="mailto:nocito.coach@gmail.com" target="_blank" rel="noopener">
             <div class="ico">
               <img src="img/logo-nocitocoach.jpeg?v=2" alt="nocito.coach">
             </div>
@@ -1123,6 +1225,34 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
           </a>
         </div>
         <img class="contact-logo" src="img/logo-nocitocoach.jpeg?v=2" alt="Logo nocito.coach">
+      </div>
+    </section>
+
+    <!-- ============ PREGUNTAS FRECUENTES ============ -->
+    <section class="section" id="faq" data-index="05" >
+      <div class="container reveal">
+        <span class="section-label"><span class="sec-num">05</span> Preguntas frecuentes</span>
+        <h2 class="section-title">Resolvamos tus <span class="grad-text">dudas</span></h2>
+        <p class="section-sub">Respuestas rápidas a las consultas más comunes antes de empezar.</p>
+
+        <div class="faq-list reveal reveal-d1">
+          <details class="faq-item" open>
+            <summary>¿Necesito ir a un gimnasio o puedo entrenar en casa?</summary>
+            <div class="faq-body"><p>Los planes se adaptan 100% a tu disponibilidad de equipamiento, ya sea gimnasio comercial, entrenamiento en casa o parque.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>¿Cada cuánto tiempo se actualizan la rutina y el plan nutricional?</summary>
+            <div class="faq-body"><p>En los planes con seguimiento, la revisión y los ajustes se realizan semanalmente según tu progresión e impresiones.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>¿Cómo se realiza el pago?</summary>
+            <div class="faq-body"><p>Podés abonar de forma rápida y segura mediante transferencia bancaria o Mercado Pago.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>¿Qué pasa si tengo una lesión previa o condición médica?</summary>
+            <div class="faq-body"><p>Adaptamos la selección de ejercicios y la intensidad para trabajar de forma totalmente segura y progresiva según tu caso.</p></div>
+          </details>
+        </div>
       </div>
     </section>
   </main>
@@ -1791,7 +1921,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       /* ---------- WhatsApp / email de contacto ---------- */
       $id("whatsappLinkMain").addEventListener("click", function (ev) {
         ev.preventDefault();
-        var msg = "Hola José, me interesan tus planes de entrenamiento y nutrición, como puedo empezar?";
+        var msg = "Hola José, quiero consultar por tus servicios de entrenamiento.";
         window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
       });
 
@@ -1801,7 +1931,7 @@ Tu solicitud ya fue enviada a José. Aboná tu asesoría con Mercado Pago y Jos�
       if (heroWhatsApp) {
         heroWhatsApp.addEventListener("click", function (ev) {
           ev.preventDefault();
-          var msg = "Hola José, me interesan tus planes de entrenamiento y nutrición, como puedo empezar?";
+          var msg = "Hola José, quiero consultar por tus servicios de entrenamiento.";
           window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
         });
       }
