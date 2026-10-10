@@ -8,12 +8,15 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/kv": "^3.0.0",
+    "chart.js": "^4.5.1",
     "mercadopago": "^2.0.0",
     "next": "^15.1.6",
     "pdfkit": "^0.20.2",
     "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.0.0",
     "resend": "^4.1.2"
   },
