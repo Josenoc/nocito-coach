@@ -1,0 +1,47 @@
+﻿create table if not exists public.alumnos (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null,
+  email text unique not null,
+  token_acceso text unique not null,
+  activo boolean default true,
+  created_at timestamp with time zone default now()
+);
+create table if not exists public.rutinas (
+  id uuid primary key default gen_random_uuid(),
+  alumno_id uuid references public.alumnos(id) on delete cascade,
+  nombre text not null,
+  activa boolean default true,
+  created_at timestamp with time zone default now()
+);
+create table if not exists public.ejercicios_asignados (
+  id uuid primary key default gen_random_uuid(),
+  rutina_id uuid references public.rutinas(id) on delete cascade,
+  nombre text not null,
+  orden int default 0,
+  series_default int,
+  reps_default int,
+  peso_default numeric,
+  unidad_peso text check (unidad_peso in ('kg','lbs')) default 'kg'
+);
+create table if not exists public.registros_progreso (
+  id uuid primary key default gen_random_uuid(),
+  alumno_id uuid references public.alumnos(id) on delete cascade,
+  fecha date not null default (current_date),
+  ejercicio text not null,
+  series int,
+  repeticiones int,
+  peso_utilizado numeric,
+  unidad_peso text check (unidad_peso in ('kg','lbs')) default 'kg',
+  notas text,
+  fuente text check (fuente in ('audio','manual')) not null,
+  audio_url text,
+  raw_transcripcion text,
+  raw_estructurado jsonb,
+  created_at timestamp with time zone default now()
+);
+create index if not exists idx_registros_alumno_fecha on public.registros_progreso (alumno_id, fecha desc);
+create index if not exists idx_registros_ejercicio on public.registros_progreso (ejercicio);
+insert into public.alumnos (nombre, email, token_acceso, activo)
+values ('Alumno Test', 'alumno@nocito.coach', 'token-demo-001', true)
+on conflict (email) do nothing
+on conflict (token_acceso) do nothing;
