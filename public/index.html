@@ -706,28 +706,9 @@
     .testi-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 60px; }
     @media (max-width: 900px) { .testi-wrap { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 620px) { .testi-wrap { grid-template-columns: 1fr; } }
-    .testi-card {
-      background: linear-gradient(180deg, #121212, #0D0D0D); border: 1px solid rgba(255,255,255,.1);
-      border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px;
-      transition: transform .28s ease, border-color .28s ease, box-shadow .32s ease;
-    }
-    .testi-card:hover {
-      transform: translateY(-5px); border-color: var(--orange);
-      box-shadow: 0 26px 54px rgba(0,0,0,.55), 0 0 0 1px rgba(255,196,0,.12);
-    }
-    .testi-photo {
-      position: relative; display: flex; align-items: center; justify-content: center;
-      aspect-ratio: 4/3; border-radius: 8px; overflow: hidden; min-height: 150px;
-      background: linear-gradient(135deg, #2A2A2A, #121212);
-      border: 1px solid rgba(255,196,0,.25);
-    }
-    .testi-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-    .testi-initial { font-size: 3.2rem; font-weight: 800; color: rgba(255,196,0,.35); letter-spacing: .05em; }
-    .testi-goal { color: var(--orange); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
-    .testi-quote { position: relative; color: #CFCFCF; font-size: .95rem; line-height: 1.65; margin-bottom: 10px; }
-    .testi-quote::before { content: "“"; color: var(--orange); font-size: 1.7rem; line-height: 0; vertical-align: -8px; margin-right: 4px; }
-    .testi-name { color: var(--text); font-weight: 700; font-size: 1.02rem; }
-    .testi-cta { text-align: center; margin-top: 40px; color: var(--muted); font-size: 1rem; }
+    .testi-card { padding: 28px; gap: 12px; }
+    .testi-card .testi-quote { margin-bottom: 14px; }
+    .testi-card .testi-name { margin-top: 8px; }
 
     /* ---------- FAQ ---------- */
     .faq-list { max-width: 780px; margin: 50px auto 0; display: grid; gap: 12px; }
@@ -1148,12 +1129,10 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
       <div class="container reveal">
         <span class="section-label"><span class="sec-num">03</span> Casos de éxito</span>
         <h2 class="section-title">Historias reales, <span class="grad-text">resultados sostenidos</span></h2>
-        <p class="section-sub">Alumnos que confiaron en un plan adaptado a su vida y a su etapa. Las fotos son reemplazables: subí tus antes/después en <span style="white-space:nowrap;">.testi-photo</span>.</p>
+        <p class="section-sub">Alumnos que confiaron en un plan adaptado a su vida y a su etapa.</p>
 
         <div class="testi-wrap">
           <article class="testi-card reveal">
-            <!-- Reemplazar por: <img src="img/foto-juan.jpg" alt="Resultado de Juan"> -->
-            <div class="testi-photo"><span class="testi-initial">JM</span></div>
             <div>
               <p class="testi-goal">Objetivo: recomposición corporal</p>
               <p class="testi-quote">En 5 meses mantuve mi masa muscular mientras bajaba grasa. José adaptó el plan a mi doble turno laboral y nunca me sentí obligado a seguir una rutina genérica.</p>
@@ -1162,8 +1141,6 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
           </article>
 
           <article class="testi-card reveal reveal-d1">
-            <!-- Reemplazar por: <img src="img/foto-martina.jpg" alt="Resultado de Martina"> -->
-            <div class="testi-photo"><span class="testi-initial">MC</span></div>
             <div>
               <p class="testi-goal">Objetivo: ganar fuerza</p>
               <p class="testi-quote">Empecé de cero y con una lesión de rodilla. La progresión cuidada me permitió entrenar sin dolor y hoy levanto pesos que nunca imaginé.</p>
@@ -1172,8 +1149,6 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
           </article>
 
           <article class="testi-card reveal reveal-d2">
-            <!-- Reemplazar por: <img src="img/foto-diego.jpg" alt="Resultado de Diego"> -->
-            <div class="testi-photo"><span class="testi-initial">DA</span></div>
             <div>
               <p class="testi-goal">Objetivo: perder grasa corporal</p>
               <p class="testi-quote">Sabía lo que tenía que hacer, pero no cómo sostenerlo. Con los ajustes semanales y el acompañamiento por WhatsApp por fin lo logré.</p>
