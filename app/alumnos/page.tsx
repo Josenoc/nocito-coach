@@ -2,6 +2,19 @@
 
 import { useState, useEffect, useRef } from 'react';
 import type { Alumno, RegistroProgreso } from '@/lib/types';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export default function AlumnosPage() {
   const [token, setToken] = useState('');
@@ -25,6 +38,10 @@ export default function AlumnosPage() {
   const [chunks, setChunks] = useState<Blob[]>([]);
   const audioRef = useRef<MediaStream | null>(null);
   const [ultimoAudioUrl, setUltimoAudioUrl] = useState<string | null>(null);
+  const [tab, setTab] = useState<'progreso' | 'rutina' | 'evolucion'>('progreso');
+  const [rutina, setRutina] = useState<any>(null);
+  const [evolucion, setEvolucion] = useState<RegistroProgreso[]>([]);
+  const [ejercicioSel, setEjercicioSel] = useState('');
 
   useEffect(() => {
     const t = localStorage.getItem('alumno_token');
@@ -46,11 +63,23 @@ export default function AlumnosPage() {
       setAlumno(json.alumno);
       localStorage.setItem('alumno_token', token);
       await cargarRegistros(json.alumno.id);
+      await cargarDatos(json.alumno);
     } catch (err: any) {
       setError(err.message || 'Error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const cargarDatos = async (al: Alumno) => {
+    try {
+      const r = await fetch(`/api/alumnos/rutina?token=${al.token_acceso}`);
+      const j = await r.json();
+      if (j.rutina) setRutina(j.rutina);
+      const e = await fetch(`/api/alumnos/evolucion?token=${al.token_acceso}`);
+      const ej = await e.json();
+      if (ej.registros) setEvolucion(ej.registros);
+    } catch {}
   };
 
   const cargarRegistros = async (alumno_id: string) => {
@@ -62,6 +91,8 @@ export default function AlumnosPage() {
   const logout = () => {
     setAlumno(null);
     setRegistros([]);
+    setRutina(null);
+    setEvolucion([]);
     localStorage.removeItem('alumno_token');
   };
 
