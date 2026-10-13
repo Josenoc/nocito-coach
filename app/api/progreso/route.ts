@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,7 +11,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'alumno_id requerido' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('registros_progreso')
       .select('*')
       .eq('alumno_id', alumno_id)
@@ -35,7 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'alumno_id, ejercicio y fuente son requeridos' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('registros_progreso')
       .insert({
         alumno_id,
