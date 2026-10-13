@@ -426,11 +426,12 @@
     .footer-brand .brand-name { font-size: clamp(1rem, 2.6vw, 1.2rem); }
 
     /* ---------- Responsive ---------- */
-    @media (max-width: 960px) {
-      .hero-grid, .eval-wrap, .contact-wrap { grid-template-columns: 1fr; }
-      .form-cols { grid-template-columns: 1fr; }
-      .form-col { background: none; border: 0; border-radius: 0; padding: 0; }
-      .info-list { grid-template-columns: 1fr; margin-top: 30px; }
+      @media (max-width: 960px) {
+        .hero-grid, .eval-wrap, .contact-wrap { grid-template-columns: 1fr; }
+        .form-cols { grid-template-columns: 1fr; }
+        .bit-grid { grid-template-columns: 1fr; }
+        .form-col { background: none; border: 0; border-radius: 0; padding: 0; }
+        .info-list { grid-template-columns: 1fr; margin-top: 30px; }
       .pricing-grid { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
       .price-card.featured { transform: none; }
     }
@@ -603,9 +604,18 @@
     .field select {
       background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23FFC400' stroke-width='2.4'><path d='M6 9l6 6 6-6'/></svg>");
       background-repeat: no-repeat; background-position: right 14px center; background-size: 14px 14px;
-      padding-right: 44px;
-    }
-    .pill .pill-label, .day-pill label {
+        padding-right: 44px;
+      }
+      .field textarea {
+        width: 100%; background: #0D0D0D; border: 1px solid rgba(255,255,255,.12);
+        color: var(--text); border-radius: 6px; padding: 14px 15px; font-size: .98rem;
+        font-family: inherit; outline: none; resize: vertical; transition: border .2s, box-shadow .2s;
+      }
+      .field textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,196,0,.15); }
+      .bit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+      .bit-grid .field { margin: 0; }
+      .bit-ej-card { will-change: auto; }
+      .pill .pill-label, .day-pill label {
       border-radius: 4px; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase;
       border-color: rgba(255,255,255,.14); background: var(--surface); color: var(--muted);
       padding: 11px 18px;
@@ -816,19 +826,21 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
+        <a href="#bitacora">Bitácora</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-cta" href="#evaluacion">Comencemos</a>
-      </nav>
+        </nav>
       <button class="hamburger" id="hamburger" aria-label="Abrir menú">
         <span></span><span></span><span></span>
       </button>
     </div>
     <div class="container mobile-menu" id="mobileMenu">
-      <a href="#inicio">Sobre mí</a>
-      <a href="#evaluacion">Ingresar datos</a>
-      <a href="#planes">Planes y precios</a>
-      <a href="#contacto">Contacto</a>
-      <a class="nav-cta" href="#evaluacion" style="display:inline-block;margin-top:14px;">Comencemos</a>
+        <a href="#inicio">Sobre mí</a>
+        <a href="#evaluacion">Ingresar datos</a>
+        <a href="#planes">Planes y precios</a>
+        <a href="#bitacora">Bitácora</a>
+        <a href="#contacto">Contacto</a>
+        <a class="nav-cta" href="#evaluacion" style="display:inline-block;margin-top:14px;">Comencemos</a>
     </div>
   </header>
 
@@ -1203,34 +1215,156 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
       </div>
     </section>
 
-    <!-- ============ PREGUNTAS FRECUENTES ============ -->
-    <section class="section" id="faq" data-index="05" >
-      <div class="container reveal">
-        <span class="section-label"><span class="sec-num">05</span> Preguntas frecuentes</span>
-        <h2 class="section-title">Resolvamos tus <span class="grad-text">dudas</span></h2>
-        <p class="section-sub">Respuestas rápidas a las consultas más comunes antes de empezar.</p>
+      <!-- ============ BITÁCORA / REGISTRO DE ENTRENAMIENTO ============ -->
+      <section class="section" id="bitacora" data-index="05" >
+        <div class="container reveal">
+          <span class="section-label"><span class="sec-num">05</span> Bitácora</span>
+          <h2 class="section-title">Bitácora de Entrenamiento Diario</h2>
+          <p class="section-sub">Completá tus cargas, series y sensaciones sesión por sesión para mantener el control de tu progreso.</p>
 
-        <div class="faq-list reveal reveal-d1">
-          <details class="faq-item" open>
-            <summary>¿Necesito ir a un gimnasio o puedo entrenar en casa?</summary>
-            <div class="faq-body"><p>Los planes se adaptan 100% a tu disponibilidad de equipamiento, ya sea gimnasio comercial, entrenamiento en casa o parque.</p></div>
-          </details>
-          <details class="faq-item">
-            <summary>¿Cada cuánto tiempo se actualizan la rutina y el plan nutricional?</summary>
-            <div class="faq-body"><p>En los planes con seguimiento, la revisión y los ajustes se realizan semanalmente según tu progresión e impresiones.</p></div>
-          </details>
-          <details class="faq-item">
-            <summary>¿Cómo se realiza el pago?</summary>
-            <div class="faq-body"><p>Podés abonar de forma rápida y segura mediante transferencia bancaria o Mercado Pago.</p></div>
-          </details>
-          <details class="faq-item">
-            <summary>¿Qué pasa si tengo una lesión previa o condición médica?</summary>
-            <div class="faq-body"><p>Adaptamos la selección de ejercicios y la intensidad para trabajar de forma totalmente segura y progresiva según tu caso.</p></div>
-          </details>
+          <form id="bitacoraForm" class="form-card" novalidate style="margin-top:24px;">
+            <h3>Datos generales</h3>
+            <div class="bit-grid" style="margin-top:12px;">
+              <div class="field">
+                <label for="bit_nombre">Nombre y Apellido <span>*</span></label>
+                <input type="text" id="bit_nombre" placeholder="Ej: Martín Gómez" autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="bit_dia">Día de la semana <span>*</span></label>
+                <select id="bit_dia">
+                  <option value="">Seleccionar...</option>
+                  <option value="Lunes">Lunes</option>
+                  <option value="Martes">Martes</option>
+                  <option value="Miércoles">Miércoles</option>
+                  <option value="Jueves">Jueves</option>
+                  <option value="Viernes">Viernes</option>
+                  <option value="Sábado">Sábado</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bit_rutina">Grupo Muscular o Nombre de la Rutina <span>*</span></label>
+                <input type="text" id="bit_rutina" placeholder="Ej: Pecho + Tríceps / Fuerza 3x">
+              </div>
+            </div>
+
+            <h3 style="margin-top:28px;">Ejercicios</h3>
+            <p>Completar serie 1–4 en formato Peso x Reps (ej: 80x10). RPE 1–10.</p>
+            <div id="bit_ejercicios" style="display:grid; gap:14px; margin-top:14px;">
+              <div class="bit-ej-card" style="border:1px solid var(--border); border-radius:8px; padding:14px; background:linear-gradient(180deg,#121212,#0D0D0D);">
+                <div class="field">
+                  <label>Ejercicio</label>
+                  <input type="text" class="bit_ej_nombre" placeholder="Ej: Sentadillas">
+                </div>
+                <div class="row-4" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:10px;">
+                  <div class="field">
+                    <label>Serie 1</label>
+                    <input type="text" class="bit_s1" placeholder="80x10">
+                  </div>
+                  <div class="field">
+                    <label>Serie 2</label>
+                    <input type="text" class="bit_s2" placeholder="80x8">
+                  </div>
+                  <div class="field">
+                    <label>Serie 3</label>
+                    <input type="text" class="bit_s3" placeholder="75x8">
+                  </div>
+                  <div class="field">
+                    <label>Serie 4</label>
+                    <input type="text" class="bit_s4" placeholder="70x8">
+                  </div>
+                </div>
+                <div class="field" style="margin-top:10px; max-width:240px;">
+                  <label>RPE (1–10)</label>
+                  <input type="number" min="1" max="10" class="bit_rpe" placeholder="8">
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline" id="bit_agregar" style="margin-top:12px;">Agregar ejercicio</button>
+
+            <h3 style="margin-top:28px;">Estado y sensaciones</h3>
+            <div class="bit-grid" style="margin-top:12px;">
+              <div class="field">
+                <label for="bit_sensacion">Sensación general del cliente</label>
+                <select id="bit_sensacion">
+                  <option value="">Seleccionar...</option>
+                  <option value="Excelente">Excelente</option>
+                  <option value="Buena">Buena</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Mala">Mala</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bit_energia">Nivel de energía</label>
+                <select id="bit_energia">
+                  <option value="">Seleccionar...</option>
+                  <option value="Alto">Alto</option>
+                  <option value="Normal">Normal</option>
+                  <option value="Bajo">Bajo</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bit_sueno">Horas de sueño</label>
+                <input type="text" id="bit_sueno" placeholder="Ej: 7h 30m / 8">
+              </div>
+              <div class="field">
+                <label for="bit_preentreno">¿Comió pre-entreno?</label>
+                <select id="bit_preentreno">
+                  <option value="">Seleccionar...</option>
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bit_molestias">¿Molestias físicas o dolor?</label>
+                <select id="bit_molestias">
+                  <option value="">Seleccionar...</option>
+                  <option value="No">No</option>
+                  <option value="Sí">Sí</option>
+                </select>
+              </div>
+              <div class="field" id="bit_molestias_det_wrap" style="display:none;">
+                <label for="bit_molestias_det">¿Dónde?</label>
+                <input type="text" id="bit_molestias_det" placeholder="Ej: Lumbar, hombro derecho">
+              </div>
+              <div class="field" style="grid-column:1 / -1;">
+                <label for="bit_obs">Observaciones generales de la sesión</label>
+                <textarea id="bit_obs" rows="4" placeholder="Notas, sensaciones, fatiga, etc."></textarea>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="bit_enviar" style="margin-top:18px;">Enviar reporte diario a José</button>
+          </form>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+
+      <!-- ============ PREGUNTAS FRECUENTES ============ -->
+      <section class="section" id="faq" data-index="06" >
+        <div class="container reveal">
+          <span class="section-label"><span class="sec-num">06</span> Preguntas frecuentes</span>
+          <h2 class="section-title">Resolvamos tus <span class="grad-text">dudas</span></h2>
+          <p class="section-sub">Respuestas rápidas a las consultas más comunes antes de empezar.</p>
+
+          <div class="faq-list reveal reveal-d1">
+            <details class="faq-item" open>
+              <summary>¿Necesito ir a un gimnasio o puedo entrenar en casa?</summary>
+              <div class="faq-body"><p>Los planes se adaptan 100% a tu disponibilidad de equipamiento, ya sea gimnasio comercial, entrenamiento en casa o parque.</p></div>
+            </details>
+            <details class="faq-item">
+              <summary>¿Cada cuánto tiempo se actualizan la rutina y el plan nutricional?</summary>
+              <div class="faq-body"><p>En los planes con seguimiento, la revisión y los ajustes se realizan semanalmente según tu progresión e impresiones.</p></div>
+            </details>
+            <details class="faq-item">
+              <summary>¿Cómo se realiza el pago?</summary>
+              <div class="faq-body"><p>Podés abonar de forma rápida y segura mediante transferencia bancaria o Mercado Pago.</p></div>
+            </details>
+            <details class="faq-item">
+              <summary>¿Qué pasa si tengo una lesión previa o condición médica?</summary>
+              <div class="faq-body"><p>Adaptamos la selección de ejercicios y la intensidad para trabajar de forma totalmente segura y progresiva según tu caso.</p></div>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
 
   <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
@@ -2032,6 +2166,86 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
           var hit = e.target.closest("a, button, input, select, textarea, .pill, .day-pill");
           ring.classList.toggle("grow", !!hit);
         }, { passive: true });
+      }
+    })();
+  </script>
+
+  <script>
+    (function () {
+      "use strict";
+      var ejerciciosContainer = document.getElementById("bit_ejercicios");
+      var agregarBtn = document.getElementById("bit_agregar");
+      var enviarBtn = document.getElementById("bit_enviar");
+      var molSelect = document.getElementById("bit_molestias");
+      var molWrap = document.getElementById("bit_molestias_det_wrap");
+
+      if (agregarBtn && ejerciciosContainer) {
+        agregarBtn.addEventListener("click", function () {
+          var card = document.createElement("div");
+          card.className = "bit-ej-card";
+          card.style.cssText = "border:1px solid var(--border); border-radius:8px; padding:14px; background:linear-gradient(180deg,#121212,#0D0D0D);";
+          card.innerHTML = '<div class="field"><label>Ejercicio</label><input type="text" class="bit_ej_nombre" placeholder="Ej: Press Banca"></div><div class="row-4" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:10px;"><div class="field"><label>Serie 1</label><input type="text" class="bit_s1" placeholder="80x10"></div><div class="field"><label>Serie 2</label><input type="text" class="bit_s2" placeholder="80x8"></div><div class="field"><label>Serie 3</label><input type="text" class="bit_s3" placeholder="75x8"></div><div class="field"><label>Serie 4</label><input type="text" class="bit_s4" placeholder="70x8"></div></div><div class="field" style="margin-top:10px; max-width:240px;"><label>RPE (1\u201310)</label><input type="number" min="1" max="10" class="bit_rpe" placeholder="8"></div><button type="button" class="btn btn-outline" style="margin-top:10px; padding:8px 14px; font-size:.85rem;" onclick="this.parentElement.remove()">Eliminar</button>';
+          ejerciciosContainer.appendChild(card);
+        });
+      }
+
+      if (molSelect && molWrap) {
+        molSelect.addEventListener("change", function () {
+          molWrap.style.display = (molSelect.value === "S\u00ed") ? "block" : "none";
+        });
+      }
+
+      if (enviarBtn) {
+        enviarBtn.addEventListener("click", function () {
+          var val = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
+          var nombre = val("bit_nombre");
+          var dia = val("bit_dia");
+          var rutina = val("bit_rutina");
+          var sensacion = val("bit_sensacion");
+          var energia = val("bit_energia");
+          var sueno = val("bit_sueno");
+          var preentreno = val("bit_preentreno");
+          var molestias = val("bit_molestias");
+          var molestiasDet = val("bit_molestias_det");
+          var obs = val("bit_obs");
+
+          var mensaje = "Hola Jos\u00e9, ac\u00e1 te env\u00edo mi *BIT\u00c1CORA DE ENTRENAMIENTO DIARIO*:\n\n";
+          mensaje += "*Datos Generales*\n";
+          mensaje += "\u2022 Nombre y Apellido: " + nombre + "\n";
+          mensaje += "\u2022 D\u00eda de la semana: " + dia + "\n";
+          mensaje += "\u2022 Grupo Muscular / Rutina: " + rutina + "\n\n";
+          mensaje += "*Ejercicios*\n";
+
+          var cards = document.querySelectorAll(".bit-ej-card");
+          if (cards.length === 0) {
+            mensaje += "- Sin ejercicios cargados\n\n";
+          } else {
+            for (var i = 0; i < cards.length; i++) {
+              var c = cards[i];
+              var get = function (sel) { var el = c.querySelector(sel); return el ? el.value.trim() : ""; };
+              var ej = get(".bit_ej_nombre") || "-";
+              var s1 = get(".bit_s1") || "-";
+              var s2 = get(".bit_s2") || "-";
+              var s3 = get(".bit_s3") || "-";
+              var s4 = get(".bit_s4") || "-";
+              var rpe = get(".bit_rpe") || "-";
+              mensaje += (i + 1) + ". *" + ej + "*\n";
+              mensaje += "   Serie 1: " + s1 + " | Serie 2: " + s2 + " | Serie 3: " + s3 + " | Serie 4: " + s4 + "\n";
+              mensaje += "   RPE: " + rpe + "/10\n\n";
+            }
+          }
+
+          mensaje += "*Estado y Sensaciones*\n";
+          mensaje += "\u2022 Sensaci\u00f3n general: " + (sensacion || "-") + "\n";
+          mensaje += "\u2022 Nivel de energ\u00eda: " + (energia || "-") + "\n";
+          mensaje += "\u2022 Horas de sue\u00f1o: " + (sueno || "-") + "\n";
+          mensaje += "\u2022 Comi\u00f3 pre-entreno: " + (preentreno || "-") + "\n";
+          mensaje += "\u2022 Molestias f\u00edsicas/dolor: " + (molestias || "-") + (molestias === "S\u00ed" && molestiasDet ? " (" + molestiasDet + ")" : "") + "\n";
+          mensaje += "\u2022 Observaciones: " + (obs || "-") + "\n";
+
+          var url = "https://wa.me/5492616224718?text=" + encodeURIComponent(mensaje);
+          window.open(url, "_blank", "noopener");
+        });
       }
     })();
   </script>
