@@ -520,6 +520,32 @@
     }
     .nav-cta:hover { background: var(--orange); color: #0A0A0A; box-shadow: none; transform: none; }
 
+    /* ---------- Bitácora: destacado amarillo + grabar audio ---------- */
+    a.nav-highlight {
+      background: var(--orange) !important; color: #0A0A0A !important;
+      font-weight: 800; padding: 7px 14px !important; border-radius: 6px; border-bottom: 0 !important;
+    }
+    a.nav-highlight::after { display: none !important; }
+    a.nav-highlight:hover { background: var(--orange-soft) !important; color: #0A0A0A !important; }
+    .bit-head { margin: 4px 0 18px; }
+    .btn-record {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--orange); color: #0A0A0A; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase; font-size: .86rem;
+      padding: 14px 26px; border-radius: 8px; border: 0; cursor: pointer;
+      transition: transform .15s, box-shadow .2s, background .2s;
+    }
+    .btn-record::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: #0A0A0A; }
+    .btn-record:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(255,196,0,.35); }
+    .btn-record.recording { background: var(--danger); color: #fff; }
+    .btn-record.recording::before { background: #fff; animation: bitPulse 1s ease-in-out infinite; }
+    @keyframes bitPulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+    .bit-audio { display: none; margin-top: 14px; }
+    .bit-audio.show { display: block; }
+    .bit-audio audio { width: min(420px, 100%); display: block; margin-bottom: 8px; }
+    .bit-audio-hint { font-size: .85rem; color: var(--muted); }
+    .bit-audio-hint a { color: var(--orange); font-weight: 700; cursor: pointer; }
+
     .hero { padding: clamp(70px, 9vw, 120px) 0 clamp(80px, 11vw, 150px); }
     .hero::before {
       background:
@@ -826,7 +852,7 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
-        <a href="#bitacora">Bitácora</a>
+        <a href="#bitacora" class="nav-highlight">Bitácora</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-cta" href="#evaluacion">Comencemos</a>
         </nav>
@@ -838,7 +864,7 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
-        <a href="#bitacora">Bitácora</a>
+        <a href="#bitacora" class="nav-highlight">Bitácora</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-cta" href="#evaluacion" style="display:inline-block;margin-top:14px;">Comencemos</a>
     </div>
@@ -1220,6 +1246,13 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
         <div class="container reveal">
           <span class="section-label"><span class="sec-num">05</span> Bitácora</span>
           <h2 class="section-title">Bitácora de Entrenamiento Diario</h2>
+          <div class="bit-head">
+            <button type="button" id="bit_grabar" class="btn-record">GRABAR AUDIO</button>
+            <div class="bit-audio" id="bit_audio_wrap">
+              <audio id="bit_audio" controls></audio>
+              <div class="bit-audio-hint">Audio grabado. <a id="bit_audio_dl" download="bitacora-entrenamiento.webm">Descargalo</a> y adjuntalo en el chat de WhatsApp.</div>
+            </div>
+          </div>
           <p class="section-sub">Completá tus cargas, series y sensaciones sesión por sesión para mantener el control de tu progreso.</p>
 
           <form id="bitacoraForm" class="form-card" novalidate style="margin-top:24px;">
@@ -2245,6 +2278,53 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
 
           var url = "https://wa.me/5492616224718?text=" + encodeURIComponent(mensaje);
           window.open(url, "_blank", "noopener");
+        });
+      }
+
+      var grabarBtn = document.getElementById("bit_grabar");
+      var audioWrap = document.getElementById("bit_audio_wrap");
+      var audioEl = document.getElementById("bit_audio");
+      var audioDl = document.getElementById("bit_audio_dl");
+
+      if (grabarBtn && navigator.mediaDevices && window.MediaRecorder) {
+        var mediaRecorder = null;
+        var chunks = [];
+        var stream = null;
+
+        grabarBtn.addEventListener("click", function () {
+          if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+            return;
+          }
+          navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
+            stream = s;
+            chunks = [];
+            var mime = (window.MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported("audio/webm")) ? "audio/webm" : "";
+            mediaRecorder = mime ? new MediaRecorder(s, { mimeType: mime }) : new MediaRecorder(s);
+            mediaRecorder.ondataavailable = function (e) { if (e.data && e.data.size > 0) { chunks.push(e.data); } };
+            mediaRecorder.onstop = function () {
+              var blob = new Blob(chunks, { type: mime || "audio/webm" });
+              var blobUrl = URL.createObjectURL(blob);
+              if (audioEl) { audioEl.src = blobUrl; }
+              if (audioDl) {
+                audioDl.href = blobUrl;
+                audioDl.download = "bitacora-" + new Date().toISOString().slice(0, 10) + ".webm";
+              }
+              if (audioWrap) { audioWrap.classList.add("show"); }
+              if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+              grabarBtn.classList.remove("recording");
+              grabarBtn.textContent = "GRABAR AUDIO";
+            };
+            mediaRecorder.start();
+            grabarBtn.classList.add("recording");
+            grabarBtn.textContent = "DETENER GRABACIÓN";
+          }).catch(function () {
+            alert("No se pudo acceder al micr\u00f3fono. Revis\u00e1 los permisos del navegador.");
+          });
+        });
+      } else if (grabarBtn) {
+        grabarBtn.addEventListener("click", function () {
+          alert("Tu navegador no permite grabar audio. Us\u00e1 un navegador actualizado.");
         });
       }
     })();
