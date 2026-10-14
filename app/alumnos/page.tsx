@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { Alumno, RegistroProgreso } from '@/lib/types';
+import type { Alumno, RegistroProgreso, PerfilAlumno } from '@/lib/types';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,6 +15,40 @@ import {
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+const OBJETIVOS: [string, string][] = [
+  ['ganar-masa', 'Ganar masa muscular'],
+  ['perder-grasa', 'Perder grasa corporal'],
+  ['recomposicion', 'Recomposición corporal'],
+];
+
+const EXPERIENCIAS: [string, string][] = [
+  ['principiante', 'Principiante'],
+  ['intermedio', 'Intermedio'],
+  ['avanzado', 'Avanzado'],
+];
+
+const PREFERENCIAS = ['Omnívoro', 'Vegetariano', 'Vegano', 'Celíaco', 'Sin lactosa'];
+
+const inputStyle = {
+  padding: 12,
+  borderRadius: 6,
+  border: '1px solid var(--border)',
+  background: 'var(--surface)',
+  color: 'var(--text)',
+  width: '100%',
+} as const;
+
+const EMPTY_PERFIL = {
+  sexo: 'Masculino',
+  edad: '',
+  altura: '',
+  peso: '',
+  objetivo: 'ganar-masa',
+  experiencia: 'principiante',
+  dias: '3',
+  preferencias: ['Omnívoro'] as string[],
+};
 
 export default function AlumnosPage() {
   const [token, setToken] = useState('');
@@ -42,11 +76,68 @@ export default function AlumnosPage() {
   const [rutina, setRutina] = useState<any>(null);
   const [evolucion, setEvolucion] = useState<RegistroProgreso[]>([]);
   const [ejercicioSel, setEjercicioSel] = useState('');
+  const [perfilForm, setPerfilForm] = useState({ ...EMPTY_PERFIL });
+  const [guardandoPerfil, setGuardandoPerfil] = useState(false);
+  const [perfilMsg, setPerfilMsg] = useState<string | null>(null);
+  const [perfilError, setPerfilError] = useState<string | null>(null);
 
   useEffect(() => {
     const t = localStorage.getItem('alumno_token');
     if (t) setToken(t);
   }, []);
+
+  const aplicarPerfil = (p?: PerfilAlumno | null) => {
+    if (!p) {
+      setPerfilForm({ ...EMPTY_PERFIL });
+      return;
+    }
+    setPerfilForm({
+      sexo: p.sexo || 'Masculino',
+      edad: p.edad ? String(p.edad) : '',
+      altura: p.altura ? String(p.altura) : '',
+      peso: p.peso ? String(p.peso) : '',
+      objetivo: p.objetivo || 'ganar-masa',
+      experiencia: p.experiencia || 'principiante',
+      dias: p.dias ? String(p.dias) : '3',
+      preferencias: p.preferencias?.length ? p.preferencias : ['Omnívoro'],
+    });
+  };
+
+  const togglePref = (p: string) => {
+    setPerfilForm((f) => {
+      const has = f.preferencias.includes(p);
+      const next = has
+        ? f.preferencias.filter((x) => x !== p)
+        : [...f.preferencias, p];
+      return { ...f, preferencias: next.length ? next : ['Omnívoro'] };
+    });
+  };
+
+  const guardarPerfil = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!alumno) return;
+    setGuardandoPerfil(true);
+    setPerfilMsg(null);
+    setPerfilError(null);
+    try {
+      const res = await fetch('/api/alumnos/perfil', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: alumno.token_acceso,
+          perfil: perfilForm,
+        }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      setAlumno({ ...alumno, perfil: json.perfil });
+      setPerfilMsg('Perfil guardado. ¡Tu plan nutricional está listo!');
+    } catch (err: any) {
+      setPerfilError(err.message || 'Error guardando el perfil');
+    } finally {
+      setGuardandoPerfil(false);
+    }
+  };
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +152,7 @@ export default function AlumnosPage() {
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
       setAlumno(json.alumno);
+      aplicarPerfil(json.alumno.perfil);
       localStorage.setItem('alumno_token', token);
       await cargarRegistros(json.alumno.id);
       await cargarDatos(json.alumno);
@@ -246,6 +338,89 @@ export default function AlumnosPage() {
           </div>
           <button onClick={logout} className="btn btn-outline">Salir</button>
         </div>
+
+        <section style={{ marginTop: 40, background: 'linear-gradient(180deg,#121212,#0D0D0D)', border: '1px solid var(--border)', borderRadius: 10, padding: 24 }}>
+          <h3 style={{ marginBottom: 8 }}>Tu perfil y plan nutricional</h3>
+          <p style={{ color: 'var(--muted)', marginBottom: 20 }}>
+            Completá tus datos para calcular tus macros. Podés actualizarlos cuando quieras.
+          </p>
+
+          <form onSubmit={guardarPerfil} style={{ display: 'grid', gap: 16, maxWidth: 720 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px,1fr))', gap: 12 }}>
+              <select value={perfilForm.sexo} onChange={(e) => setPerfilForm({ ...perfilForm, sexo: e.target.value })} style={inputStyle}>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+              <input type="number" placeholder="Edad (años)" value={perfilForm.edad} onChange={(e) => setPerfilForm({ ...perfilForm, edad: e.target.value })} style={inputStyle} required />
+              <input type="number" placeholder="Altura (cm)" value={perfilForm.altura} onChange={(e) => setPerfilForm({ ...perfilForm, altura: e.target.value })} style={inputStyle} required />
+              <input type="number" step="0.1" placeholder="Peso (kg)" value={perfilForm.peso} onChange={(e) => setPerfilForm({ ...perfilForm, peso: e.target.value })} style={inputStyle} required />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px,1fr))', gap: 12 }}>
+              <select value={perfilForm.objetivo} onChange={(e) => setPerfilForm({ ...perfilForm, objetivo: e.target.value })} style={inputStyle}>
+                {OBJETIVOS.map(([k, label]) => (
+                  <option key={k} value={k}>{label}</option>
+                ))}
+              </select>
+              <select value={perfilForm.experiencia} onChange={(e) => setPerfilForm({ ...perfilForm, experiencia: e.target.value })} style={inputStyle}>
+                {EXPERIENCIAS.map(([k, label]) => (
+                  <option key={k} value={k}>{label}</option>
+                ))}
+              </select>
+              <select value={perfilForm.dias} onChange={(e) => setPerfilForm({ ...perfilForm, dias: e.target.value })} style={inputStyle}>
+                {[2, 3, 4, 5, 6].map((d) => (
+                  <option key={d} value={d}>{d} días / semana</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <p style={{ color: 'var(--muted)', fontSize: '.85rem', marginBottom: 8 }}>Preferencias alimentarias</p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {PREFERENCIAS.map((p) => {
+                  const active = perfilForm.preferencias.includes(p);
+                  return (
+                    <button type="button" key={p} onClick={() => togglePref(p)} style={{ padding: '8px 14px', borderRadius: 999, cursor: 'pointer', fontSize: '.9rem', border: '1px solid ' + (active ? 'var(--orange)' : 'var(--border)'), background: active ? 'rgba(255,196,0,.12)' : 'var(--surface)', color: active ? 'var(--orange)' : 'var(--text)' }}>{p}</button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button className="btn btn-primary" type="submit" disabled={guardandoPerfil}>
+                {guardandoPerfil ? 'Guardando...' : 'Guardar perfil'}
+              </button>
+              {perfilMsg && <span style={{ color: 'var(--blue)', fontSize: '.9rem' }}>{perfilMsg}</span>}
+              {perfilError && <span style={{ color: 'var(--orange)', fontSize: '.9rem' }}>{perfilError}</span>}
+            </div>
+          </form>
+
+          {alumno.perfil?.macros && (
+            <div style={{ marginTop: 28, borderTop: '1px solid var(--border)', paddingTop: 24 }}>
+              <h4 style={{ marginBottom: 4 }}>Tu plan nutricional</h4>
+              <p style={{ color: 'var(--muted)', marginBottom: 16 }}>Mantenimiento estimado: {alumno.perfil.tdee} kcal/día</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px,1fr))', gap: 12, marginBottom: 16 }}>
+                {[['Calorías', alumno.perfil.macros.cal + ' kcal'], ['Proteínas', alumno.perfil.macros.prot + ' g'], ['Carbohidratos', alumno.perfil.macros.carbs + ' g'], ['Grasas', alumno.perfil.macros.fat + ' g']].map(([label, val]) => (
+                  <div key={label} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16 }}>
+                    <div style={{ color: 'var(--muted)', fontSize: '.8rem', textTransform: 'uppercase', letterSpacing: '.08em' }}>{label}</div>
+                    <div style={{ color: 'var(--orange)', fontSize: '1.3rem', fontWeight: 700, marginTop: 6 }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+              <p style={{ color: 'var(--muted)', marginBottom: 16 }}>{alumno.perfil.macros.proteinSources}</p>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <tbody>
+                  {alumno.perfil.macros.meals.map(([comida, sug]) => (
+                    <tr key={comida} style={{ borderTop: '1px solid var(--border)' }}>
+                      <td style={{ padding: '10px 12px', fontWeight: 600, width: 130 }}>{comida}</td>
+                      <td style={{ padding: '10px 12px', color: 'var(--muted)' }}>{sug}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
         <section style={{ marginTop: 40, background: 'linear-gradient(180deg,#121212,#0D0D0D)', border: '1px solid var(--border)', borderRadius: 10, padding: 24 }}>
           <h3 style={{ marginBottom: 16 }}>Registrar progreso semanal</h3>

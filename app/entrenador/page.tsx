@@ -1,225 +1,696 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { Alumno, RegistroProgreso, Rutina } from '@/lib/types';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Profile } from "@/lib/app-types";
 
-export default function EntrenadorPage() {
-  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
-  const [registros, setRegistros] = useState<RegistroProgreso[]>([]);
-  const [selected, setSelected] = useState<Alumno | null>(null);
-  const [pass, setPass] = useState('');
-  const [auth, setAuth] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState<'historial' | 'rutinas'>('historial');
-  const [rutinas, setRutinas] = useState<Rutina[]>([]);
-  const [nuevaRutina, setNuevaRutina] = useState('');
-  const [ejercicios, setEjercicios] = useState<Array<{nombre: string; series_default?: number|null; reps_default?: number|null; peso_default?: number|null; unidad_peso: 'kg'|'lbs'}>>([
-    { nombre: '', unidad_peso: 'kg' }
-  ]);
+interface ClientRow {
+  id: string;
+  email: string;
+  full_name: string;
+  activo: boolean;
+  has_pin: boolean;
+}
 
-  const login = (e: React.FormEvent) => {
+interface ExRow {
+  name: string;
+  video_url: string;
+  technique_notes: string;
+  target_sets: string;
+  target_reps: string;
+  target_weight: string;
+  unit: "kg" | "lbs";
+}
+
+interface Draft {
+  id?: string;
+  name: string;
+  day_name: string;
+  week_number: string;
+  position: string;
+  active: boolean;
+  exercises: ExRow[];
+}
+
+const emptyEx = (): ExRow => ({
+  name: "",
+  video_url: "",
+  technique_notes: "",
+  target_sets: "3",
+  target_reps: "10",
+  target_weight: "",
+  unit: "kg",
+});
+
+const emptyDraft = (): Draft => ({
+  name: "",
+  day_name: "",
+  week_number: "1",
+  position: "0",
+  active: true,
+  exercises: [emptyEx()],
+});
+
+export default function CoachDashboard() {
+  const router = useRouter();
+
+  const [checking, setChecking] = useState(true);
+  const [coach, setCoach] = useState<Profile | null>(null);
+  const [email, setEmail] = useState("");
+  const [pin, setPin] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  const [clients, setClients] = useState<ClientRow[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<any>(null);
+  const [tab, setTab] = useState<"historial" | "rutinas" | "acceso">("historial");
+
+  const [draft, setDraft] = useState<Draft>(emptyDraft());
+  const [newClient, setNewClient] = useState({ email: "", full_name: "", pin: "" });
+  const [pinFor, setPinFor] = useState("");
+  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.ok && j.profile) {
+          if (j.profile.role !== "coach") {
+            router.replace("/app");
+            return;
+          }
+          setCoach(j.profile);
+          loadClients();
+        }
+      })
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  }, []);
+
+  const loadClients = async () => {
+    const res = await fetch("/api/coach/clients");
+    const json = await res.json();
+    if (json.ok) setClients(json.clients);
+  };
+
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pass === 'nocito-entrenador-2026') {
-      setAuth(true);
-      cargarAlumnos();
-    } else {
-      alert('Contraseña incorrecta');
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, pin }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      if (json.profile.role !== "coach") {
+        router.replace("/app");
+        return;
+      }
+      setCoach(json.profile);
+      await loadClients();
+    } catch (err: any) {
+      setAuthError(err.message || "No se pudo ingresar");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
-  const cargarAlumnos = async () => {
-    setLoading(true);
-    const res = await fetch('/api/entrenador/alumnos');
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setCoach(null);
+    setClients([]);
+    setDetail(null);
+  };
+
+  const selectClient = async (id: string) => {
+    setSelectedId(id);
+    setTab("historial");
+    setMsg(null);
+    setDraft(emptyDraft());
+    const res = await fetch(`/api/coach/client?id=${id}`);
     const json = await res.json();
-    if (json.ok) setAlumnos(json.alumnos);
-    setLoading(false);
+    if (json.ok) setDetail(json);
   };
 
-  const verAlumno = async (al: Alumno) => {
-    setSelected(al);
-    setTab('historial');
-    const res = await fetch(`/api/progreso?alumno_id=${al.id}`);
+  const reloadDetail = async () => {
+    if (!selectedId) return;
+    const res = await fetch(`/api/coach/client?id=${selectedId}`);
     const json = await res.json();
-    if (json.ok) setRegistros(json.registros);
-    await cargarRutinas(al);
+    if (json.ok) setDetail(json);
   };
 
-  const cargarRutinas = async (al: Alumno) => {
-    const res = await fetch(`/api/entrenador/rutinas?password=nocito-entrenador-2026&alumno_id=${al.id}`);
-    const json = await res.json();
-    if (!json.error) setRutinas(json.rutinas || []);
+  const setEx = (idx: number, patch: Partial<ExRow>) => {
+    setDraft((d) => ({
+      ...d,
+      exercises: d.exercises.map((e, i) => (i === idx ? { ...e, ...patch } : e)),
+    }));
   };
 
-  const agregarEjercicio = () => {
-    setEjercicios([...ejercicios, { nombre: '', unidad_peso: 'kg' }]);
-  };
-
-  const crearRutina = async () => {
-    if (!selected || !nuevaRutina.trim()) return;
+  const saveRoutine = async () => {
+    if (!selectedId) return;
+    if (!draft.exercises.some((e) => e.name.trim())) {
+      setMsg({ type: "err", text: "Agregá al menos un ejercicio." });
+      return;
+    }
     const payload = {
-      password: 'nocito-entrenador-2026',
-      alumno_id: selected.id,
-      nombre: nuevaRutina.trim(),
-      ejercicios: ejercicios.filter(e => e.nombre.trim()).map(e => ({
-        ...e,
-        nombre: e.nombre.trim(),
-        series_default: e.series_default || null,
-        reps_default: e.reps_default || null,
-        peso_default: e.peso_default || null
-      }))
+      ...(draft.id ? { id: draft.id } : { client_id: selectedId }),
+      name: draft.name || draft.day_name || "Rutina",
+      day_name: draft.day_name,
+      week_number: draft.week_number,
+      position: draft.position,
+      active: draft.active,
+      exercises: draft.exercises
+        .filter((e) => e.name.trim())
+        .map((e, i) => ({
+          name: e.name.trim(),
+          video_url: e.video_url.trim(),
+          technique_notes: e.technique_notes,
+          order_index: i,
+          target_sets: e.target_sets,
+          target_reps: e.target_reps,
+          target_weight: e.target_weight,
+          unit: e.unit,
+        })),
     };
-    const res = await fetch('/api/entrenador/rutinas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    const res = await fetch("/api/coach/routine", {
+      method: draft.id ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
     const json = await res.json();
-    if (json.success) {
-      alert('Rutina creada');
-      setNuevaRutina('');
-      setEjercicios([{ nombre: '', unidad_peso: 'kg' }]);
-      await cargarRutinas(selected);
+    if (json.ok) {
+      setMsg({ type: "ok", text: draft.id ? "Rutina actualizada." : "Rutina creada." });
+      setDraft(emptyDraft());
+      await reloadDetail();
     } else {
-      alert(json.error || 'Error');
+      setMsg({ type: "err", text: json.error || "Error" });
     }
   };
 
-  const exportarExcel = (alumnoId?: string) => {
-    const q = new URLSearchParams({ password: 'nocito-entrenador-2026' });
-    if (alumnoId) q.set('alumno_id', alumnoId);
-    window.location.href = `/api/entrenador/export?${q.toString()}`;
+  const editRoutine = (r: any) => {
+    setDraft({
+      id: r.id,
+      name: r.name,
+      day_name: r.day_name,
+      week_number: String(r.week_number),
+      position: String(r.position),
+      active: r.active,
+      exercises: (r.exercises ?? [])
+        .sort((a: any, b: any) => a.order_index - b.order_index)
+        .map((e: any) => ({
+          name: e.name,
+          video_url: e.video_url ?? "",
+          technique_notes: e.technique_notes ?? "",
+          target_sets: e.target_sets != null ? String(e.target_sets) : "",
+          target_reps: e.target_reps != null ? String(e.target_reps) : "",
+          target_weight: e.target_weight != null ? String(e.target_weight) : "",
+          unit: e.unit ?? "kg",
+        })),
+    });
+    setTab("rutinas");
+    setMsg(null);
   };
 
-  if (!auth) {
+  const deleteRoutine = async (id: string) => {
+    if (!confirm("¿Eliminar esta rutina del día?")) return;
+    const res = await fetch(`/api/coach/routine?id=${id}`, { method: "DELETE" });
+    const json = await res.json();
+    if (json.ok) {
+      setMsg({ type: "ok", text: "Rutina eliminada." });
+      await reloadDetail();
+    } else {
+      setMsg({ type: "err", text: json.error || "Error" });
+    }
+  };
+
+  const createClient = async () => {
+    const res = await fetch("/api/coach/clients", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newClient),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setMsg({ type: "ok", text: "Cliente creado." });
+      setNewClient({ email: "", full_name: "", pin: "" });
+      await loadClients();
+    } else {
+      setMsg({ type: "err", text: json.error || "Error" });
+    }
+  };
+
+  const savePin = async () => {
+    if (!selectedId) return;
+    const res = await fetch("/api/coach/pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ client_id: selectedId, pin: pinFor }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setMsg({ type: "ok", text: "PIN actualizado." });
+      setPinFor("");
+      await loadClients();
+    } else {
+      setMsg({ type: "err", text: json.error || "Error" });
+    }
+  };
+
+  if (checking) {
     return (
-      <main className="section">
-        <div className="container" style={{ maxWidth: 420, margin: '60px auto' }}>
-          <h2>Panel Entrenador</h2>
-          <p style={{ color: 'var(--muted)', marginBottom: 20 }}>Acceso exclusivo para José</p>
-          <form onSubmit={login}>
-            <input type="password" placeholder="Contraseña" value={pass} onChange={(e) => setPass(e.target.value)} style={{ width: '100%', padding: 12, marginBottom: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)' }} />
-            <button className="btn btn-primary">Ingresar</button>
+      <main className="auth-wrap">
+        <p className="muted">Cargando…</p>
+      </main>
+    );
+  }
+
+  if (!coach) {
+    return (
+      <main className="auth-wrap">
+        <div className="auth-card card">
+          <p className="auth-logo">Nocito Coach</p>
+          <h1 style={{ margin: "0 0 4px", fontSize: "1.5rem" }}>Panel del coach</h1>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Acceso exclusivo de José.
+          </p>
+          <form onSubmit={login} style={{ display: "grid", gap: 14, marginTop: 16 }}>
+            <div>
+              <label className="lbl">Email</label>
+              <input
+                className="input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="lbl">PIN</label>
+              <input
+                className="input"
+                inputMode="numeric"
+                maxLength={4}
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                style={{ letterSpacing: "0.5em", textAlign: "center", fontSize: "1.3rem" }}
+                required
+              />
+            </div>
+            <button className="btn btn-primary" disabled={authLoading}>
+              {authLoading ? "Ingresando…" : "Ingresar"}
+            </button>
+            {authError && <div className="toast err">{authError}</div>}
           </form>
         </div>
       </main>
     );
   }
 
+  const selected = clients.find((c) => c.id === selectedId);
+
   return (
     <main className="section">
       <div className="container">
-        <h2>Panel de Control - José</h2>
-        <p style={{ color: 'var(--muted)' }}>Seguimiento y evolución de cargas por alumno</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,320px) 1fr', gap: 24, marginTop: 32 }}>
-          <aside style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 18, background: 'linear-gradient(180deg,#121212,#0D0D0D)', height: 'fit-content' }}>
-            <h4 style={{ marginBottom: 14 }}>Alumnos ({alumnos.length})</h4>
-            {loading && <p style={{ color: 'var(--muted)' }}>Cargando...</p>}
-            {alumnos.map((a) => (
-              <button key={a.id} onClick={() => verAlumno(a)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: 12, marginBottom: 8, background: selected?.id === a.id ? 'var(--orange)' : 'transparent', color: selected?.id === a.id ? '#000' : 'inherit', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', transition: '.2s' }}>
-                {a.nombre}
+        <div className="topbar">
+          <div>
+            <h1>Panel de {coach.full_name || "José"}</h1>
+            <span className="muted" style={{ fontSize: ".9rem" }}>
+              {clients.length} clientes
+            </span>
+          </div>
+          <button className="btn btn-outline" onClick={logout}>
+            Salir
+          </button>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(240px, 300px) 1fr",
+            gap: 22,
+            alignItems: "start",
+          }}
+        >
+          <aside className="card">
+            <h3 style={{ margin: "0 0 12px" }}>Clientes</h3>
+            {clients.length === 0 && <p className="muted">Sin clientes todavía.</p>}
+            {clients.map((c) => (
+              <button
+                key={c.id}
+                className={`list-item ${selectedId === c.id ? "active" : ""}`}
+                onClick={() => selectClient(c.id)}
+              >
+                <strong>{c.full_name || c.email}</strong>
+                <br />
+                <small>
+                  {c.email} · {c.has_pin ? "PIN ok" : "sin PIN"}
+                </small>
               </button>
             ))}
           </aside>
+
           <section>
-            {selected && (
-              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-                <button className={`btn ${tab === 'historial' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setTab('historial')}>Historial</button>
-                <button className={`btn ${tab === 'rutinas' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setTab('rutinas')}>Rutinas</button>
+            {!selected && (
+              <div className="card">
+                <p className="muted">Seleccioná un cliente para ver su actividad.</p>
               </div>
             )}
-            {tab === 'historial' && (
+
+            {selected && (
               <>
-                <h3 style={{ marginBottom: 8 }}>{selected ? `Historial: ${selected.nombre}` : 'Selecciona un alumno para ver su evolución'}</h3>
-                {selected && <p style={{ color: 'var(--muted)', marginBottom: 16 }}>{registros.length} registros</p>}
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
-                  <button className="btn btn-outline" onClick={() => exportarExcel()}>Exportar todos (.xlsx)</button>
-                  {selected && (
-                    <button className="btn btn-primary" onClick={() => exportarExcel(selected.id)}>Exportar {selected.nombre} (.xlsx)</button>
-                  )}
+                <div className="row-between" style={{ marginBottom: 16 }}>
+                  <h2 style={{ margin: 0, fontSize: "1.3rem" }}>
+                    {selected.full_name || selected.email}
+                  </h2>
+                  <div className="tabs" style={{ margin: 0 }}>
+                    {(["historial", "rutinas", "acceso"] as const).map((t) => (
+                      <button
+                        key={t}
+                        className={`chip ${tab === t ? "active" : ""}`}
+                        onClick={() => setTab(t)}
+                      >
+                        {t === "historial"
+                          ? "Historial"
+                          : t === "rutinas"
+                          ? "Rutinas"
+                          : "Acceso"}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
-                    <thead style={{ background: 'linear-gradient(180deg,#121212,#0D0D0D)' }}>
-                      <tr>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Fecha</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Ejercicio</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Series</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Reps</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Peso</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Fuente</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Notas</th>
-                        <th style={{ textAlign: 'left', padding: 12, fontSize: '.85rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.08em' }}>Audio</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {registros.map((r) => (
-                        <tr key={r.id} style={{ borderTop: '1px solid var(--border)' }}>
-                          <td style={{ padding: 12 }}>{r.fecha}</td>
-                          <td style={{ padding: 12 }}>{r.ejercicio}</td>
-                          <td style={{ padding: 12 }}>{r.series ?? '-'}</td>
-                          <td style={{ padding: 12 }}>{r.repeticiones ?? '-'}</td>
-                          <td style={{ padding: 12 }}>{r.peso_utilizado ? `${r.peso_utilizado} ${r.unidad_peso}` : '-'}</td>
-                          <td style={{ padding: 12 }}>{r.fuente === 'audio' ? 'Audio' : 'Manual'}</td>
-                          <td style={{ padding: 12, color: 'var(--muted)', maxWidth: 240, whiteSpace: 'pre-wrap' }}>{r.notas || '-'}</td>
-                          <td style={{ padding: 12 }}>
-                            {r.audio_url ? (
-                              <a href={r.audio_url} target="_blank" rel="noopener" className="link-internal">Escuchar</a>
-                            ) : (
-                              '-'
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-            {tab === 'rutinas' && selected && (
-              <div>
-                <h3 style={{ marginBottom: 8 }}>Rutinas - {selected.nombre}</h3>
-                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 18, background: 'linear-gradient(180deg,#121212,#0D0D0D)', marginBottom: 20 }}>
-                  <h4 style={{ marginBottom: 12 }}>Crear nueva rutina activa</h4>
-                  <input placeholder="Nombre de rutina (ej: Fuerza 3x)" value={nuevaRutina} onChange={(e) => setNuevaRutina(e.target.value)} style={{ width: '100%', padding: 10, marginBottom: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    {ejercicios.map((ex, idx) => (
-                      <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr repeat(4, 1fr)', gap: 8 }}>
-                        <input placeholder="Ejercicio" value={ex.nombre} onChange={(e) => { const arr = [...ejercicios]; arr[idx].nombre = e.target.value; setEjercicios(arr); }} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
-                        <input type="number" placeholder="Series" value={ex.series_default ?? ''} onChange={(e) => { const arr = [...ejercicios]; arr[idx].series_default = e.target.value ? Number(e.target.value) : null; setEjercicios(arr); }} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
-                        <input type="number" placeholder="Reps" value={ex.reps_default ?? ''} onChange={(e) => { const arr = [...ejercicios]; arr[idx].reps_default = e.target.value ? Number(e.target.value) : null; setEjercicios(arr); }} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
-                        <input type="number" step="0.1" placeholder="Peso" value={ex.peso_default ?? ''} onChange={(e) => { const arr = [...ejercicios]; arr[idx].peso_default = e.target.value ? Number(e.target.value) : null; setEjercicios(arr); }} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
-                        <select value={ex.unidad_peso} onChange={(e) => { const arr = [...ejercicios]; arr[idx].unidad_peso = e.target.value as 'kg'|'lbs'; setEjercicios(arr); }} style={{ padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
-                          <option value="kg">kg</option>
-                          <option value="lbs">lbs</option>
-                        </select>
+
+                {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+
+                {tab === "historial" && detail && (
+                  <div className="card" style={{ marginTop: 12 }}>
+                    <h3 style={{ marginTop: 0 }}>Series registradas</h3>
+                    <div className="scroll-x">
+                      <table className="data-table" style={{ minWidth: 640 }}>
+                        <thead>
+                          <tr>
+                            <th>Fecha</th>
+                            <th>Ejercicio</th>
+                            <th>Set</th>
+                            <th>Reps</th>
+                            <th>Peso</th>
+                            <th>Objetivo</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(detail.logs ?? []).map((l: any) => (
+                            <tr key={l.id}>
+                              <td>{l.log_date}</td>
+                              <td>{l.exercises?.name ?? "-"}</td>
+                              <td>{l.set_number}</td>
+                              <td>{l.actual_reps ?? "-"}</td>
+                              <td>{l.actual_weight ?? "-"}</td>
+                              <td className="muted">
+                                {l.target_reps ?? "-"} × {l.target_weight ?? "-"}
+                              </td>
+                            </tr>
+                          ))}
+                          {(detail.logs ?? []).length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="muted">
+                                Sin registros.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <h3 style={{ marginTop: 24 }}>Notas de voz</h3>
+                    {(detail.audio ?? []).length === 0 && (
+                      <p className="muted">Sin notas de voz.</p>
+                    )}
+                    {(detail.audio ?? []).map((a: any) => (
+                      <div
+                        key={a.id}
+                        className="row-between"
+                        style={{
+                          borderTop: "1px solid var(--border)",
+                          padding: "10px 0",
+                        }}
+                      >
+                        <span className="muted">
+                          {a.exercises?.name ?? "General"} ·{" "}
+                          {new Date(a.created_at).toLocaleString()}
+                        </span>
+                        <audio src={a.audio_storage_url} controls preload="none" />
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                    <button className="btn btn-outline" onClick={agregarEjercicio}>Agregar ejercicio</button>
-                    <button className="btn btn-primary" onClick={crearRutina}>Guardar rutina</button>
-                  </div>
-                </div>
-                <div>
-                  {rutinas.map(r => (
-                    <div key={r.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, marginBottom: 12 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <strong>{r.nombre}</strong>
-                        <span style={{ color: r.activa ? 'var(--orange)' : 'var(--muted)' }}>{r.activa ? 'ACTIVA' : 'Inactiva'}</span>
+                )}
+
+                {tab === "rutinas" && detail && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="card" style={{ marginBottom: 16 }}>
+                      <h3 style={{ marginTop: 0 }}>
+                        {draft.id ? "Editar rutina" : "Nueva rutina (día)"}
+                      </h3>
+                      <div className="grid-4" style={{ marginBottom: 12 }}>
+                        <div>
+                          <label className="lbl">Día</label>
+                          <input
+                            className="input"
+                            placeholder="Día 1 · Push"
+                            value={draft.day_name}
+                            onChange={(e) => setDraft({ ...draft, day_name: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="lbl">Semana</label>
+                          <input
+                            className="input"
+                            type="number"
+                            value={draft.week_number}
+                            onChange={(e) =>
+                              setDraft({ ...draft, week_number: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="lbl">Orden</label>
+                          <input
+                            className="input"
+                            type="number"
+                            value={draft.position}
+                            onChange={(e) => setDraft({ ...draft, position: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="lbl">Activa</label>
+                          <select
+                            className="input"
+                            value={draft.active ? "1" : "0"}
+                            onChange={(e) =>
+                              setDraft({ ...draft, active: e.target.value === "1" })
+                            }
+                          >
+                            <option value="1">Sí</option>
+                            <option value="0">No</option>
+                          </select>
+                        </div>
                       </div>
-                      {(r as any).ejercicios_asignados?.length > 0 && (
-                        <ul style={{ margin: 0, paddingLeft: 18 }}>
-                          {(r as any).ejercicios_asignados.map((e: any) => (
-                            <li key={e.id} style={{ color: 'var(--muted)' }}>
-                              {e.orden+1}. {e.nombre} {e.series_default ? `- ${e.series_default}x${e.reps_default || ''}` : ''} {e.peso_default ? `@${e.peso_default}${e.unidad_peso}` : ''}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
+
+                      {draft.exercises.map((ex, idx) => (
+                        <div
+                          key={idx}
+                          className="card"
+                          style={{ background: "var(--surface)", marginBottom: 10 }}
+                        >
+                          <div className="grid-4">
+                            <input
+                              className="input"
+                              placeholder="Ejercicio"
+                              value={ex.name}
+                              onChange={(e) => setEx(idx, { name: e.target.value })}
+                            />
+                            <input
+                              className="input"
+                              placeholder="URL de video (YouTube)"
+                              value={ex.video_url}
+                              onChange={(e) => setEx(idx, { video_url: e.target.value })}
+                            />
+                            <input
+                              className="input"
+                              placeholder="Series"
+                              inputMode="numeric"
+                              value={ex.target_sets}
+                              onChange={(e) => setEx(idx, { target_sets: e.target.value })}
+                            />
+                            <input
+                              className="input"
+                              placeholder="Reps"
+                              inputMode="numeric"
+                              value={ex.target_reps}
+                              onChange={(e) => setEx(idx, { target_reps: e.target.value })}
+                            />
+                          </div>
+                          <div className="grid-4" style={{ marginTop: 10 }}>
+                            <input
+                              className="input"
+                              placeholder="Peso objetivo"
+                              inputMode="decimal"
+                              value={ex.target_weight}
+                              onChange={(e) => setEx(idx, { target_weight: e.target.value })}
+                            />
+                            <select
+                              className="input"
+                              value={ex.unit}
+                              onChange={(e) =>
+                                setEx(idx, { unit: e.target.value as "kg" | "lbs" })
+                              }
+                            >
+                              <option value="kg">kg</option>
+                              <option value="lbs">lbs</option>
+                            </select>
+                            <input
+                              className="input"
+                              placeholder="Técnica (una indicación por línea)"
+                              value={ex.technique_notes}
+                              onChange={(e) => setEx(idx, { technique_notes: e.target.value })}
+                              style={{ gridColumn: "span 2" }}
+                            />
+                          </div>
+                          <div style={{ marginTop: 8 }}>
+                            <button
+                              className="btn btn-danger"
+                              type="button"
+                              onClick={() =>
+                                setDraft((d) => ({
+                                  ...d,
+                                  exercises: d.exercises.filter((_, i) => i !== idx),
+                                }))
+                              }
+                            >
+                              Quitar
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+                        <button
+                          className="btn btn-outline"
+                          onClick={() =>
+                            setDraft((d) => ({ ...d, exercises: [...d.exercises, emptyEx()] }))
+                          }
+                        >
+                          + Ejercicio
+                        </button>
+                        <button className="btn btn-primary" onClick={saveRoutine}>
+                          {draft.id ? "Guardar cambios" : "Crear rutina"}
+                        </button>
+                        {draft.id && (
+                          <button
+                            className="btn btn-outline"
+                            onClick={() => setDraft(emptyDraft())}
+                          >
+                            Cancelar
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+
+                    {(detail.routines ?? []).map((r: any) => (
+                      <div className="card" key={r.id} style={{ marginBottom: 12 }}>
+                        <div className="row-between">
+                          <div>
+                            <strong>{r.day_name || r.name}</strong>
+                            <div className="muted" style={{ fontSize: ".85rem" }}>
+                              Semana {r.week_number} · {(r.exercises ?? []).length} ejercicios ·{" "}
+                              {r.active ? "activa" : "inactiva"}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button className="btn btn-outline" onClick={() => editRoutine(r)}>
+                              Editar
+                            </button>
+                            <button
+                              className="btn btn-danger"
+                              onClick={() => deleteRoutine(r.id)}
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {tab === "acceso" && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="card" style={{ marginBottom: 16 }}>
+                      <h3 style={{ marginTop: 0 }}>PIN de {selected.full_name || selected.email}</h3>
+                      <p className="muted">
+                        {selected.has_pin ? "Tiene PIN asignado." : "Sin PIN asignado."}
+                      </p>
+                      <div className="grid-2">
+                        <input
+                          className="input"
+                          inputMode="numeric"
+                          maxLength={4}
+                          placeholder="Nuevo PIN (4 dígitos)"
+                          value={pinFor}
+                          onChange={(e) =>
+                            setPinFor(e.target.value.replace(/\D/g, "").slice(0, 4))
+                          }
+                        />
+                        <button className="btn btn-primary" onClick={savePin}>
+                          Actualizar PIN
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="card">
+                      <h3 style={{ marginTop: 0 }}>Nuevo cliente</h3>
+                      <div className="grid-3">
+                        <input
+                          className="input"
+                          placeholder="Email"
+                          value={newClient.email}
+                          onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
+                        />
+                        <input
+                          className="input"
+                          placeholder="Nombre completo"
+                          value={newClient.full_name}
+                          onChange={(e) =>
+                            setNewClient({ ...newClient, full_name: e.target.value })
+                          }
+                        />
+                        <input
+                          className="input"
+                          inputMode="numeric"
+                          maxLength={4}
+                          placeholder="PIN (4 dígitos)"
+                          value={newClient.pin}
+                          onChange={(e) =>
+                            setNewClient({
+                              ...newClient,
+                              pin: e.target.value.replace(/\D/g, "").slice(0, 4),
+                            })
+                          }
+                        />
+                      </div>
+                      <button
+                        className="btn btn-primary"
+                        style={{ marginTop: 12 }}
+                        onClick={createClient}
+                      >
+                        Crear cliente
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </section>
         </div>

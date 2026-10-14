@@ -2,6 +2,11 @@ import { getResend, getDestinationEmail, SENDER_EMAIL } from "./resend";
 import { generatePayload } from "./routine-gen";
 import { renderRoutineHtml, renderRoutineText } from "./routine";
 import { renderRoutinePdf } from "./routine-pdf";
+import {
+  provisionAlumno,
+  sendAlumnoAccessEmail,
+  isDeliverableEmail,
+} from "./alumnos";
 
 const TOKEN = process.env.MP_ACCESS_TOKEN || "";
 
@@ -57,5 +62,47 @@ export async function sendRoutineForPaymentId(paymentId: string | number) {
   if (result.error) {
     return { ok: false as const, error: `Resend: ${result.error.message}` };
   }
-  return { ok: true as const, id: result.data?.id };
+
+  const access = await deliverAccess(payment, payload.name);
+
+  return { ok: true as const, id: result.data?.id, access };
+}
+
+async function deliverAccess(
+  payment: Record<string, unknown>,
+  name: string
+): Promise<Record<string, unknown>> {
+  try {
+    const payer = (payment.payer ?? {}) as Record<string, unknown>;
+    const metadata = (payment.metadata ?? {}) as Record<string, unknown>;
+    const candidate =
+      (isDeliverableEmail(payer.email) && payer.email.toLowerCase()) ||
+      (isDeliverableEmail(metadata.contact) && metadata.contact.toLowerCase()) ||
+      "";
+    if (!candidate) return { provisioned: false, reason: "sin email" };
+
+    const prov = await provisionAlumno({ name, email: candidate });
+    if ('error' in prov) {
+      console.error("[access] provisionAlumno:", prov.error);
+      return { provisioned: false, reason: prov.error };
+    }
+
+    const mail = await sendAlumnoAccessEmail({
+      name,
+      email: prov.email,
+      token: prov.token,
+      existing: prov.existing,
+    });
+    if (!mail.ok) console.error("[access] email:", mail.error);
+
+    return {
+      provisioned: true,
+      existing: prov.existing,
+      emailed: mail.ok,
+      emailedTo: mail.to ?? null,
+    };
+  } catch (err: any) {
+    console.error("[access]", err);
+    return { provisioned: false, reason: err?.message || String(err) };
+  }
 }

@@ -431,6 +431,28 @@ export function buildNutrition(
   };
 }
 
+export function computeTdee(
+  sex: string,
+  weight: unknown,
+  height: unknown,
+  age: unknown,
+  days: unknown
+): number {
+  const w = Number(weight) || 0;
+  const h = Number(height) || 0;
+  const a = Number(age) || 0;
+  const d = Number(days) || 0;
+  const tmb =
+    sex === "Femenino"
+      ? 10 * w + 6.25 * h - 5 * a - 161
+      : 10 * w + 6.25 * h - 5 * a + 5;
+  let actFactor = 1.2;
+  if (d >= 5) actFactor = 1.725;
+  else if (d >= 3) actFactor = 1.55;
+  else if (d > 0) actFactor = 1.375;
+  return Math.round(tmb * actFactor);
+}
+
 export function generatePayload(meta: Meta): ClientPayload | null {
   const name = metaString(meta, "name", "name");
   if (!name) return null;

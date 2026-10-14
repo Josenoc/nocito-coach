@@ -1,3 +1,21 @@
+import type { NutritionData } from '@/app/lib/routine';
+
+export interface PerfilAlumno {
+  sexo: string;
+  edad: number;
+  altura: number;
+  peso: number;
+  objetivo: string;
+  objetivoLabel?: string;
+  experiencia: string;
+  experienciaLabel?: string;
+  dias: number;
+  preferencias: string[];
+  tdee?: number;
+  macros?: NutritionData;
+  actualizado?: string;
+}
+
 export interface Alumno {
   id: string;
   nombre: string;
@@ -5,6 +23,7 @@ export interface Alumno {
   token_acceso: string;
   activo: boolean;
   created_at: string;
+  perfil?: PerfilAlumno | null;
 }
 
 export interface Rutina {
