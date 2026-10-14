@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Token inválido' }, { status: 400 });
     }
 
-    const { data, error } = await getSupabase()
+    const { data, error } = await getSupabaseAdmin()
       .from('alumnos')
       .select('*')
       .eq('token_acceso', token)

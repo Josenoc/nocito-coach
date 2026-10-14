@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await getSupabase()
+    const { data, error } = await getSupabaseAdmin()
       .from('alumnos')
       .select('*')
       .eq('activo', true)
