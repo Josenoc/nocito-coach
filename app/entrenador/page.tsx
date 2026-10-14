@@ -84,6 +84,12 @@ export default function EntrenadorPage() {
     }
   };
 
+  const exportarExcel = (alumnoId?: string) => {
+    const q = new URLSearchParams({ password: 'nocito-entrenador-2026' });
+    if (alumnoId) q.set('alumno_id', alumnoId);
+    window.location.href = `/api/entrenador/export?${q.toString()}`;
+  };
+
   if (!auth) {
     return (
       <main className="section">
@@ -125,6 +131,12 @@ export default function EntrenadorPage() {
               <>
                 <h3 style={{ marginBottom: 8 }}>{selected ? `Historial: ${selected.nombre}` : 'Selecciona un alumno para ver su evolución'}</h3>
                 {selected && <p style={{ color: 'var(--muted)', marginBottom: 16 }}>{registros.length} registros</p>}
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+                  <button className="btn btn-outline" onClick={() => exportarExcel()}>Exportar todos (.xlsx)</button>
+                  {selected && (
+                    <button className="btn btn-primary" onClick={() => exportarExcel(selected.id)}>Exportar {selected.nombre} (.xlsx)</button>
+                  )}
+                </div>
                 <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
                     <thead style={{ background: 'linear-gradient(180deg,#121212,#0D0D0D)' }}>
