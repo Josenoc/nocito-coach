@@ -532,32 +532,6 @@
     .footer-app:hover { background: var(--orange); color: #0A0A0A; }
     .footer-app svg { width: 15px; height: 15px; }
 
-    /* ---------- Registro Diario: destacado amarillo + grabar audio ---------- */
-    a.nav-highlight {
-      background: var(--orange) !important; color: #0A0A0A !important;
-      font-weight: 800; padding: 7px 14px !important; border-radius: 6px; border-bottom: 0 !important;
-    }
-    a.nav-highlight::after { display: none !important; }
-    a.nav-highlight:hover { background: var(--orange-soft) !important; color: #0A0A0A !important; }
-    .bit-head { margin: 4px 0 18px; }
-    .btn-record {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: var(--orange); color: #0A0A0A; font-weight: 800;
-      letter-spacing: .08em; text-transform: uppercase; font-size: .86rem;
-      padding: 14px 26px; border-radius: 8px; border: 0; cursor: pointer;
-      transition: transform .15s, box-shadow .2s, background .2s;
-    }
-    .btn-record::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: #0A0A0A; }
-    .btn-record:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(255,196,0,.35); }
-    .btn-record.recording { background: var(--danger); color: #fff; }
-    .btn-record.recording::before { background: #fff; animation: bitPulse 1s ease-in-out infinite; }
-    @keyframes bitPulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
-    .bit-audio { display: none; margin-top: 14px; }
-    .bit-audio.show { display: block; }
-    .bit-audio audio { width: min(420px, 100%); display: block; margin-bottom: 8px; }
-    .bit-audio-hint { font-size: .85rem; color: var(--muted); }
-    .bit-audio-hint a { color: var(--orange); font-weight: 700; cursor: pointer; }
-
     .hero { padding: clamp(70px, 9vw, 120px) 0 clamp(80px, 11vw, 150px); }
     .hero::before {
       background:
@@ -864,7 +838,6 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
-        <a href="#bitacora" class="nav-highlight">Registro Diario</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-app" href="/app">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -880,7 +853,6 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
-        <a href="#bitacora" class="nav-highlight">Registro Diario</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-cta" href="#evaluacion" style="display:inline-block;margin-top:14px;">Comencemos</a>
         <a class="nav-app" href="/app" style="display:inline-flex;margin-top:10px;">
@@ -1276,139 +1248,10 @@
       </div>
     </section>
 
-      <!-- ============ REGISTRO DIARIO DE ENTRENAMIENTO ============ -->
-      <section class="section" id="bitacora" data-index="05" >
-        <div class="container reveal">
-          <span class="section-label"><span class="sec-num">05</span> Registro Diario</span>
-          <h2 class="section-title">Registro Diario de Entrenamiento</h2>
-          <div class="bit-head">
-            <button type="button" id="bit_grabar" class="btn-record">GRABAR AUDIO</button>
-            <div class="bit-audio" id="bit_audio_wrap">
-              <audio id="bit_audio" controls></audio>
-              <div class="bit-audio-hint">Audio grabado. <a id="bit_audio_dl" download="registro-diario-entrenamiento.webm">Descargalo</a> y adjuntalo en el chat de WhatsApp.</div>
-            </div>
-          </div>
-          <p class="section-sub">Completá tus cargas, series y sensaciones sesión por sesión para mantener el control de tu progreso.</p>
-
-          <form id="bitacoraForm" class="form-card" novalidate style="margin-top:24px;">
-            <h3>Datos generales</h3>
-            <div class="bit-grid" style="margin-top:12px;">
-              <div class="field">
-                <label for="bit_nombre">Nombre y Apellido <span>*</span></label>
-                <input type="text" id="bit_nombre" placeholder="Ej: Martín Gómez" autocomplete="name">
-              </div>
-              <div class="field">
-                <label for="bit_dia">Día de la semana <span>*</span></label>
-                <select id="bit_dia">
-                  <option value="">Seleccionar...</option>
-                  <option value="Lunes">Lunes</option>
-                  <option value="Martes">Martes</option>
-                  <option value="Miércoles">Miércoles</option>
-                  <option value="Jueves">Jueves</option>
-                  <option value="Viernes">Viernes</option>
-                  <option value="Sábado">Sábado</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="bit_rutina">Grupo Muscular o Nombre de la Rutina <span>*</span></label>
-                <input type="text" id="bit_rutina" placeholder="Ej: Pecho + Tríceps / Fuerza 3x">
-              </div>
-            </div>
-
-            <h3 style="margin-top:28px;">Ejercicios</h3>
-            <p>Completar serie 1–4 en formato Peso x Reps (ej: 80x10). RPE 1–10.</p>
-            <div id="bit_ejercicios" style="display:grid; gap:14px; margin-top:14px;">
-              <div class="bit-ej-card" style="border:1px solid var(--border); border-radius:8px; padding:14px; background:linear-gradient(180deg,#121212,#0D0D0D);">
-                <div class="field">
-                  <label>Ejercicio</label>
-                  <input type="text" class="bit_ej_nombre" placeholder="Ej: Sentadillas">
-                </div>
-                <div class="row-4" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:10px;">
-                  <div class="field">
-                    <label>Serie 1</label>
-                    <input type="text" class="bit_s1" placeholder="80x10">
-                  </div>
-                  <div class="field">
-                    <label>Serie 2</label>
-                    <input type="text" class="bit_s2" placeholder="80x8">
-                  </div>
-                  <div class="field">
-                    <label>Serie 3</label>
-                    <input type="text" class="bit_s3" placeholder="75x8">
-                  </div>
-                  <div class="field">
-                    <label>Serie 4</label>
-                    <input type="text" class="bit_s4" placeholder="70x8">
-                  </div>
-                </div>
-                <div class="field" style="margin-top:10px; max-width:240px;">
-                  <label>RPE (1–10)</label>
-                  <input type="number" min="1" max="10" class="bit_rpe" placeholder="8">
-                </div>
-              </div>
-            </div>
-            <button type="button" class="btn btn-outline" id="bit_agregar" style="margin-top:12px;">Agregar ejercicio</button>
-
-            <h3 style="margin-top:28px;">Estado y sensaciones</h3>
-            <div class="bit-grid" style="margin-top:12px;">
-              <div class="field">
-                <label for="bit_sensacion">Sensación general del cliente</label>
-                <select id="bit_sensacion">
-                  <option value="">Seleccionar...</option>
-                  <option value="Excelente">Excelente</option>
-                  <option value="Buena">Buena</option>
-                  <option value="Regular">Regular</option>
-                  <option value="Mala">Mala</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="bit_energia">Nivel de energía</label>
-                <select id="bit_energia">
-                  <option value="">Seleccionar...</option>
-                  <option value="Alto">Alto</option>
-                  <option value="Normal">Normal</option>
-                  <option value="Bajo">Bajo</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="bit_sueno">Horas de sueño</label>
-                <input type="text" id="bit_sueno" placeholder="Ej: 7h 30m / 8">
-              </div>
-              <div class="field">
-                <label for="bit_preentreno">¿Comió pre-entreno?</label>
-                <select id="bit_preentreno">
-                  <option value="">Seleccionar...</option>
-                  <option value="Sí">Sí</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="bit_molestias">¿Molestias físicas o dolor?</label>
-                <select id="bit_molestias">
-                  <option value="">Seleccionar...</option>
-                  <option value="No">No</option>
-                  <option value="Sí">Sí</option>
-                </select>
-              </div>
-              <div class="field" id="bit_molestias_det_wrap" style="display:none;">
-                <label for="bit_molestias_det">¿Dónde?</label>
-                <input type="text" id="bit_molestias_det" placeholder="Ej: Lumbar, hombro derecho">
-              </div>
-              <div class="field" style="grid-column:1 / -1;">
-                <label for="bit_obs">Observaciones generales de la sesión</label>
-                <textarea id="bit_obs" rows="4" placeholder="Notas, sensaciones, fatiga, etc."></textarea>
-              </div>
-            </div>
-
-            <button type="button" class="btn btn-primary" id="bit_enviar" style="margin-top:18px;">Enviar reporte diario a José</button>
-          </form>
-        </div>
-      </section>
-
       <!-- ============ PREGUNTAS FRECUENTES ============ -->
-      <section class="section" id="faq" data-index="06" >
+      <section class="section" id="faq" data-index="05" >
         <div class="container reveal">
-          <span class="section-label"><span class="sec-num">06</span> Preguntas frecuentes</span>
+          <span class="section-label"><span class="sec-num">05</span> Preguntas frecuentes</span>
           <h2 class="section-title">Resolvamos tus <span class="grad-text">dudas</span></h2>
           <p class="section-sub">Respuestas rápidas a las consultas más comunes antes de empezar.</p>
 
@@ -2238,133 +2081,6 @@
           var hit = e.target.closest("a, button, input, select, textarea, .pill, .day-pill");
           ring.classList.toggle("grow", !!hit);
         }, { passive: true });
-      }
-    })();
-  </script>
-
-  <script>
-    (function () {
-      "use strict";
-      var ejerciciosContainer = document.getElementById("bit_ejercicios");
-      var agregarBtn = document.getElementById("bit_agregar");
-      var enviarBtn = document.getElementById("bit_enviar");
-      var molSelect = document.getElementById("bit_molestias");
-      var molWrap = document.getElementById("bit_molestias_det_wrap");
-
-      if (agregarBtn && ejerciciosContainer) {
-        agregarBtn.addEventListener("click", function () {
-          var card = document.createElement("div");
-          card.className = "bit-ej-card";
-          card.style.cssText = "border:1px solid var(--border); border-radius:8px; padding:14px; background:linear-gradient(180deg,#121212,#0D0D0D);";
-          card.innerHTML = '<div class="field"><label>Ejercicio</label><input type="text" class="bit_ej_nombre" placeholder="Ej: Press Banca"></div><div class="row-4" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:10px;"><div class="field"><label>Serie 1</label><input type="text" class="bit_s1" placeholder="80x10"></div><div class="field"><label>Serie 2</label><input type="text" class="bit_s2" placeholder="80x8"></div><div class="field"><label>Serie 3</label><input type="text" class="bit_s3" placeholder="75x8"></div><div class="field"><label>Serie 4</label><input type="text" class="bit_s4" placeholder="70x8"></div></div><div class="field" style="margin-top:10px; max-width:240px;"><label>RPE (1\u201310)</label><input type="number" min="1" max="10" class="bit_rpe" placeholder="8"></div><button type="button" class="btn btn-outline" style="margin-top:10px; padding:8px 14px; font-size:.85rem;" onclick="this.parentElement.remove()">Eliminar</button>';
-          ejerciciosContainer.appendChild(card);
-        });
-      }
-
-      if (molSelect && molWrap) {
-        molSelect.addEventListener("change", function () {
-          molWrap.style.display = (molSelect.value === "S\u00ed") ? "block" : "none";
-        });
-      }
-
-      if (enviarBtn) {
-        enviarBtn.addEventListener("click", function () {
-          var val = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
-          var nombre = val("bit_nombre");
-          var dia = val("bit_dia");
-          var rutina = val("bit_rutina");
-          var sensacion = val("bit_sensacion");
-          var energia = val("bit_energia");
-          var sueno = val("bit_sueno");
-          var preentreno = val("bit_preentreno");
-          var molestias = val("bit_molestias");
-          var molestiasDet = val("bit_molestias_det");
-          var obs = val("bit_obs");
-
-          var mensaje = "Hola Jos\u00e9, ac\u00e1 te env\u00edo mi *BIT\u00c1CORA DE ENTRENAMIENTO DIARIO*:\n\n";
-          mensaje += "*Datos Generales*\n";
-          mensaje += "\u2022 Nombre y Apellido: " + nombre + "\n";
-          mensaje += "\u2022 D\u00eda de la semana: " + dia + "\n";
-          mensaje += "\u2022 Grupo Muscular / Rutina: " + rutina + "\n\n";
-          mensaje += "*Ejercicios*\n";
-
-          var cards = document.querySelectorAll(".bit-ej-card");
-          if (cards.length === 0) {
-            mensaje += "- Sin ejercicios cargados\n\n";
-          } else {
-            for (var i = 0; i < cards.length; i++) {
-              var c = cards[i];
-              var get = function (sel) { var el = c.querySelector(sel); return el ? el.value.trim() : ""; };
-              var ej = get(".bit_ej_nombre") || "-";
-              var s1 = get(".bit_s1") || "-";
-              var s2 = get(".bit_s2") || "-";
-              var s3 = get(".bit_s3") || "-";
-              var s4 = get(".bit_s4") || "-";
-              var rpe = get(".bit_rpe") || "-";
-              mensaje += (i + 1) + ". *" + ej + "*\n";
-              mensaje += "   Serie 1: " + s1 + " | Serie 2: " + s2 + " | Serie 3: " + s3 + " | Serie 4: " + s4 + "\n";
-              mensaje += "   RPE: " + rpe + "/10\n\n";
-            }
-          }
-
-          mensaje += "*Estado y Sensaciones*\n";
-          mensaje += "\u2022 Sensaci\u00f3n general: " + (sensacion || "-") + "\n";
-          mensaje += "\u2022 Nivel de energ\u00eda: " + (energia || "-") + "\n";
-          mensaje += "\u2022 Horas de sue\u00f1o: " + (sueno || "-") + "\n";
-          mensaje += "\u2022 Comi\u00f3 pre-entreno: " + (preentreno || "-") + "\n";
-          mensaje += "\u2022 Molestias f\u00edsicas/dolor: " + (molestias || "-") + (molestias === "S\u00ed" && molestiasDet ? " (" + molestiasDet + ")" : "") + "\n";
-          mensaje += "\u2022 Observaciones: " + (obs || "-") + "\n";
-
-          var url = "https://wa.me/5492616224718?text=" + encodeURIComponent(mensaje);
-          window.open(url, "_blank", "noopener");
-        });
-      }
-
-      var grabarBtn = document.getElementById("bit_grabar");
-      var audioWrap = document.getElementById("bit_audio_wrap");
-      var audioEl = document.getElementById("bit_audio");
-      var audioDl = document.getElementById("bit_audio_dl");
-
-      if (grabarBtn && navigator.mediaDevices && window.MediaRecorder) {
-        var mediaRecorder = null;
-        var chunks = [];
-        var stream = null;
-
-        grabarBtn.addEventListener("click", function () {
-          if (mediaRecorder && mediaRecorder.state === "recording") {
-            mediaRecorder.stop();
-            return;
-          }
-          navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
-            stream = s;
-            chunks = [];
-            var mime = (window.MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported("audio/webm")) ? "audio/webm" : "";
-            mediaRecorder = mime ? new MediaRecorder(s, { mimeType: mime }) : new MediaRecorder(s);
-            mediaRecorder.ondataavailable = function (e) { if (e.data && e.data.size > 0) { chunks.push(e.data); } };
-            mediaRecorder.onstop = function () {
-              var blob = new Blob(chunks, { type: mime || "audio/webm" });
-              var blobUrl = URL.createObjectURL(blob);
-              if (audioEl) { audioEl.src = blobUrl; }
-              if (audioDl) {
-                audioDl.href = blobUrl;
-                audioDl.download = "registro-diario-" + new Date().toISOString().slice(0, 10) + ".webm";
-              }
-              if (audioWrap) { audioWrap.classList.add("show"); }
-              if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
-              grabarBtn.classList.remove("recording");
-              grabarBtn.textContent = "GRABAR AUDIO";
-            };
-            mediaRecorder.start();
-            grabarBtn.classList.add("recording");
-            grabarBtn.textContent = "DETENER GRABACIÓN";
-          }).catch(function () {
-            alert("No se pudo acceder al micr\u00f3fono. Revis\u00e1 los permisos del navegador.");
-          });
-        });
-      } else if (grabarBtn) {
-        grabarBtn.addEventListener("click", function () {
-          alert("Tu navegador no permite grabar audio. Us\u00e1 un navegador actualizado.");
-        });
       }
     })();
   </script>
