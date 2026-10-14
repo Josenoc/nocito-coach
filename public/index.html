@@ -580,10 +580,11 @@
     .hero-motivation {
       position: relative; z-index: 2;
       background: var(--surface); border: 1px solid var(--orange);
-      max-width: 440px; margin: 0 auto;
-      padding: 30px 32px;
+      max-width: 500px; margin: 0 auto;
+      padding: 26px 28px;
       transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease, border-color .28s ease;
     }
+    .hero-motivation-photo { display: block; width: 100%; height: auto; border-radius: 2px; margin-bottom: 22px; }
     .hero-motivation:hover {
       transform: perspective(900px) translate3d(0,-10px,14px);
       border-color: var(--orange-soft);
@@ -886,7 +887,7 @@
       <div class="container hero-grid">
         <div>
           <span class="badge-hero">Entrenamiento + Nutrición personalizada</span>
-          <h1><span>Transforma tu</span><span>cuerpo con</span><span class="grad-text">ciencia real</span><span class="grad-text">y experiencia</span></h1>
+          <h1><span>Dejá de improvisar,</span><span>construí un cuerpo</span><span class="grad-text">fuerte y sostenible</span><span class="grad-text">en el tiempo</span></h1>
           <p class="lead">
             Hola, soy José. 👋 Antes de ayudarte a potenciar tu desarrollo, quiero contarte algo: mi mayor valor no es solo enseñarte a entrenar, sino mostrarte de qué sos capaz.
             <br><br>
@@ -902,7 +903,7 @@
 
         <div class="hero-side">
           <div class="hero-motivation reveal">
-            <p>¿Empezaste el gimnasio y tuviste que dejarlo?, ¿Poco tiempo destinado a tu físico?. Se lo difícil que es mantener la constancia. Si dejaste de entrenar por el trabajo y las obligaciones cotidianas, es momento de cambiar la estrategia. Te ayudo a construir un plan sostenible y adaptable a tu disponibilidad horaria.</p>
+            <img class="hero-motivation-photo" src="img/hero-nocito.jpeg" alt="José Nocito entrenando">
             <p class="hero-motivation-cta">Contactame hoy por WhatsApp o correo para coordinar tu plan</p>
             <div class="hero-contact-btns">
               <a class="btn btn-primary btn-icon" id="heroWhatsApp" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
