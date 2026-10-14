@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
   }
   const alumnoId = searchParams.get("alumno_id");
 
-  const supabase = getSupabaseAdmin();
+  try {
+    const supabase = getSupabaseAdmin();
 
   let alumnosQuery = supabase.from("alumnos").select("id, nombre, email").order("nombre", { ascending: true });
   if (alumnoId) alumnosQuery = alumnosQuery.eq("id", alumnoId);
@@ -147,4 +148,8 @@ export async function GET(req: NextRequest) {
       "Cache-Control": "no-store",
     },
   });
+  } catch (e) {
+    console.error("export error", e);
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
 }
