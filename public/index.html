@@ -520,7 +520,7 @@
     }
     .nav-cta:hover { background: var(--orange); color: #0A0A0A; box-shadow: none; transform: none; }
 
-    /* ---------- Bitácora: destacado amarillo + grabar audio ---------- */
+    /* ---------- Registro Diario: destacado amarillo + grabar audio ---------- */
     a.nav-highlight {
       background: var(--orange) !important; color: #0A0A0A !important;
       font-weight: 800; padding: 7px 14px !important; border-radius: 6px; border-bottom: 0 !important;
@@ -852,7 +852,7 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
-        <a href="#bitacora" class="nav-highlight">Bitácora</a>
+        <a href="#bitacora" class="nav-highlight">Registro Diario</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-cta" href="#evaluacion">Comencemos</a>
         </nav>
@@ -864,7 +864,7 @@
         <a href="#inicio">Sobre mí</a>
         <a href="#evaluacion">Ingresar datos</a>
         <a href="#planes">Planes y precios</a>
-        <a href="#bitacora" class="nav-highlight">Bitácora</a>
+        <a href="#bitacora" class="nav-highlight">Registro Diario</a>
         <a href="#contacto">Contacto</a>
         <a class="nav-cta" href="#evaluacion" style="display:inline-block;margin-top:14px;">Comencemos</a>
     </div>
@@ -1193,6 +1193,30 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
               <p class="testi-name">Diego A.</p>
             </div>
           </article>
+
+          <article class="testi-card reveal reveal-d3">
+            <div>
+              <p class="testi-goal">Objetivo: recomposición corporal</p>
+              <p class="testi-quote">Pensaba que después de los 40 ya no había margen. Con la planificación de José y los ajustes semanales bajé grasa y gané tono, sin resignar las comidas que disfruto.</p>
+              <p class="testi-name">Montserrat M.</p>
+            </div>
+          </article>
+
+          <article class="testi-card reveal">
+            <div>
+              <p class="testi-goal">Objetivo: aumento de masa magra</p>
+              <p class="testi-quote">Entrenaba desde hacía años pero el peso no subía. Al ordenar la progresión y la alimentación sumé masa muscular real en pocos meses, sin perder definición.</p>
+              <p class="testi-name">Ivan A.</p>
+            </div>
+          </article>
+
+          <article class="testi-card reveal reveal-d1">
+            <div>
+              <p class="testi-goal">Objetivo: empezar desde cero</p>
+              <p class="testi-quote">Nunca había pisado un gimnasio. Empecé con ejercicios simples y bien explicados, y en pocas semanas entrenaba con seguridad y veía los primeros cambios.</p>
+              <p class="testi-name">Felipe S.</p>
+            </div>
+          </article>
         </div>
 
         <p class="testi-cta">¿Querés ser el próximo caso de éxito? <a class="link-internal" href="#contacto">Contactame hoy</a></p>
@@ -1241,16 +1265,16 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
       </div>
     </section>
 
-      <!-- ============ BITÁCORA / REGISTRO DE ENTRENAMIENTO ============ -->
+      <!-- ============ REGISTRO DIARIO DE ENTRENAMIENTO ============ -->
       <section class="section" id="bitacora" data-index="05" >
         <div class="container reveal">
-          <span class="section-label"><span class="sec-num">05</span> Bitácora</span>
-          <h2 class="section-title">Bitácora de Entrenamiento Diario</h2>
+          <span class="section-label"><span class="sec-num">05</span> Registro Diario</span>
+          <h2 class="section-title">Registro Diario de Entrenamiento</h2>
           <div class="bit-head">
             <button type="button" id="bit_grabar" class="btn-record">GRABAR AUDIO</button>
             <div class="bit-audio" id="bit_audio_wrap">
               <audio id="bit_audio" controls></audio>
-              <div class="bit-audio-hint">Audio grabado. <a id="bit_audio_dl" download="bitacora-entrenamiento.webm">Descargalo</a> y adjuntalo en el chat de WhatsApp.</div>
+              <div class="bit-audio-hint">Audio grabado. <a id="bit_audio_dl" download="registro-diario-entrenamiento.webm">Descargalo</a> y adjuntalo en el chat de WhatsApp.</div>
             </div>
           </div>
           <p class="section-sub">Completá tus cargas, series y sensaciones sesión por sesión para mantener el control de tu progreso.</p>
@@ -2308,7 +2332,7 @@ Una vez que confirmes el pago, José te envía tu rutina y tu pauta nutricional 
               if (audioEl) { audioEl.src = blobUrl; }
               if (audioDl) {
                 audioDl.href = blobUrl;
-                audioDl.download = "bitacora-" + new Date().toISOString().slice(0, 10) + ".webm";
+                audioDl.download = "registro-diario-" + new Date().toISOString().slice(0, 10) + ".webm";
               }
               if (audioWrap) { audioWrap.classList.add("show"); }
               if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }

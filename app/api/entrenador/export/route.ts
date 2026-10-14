@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
   wb.creator = "nocito.coach";
   wb.created = new Date();
 
-  const ws = wb.addWorksheet("Bitácora");
+  const ws = wb.addWorksheet("REGISTRO DIARIO");
   ws.columns = [
     { header: "Alumno", key: "alumno", width: 22 },
     { header: "Email", key: "email", width: 26 },
@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
 
   const buffer = await wb.xlsx.writeBuffer();
   const etiqueta = alumnoId ? slug(infoPorId.get(alumnoId)?.nombre || "alumno") : "todos";
-  const fileName = `bitacora-${etiqueta}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  const fileName = `registro-diario-${etiqueta}-${new Date().toISOString().slice(0, 10)}.xlsx`;
 
   return new NextResponse(Buffer.from(buffer as ArrayBuffer), {
     status: 200,
