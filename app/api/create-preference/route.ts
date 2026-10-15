@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 function emailFromContact(contact: unknown): string {
   const c = typeof contact === "string" ? contact.trim() : "";
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)) return c;
-  return "comprador@example.com";
+  return "";
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -112,10 +112,9 @@ export async function POST(req: Request) {
             unit_price: plan.price,
           },
         ],
-        payer: {
-          name: name,
-          email: emailFromContact(contact),
-        },
+        ...(emailFromContact(contact)
+          ? { payer: { name: name, email: emailFromContact(contact) } }
+          : {}),
         back_urls: {
           success: `${base}/exito?name=${encodeURIComponent(name)}`,
           pending: `${base}/exito?name=${encodeURIComponent(name)}&status=pending`,

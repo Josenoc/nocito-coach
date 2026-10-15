@@ -6,7 +6,7 @@ export type Plan = {
 };
 
 export const PLANS: Plan[] = [
-  { key: "rutnut", name: "Rut&Nut", price: 4999, months: 1 },
+  { key: "rutnut", name: "Rut&Nut", price: 50, months: 1 },
   {
     key: "habito",
     name: "Plan Hábito & Resultados (3 Meses)",
