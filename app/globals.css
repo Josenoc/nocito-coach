@@ -246,7 +246,7 @@ h1, h2, h3, h4 {
 }
 @media (max-width: 640px) {
   .section { padding: 20px 14px 64px; }
-  .exercise-card { padding: 16px; }
+  .exercise-card { padding: 18px; }
   .exercise-name { font-size: 1.12rem; word-break: break-word; }
   .track-head { flex-wrap: wrap; }
   .track-table th { padding: 6px 4px; font-size: 0.76rem; }
@@ -259,12 +259,13 @@ h1, h2, h3, h4 {
 .exercise-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--bg-2));
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 196, 0, 0.4);
   border-radius: var(--radius);
   padding: 20px;
   overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 196, 0, 0.06), 0 10px 26px rgba(0, 0, 0, 0.28);
 }
-.exercise-card + .exercise-card { margin-top: 18px; }
+.exercise-card + .exercise-card { margin-top: 22px; }
 .exercise-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .exercise-name { font-size: 1.22rem; margin: 0; }
 .ex-badge {
