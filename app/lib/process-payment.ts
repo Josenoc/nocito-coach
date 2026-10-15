@@ -4,6 +4,7 @@ import { renderRoutineHtml, renderRoutineText } from "./routine";
 import { renderRoutinePdf } from "./routine-pdf";
 import {
   provisionAlumno,
+  provisionProfile,
   sendAlumnoAccessEmail,
   isDeliverableEmail,
 } from "./alumnos";
@@ -87,17 +88,23 @@ async function deliverAccess(
       return { provisioned: false, reason: prov.error };
     }
 
+    const prof = await provisionProfile({ name, email: prov.email });
+    if ('error' in prof) {
+      console.error("[access] provisionProfile:", prof.error);
+      return { provisioned: false, reason: prof.error };
+    }
+
     const mail = await sendAlumnoAccessEmail({
       name,
       email: prov.email,
-      token: prov.token,
-      existing: prov.existing,
+      pin: prof.pin,
+      existing: prof.existing || prov.existing,
     });
     if (!mail.ok) console.error("[access] email:", mail.error);
 
     return {
       provisioned: true,
-      existing: prov.existing,
+      existing: prof.existing || prov.existing,
       emailed: mail.ok,
       emailedTo: mail.to ?? null,
     };

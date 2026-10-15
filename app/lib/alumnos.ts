@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase-server";
+import { hashPin } from "@/lib/auth";
 import { getResend, getDestinationEmail, SENDER_EMAIL } from "./resend";
 import { siteBaseUrl } from "./mp";
 
@@ -73,7 +74,53 @@ export async function provisionAlumno(input: {
   return { ok: false, error: "no se pudo generar un token único" };
 }
 
-function accessEmailHtml(name: string, token: string, base: string): string {
+function generatePin(): string {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
+export type ProfileProvision =
+  | { ok: true; pin: string; existing: boolean }
+  | { ok: false; error: string };
+
+export async function provisionProfile(input: {
+  name: string;
+  email: string;
+}): Promise<ProfileProvision> {
+  const email = input.email.trim().toLowerCase();
+  const nombre = input.name.trim() || "Alumno";
+  if (!isDeliverableEmail(email)) {
+    return { ok: false, error: "email no válido" };
+  }
+
+  let supabase;
+  try {
+    supabase = getSupabaseAdmin();
+  } catch (err: any) {
+    return { ok: false, error: err?.message || "Supabase no configurado" };
+  }
+
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  const pin = generatePin();
+  const { error } = await supabase.from("profiles").upsert(
+    {
+      email,
+      role: "client",
+      full_name: nombre,
+      pin_hash: hashPin(pin),
+      activo: true,
+    },
+    { onConflict: "email" }
+  );
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, pin, existing: Boolean(existing) };
+}
+
+function accessEmailHtml(name: string, email: string, pin: string, base: string): string {
   const link = `${base}/app`;
   return [
     `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;">`,
@@ -83,43 +130,45 @@ function accessEmailHtml(name: string, token: string, base: string): string {
     `</div>`,
     `<div style="background:#fff;padding:28px;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;">`,
     `<p style="margin:0 0 16px;color:#222;font-size:15px;">Hola ${name},</p>`,
-    `<p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.6;">Ya podés entrar a tu panel privado para cargar tu progreso y completar tu perfil (peso, edad, altura y preferencias) para calcular tu plan nutricional. Este es tu token de acceso:</p>`,
-    `<p style="margin:0 0 16px;"><span style="display:inline-block;background:#111;color:#FFC400;font-size:20px;font-weight:700;letter-spacing:2px;padding:12px 22px;border-radius:8px;">${token}</span></p>`,
+    `<p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.6;">Ya podés entrar a tu panel privado para ver tu rutina, cargar tu progreso y completar tu perfil (peso, edad, altura y preferencias) para tu plan nutricional.</p>`,
+    `<p style="margin:0 0 8px;color:#444;font-size:14px;">Tu email de acceso es <strong>${email}</strong> y tu PIN es:</p>`,
+    `<p style="margin:0 0 16px;"><span style="display:inline-block;background:#111;color:#FFC400;font-size:24px;font-weight:700;letter-spacing:6px;padding:12px 22px;border-radius:8px;">${pin}</span></p>`,
     `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Entrar a mi panel</a></p>`,
-    `<p style="margin:0;color:#888;font-size:12px;">Guardá este email: podés volver cuando quieras e ingresar con ese token.</p>`,
+    `<p style="margin:0;color:#888;font-size:12px;">Guardá este email: podés volver cuando quieras e ingresar con tu email y PIN en ${link}.</p>`,
     `</div>`,
     `</div>`,
   ].join("\n");
 }
 
-function accessEmailText(name: string, token: string, base: string): string {
+function accessEmailText(name: string, email: string, pin: string, base: string): string {
   return [
     "NOCITO COACH — TU ACCESO ESTÁ LISTO",
     "",
     `Hola ${name},`,
     "",
-    "Ya podés entrar a tu panel privado para cargar tu progreso y completar tu perfil",
-    "(peso, edad, altura y preferencias) para calcular tu plan nutricional.",
+    "Ya podés entrar a tu panel privado para ver tu rutina, cargar tu progreso",
+    "y completar tu perfil (peso, edad, altura y preferencias) para tu plan nutricional.",
     "",
-    "Tu token de acceso: " + token,
+    "Email de acceso: " + email,
+    "PIN: " + pin,
     "Entrá a: " + `${base}/app`,
     "",
-    "Guardá este email: podés volver cuando quieras e ingresar con ese token.",
+    "Guardá este email: podés volver cuando quieras e ingresar con tu email y PIN.",
   ].join("\n");
 }
 
 export async function sendAlumnoAccessEmail(input: {
   name: string;
   email: string;
-  token: string;
+  pin: string;
   existing?: boolean;
 }): Promise<{ ok: boolean; to?: string; error?: string }> {
   const base = siteBaseUrl();
   const subject = input.existing
     ? "Tu acceso a Nocito Coach"
     : "Bienvenido a Nocito Coach — tu acceso";
-  const html = accessEmailHtml(input.name, input.token, base);
-  const text = accessEmailText(input.name, input.token, base);
+  const html = accessEmailHtml(input.name, input.email, input.pin, base);
+  const text = accessEmailText(input.name, input.email, input.pin, base);
 
   let resend;
   try {
