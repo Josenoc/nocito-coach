@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/app-types";
+import { exerciseAnatomySrc, GENERIC_ANATOMY_SRC } from "@/app/lib/exercise-media";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const OBJETIVOS_REG: [string, string][] = [
@@ -768,12 +769,22 @@ export default function ClientApp() {
                           </div>
                         )}
                         {media.kind === "none" && (
-                          <div
-                            className="video-frame"
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-                          >
-                            <span className="muted">Sin video de referencia</span>
-                          </div>
+                          <figure className="anatomy-fallback">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={exerciseAnatomySrc(ex.name)}
+                              alt={`Técnica y biomecánica de ${ex.name} (guía 3D)`}
+                              loading="lazy"
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                if (img.dataset.fallback !== "1" && img.src.indexOf(GENERIC_ANATOMY_SRC) === -1) {
+                                  img.dataset.fallback = "1";
+                                  img.src = GENERIC_ANATOMY_SRC;
+                                }
+                              }}
+                            />
+                            <figcaption>Técnica y Biomecánica (Guía 3D)</figcaption>
+                          </figure>
                         )}
                         {notes.length > 0 && (
                           <ul className="tech-list">

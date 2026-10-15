@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="Guía anatómica 3D de técnica y biomecánica">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1728"/>
+      <stop offset="1" stop-color="#070b13"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="55%">
+      <stop offset="0" stop-color="#1c6bff" stop-opacity="0.28"/>
+      <stop offset="0.55" stop-color="#0d3a8f" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#0d3a8f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bgSoft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1728"/>
+      <stop offset="1" stop-color="#070b13"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5ad1ff"/>
+    </marker>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0 H0 V40" fill="none" stroke="#153055" stroke-width="1" stroke-opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <rect width="800" height="450" fill="url(#grid)" opacity="0.5"/>
+  <rect width="800" height="450" fill="url(#glow)"/>
+
+  <!-- cuerpo (silueta anatómica estilizada, vista frontal) -->
+  <g stroke="#2b64b8" stroke-width="2" fill="none" stroke-linejoin="round">
+    <circle cx="400" cy="88" r="34" fill="#101c30"/>
+    <path d="M365 128 Q400 120 435 128 L452 150 L470 232 L452 250 L440 452 H360 L348 250 L330 150 Z" fill="#0d1728" stroke="#24507f"/>
+    <path d="M340 130 C300 150 286 190 292 240 L318 250 L338 150 Z" fill="#0f2038" stroke="#1c4675"/>
+    <path d="M460 130 C500 150 516 190 510 240 L484 250 L462 150 Z" fill="#0f192c"/>
+  </g>
+
+  <!-- detalle muscular / fibras y alineación -->
+  <g stroke="#3fb6ff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    <path d="M400 70c-26 0-44 16-46 40 2 24 20 40 46 40s44-16 46-40c-2-24-20-40-46-40z" fill="#10233d" stroke-opacity="0.9"/>
+    <path d="M330 168c-34 6-58 30-62 66-2 26 4 52 18 74 14 22 40 30 66 24" stroke-opacity="0.85"/>
+    <path d="M470 168c34 6 58 30 62 66 2 26-4 52-18 74-14 22-40 30-66 24" stroke-opacity="0.85"/>
+    <path d="M336 210c22-10 42-10 64 0" stroke-opacity="0.7"/>
+    <path d="M336 250c22-10 42-10 64 0" stroke-opacity="0.55"/>
+    <path d="M400 332c-18 0-30 14-28 34 2 22 16 40 28 56 12-16 26-34 28-56 2-20-10-34-28-34z" fill="#10233d" stroke-opacity="0.9"/>
+    <path d="M400 168v150" stroke-opacity="0.6"/>
+  </g>
+
+  <!-- flechas de movimiento -->
+  <g stroke="#5ad1ff" stroke-width="2" fill="none" marker-end="url(#arrow)" opacity="0.9">
+    <path d="M300 250 C280 300, 290 340, 320 366"/>
+    <path d="M500 250 C520 300, 510 340, 480 366"/>
+  </g>
+
+  <!-- rotulado técnico -->
+  <g fill="#7fb7df" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" letter-spacing="2">
+    <text x="40" y="52">BIOMECHANICAL ANALYSIS</text>
+    <text x="40" y="72" fill="#4f7fb0" font-size="11" letter-spacing="1">MUSCLE FIBERS · SKELETAL ALIGNMENT · ROM</text>
+    <text x="760" y="52" text-anchor="end" fill="#5ad1ff" font-size="12" letter-spacing="2">3D</text>
+  </g>
+  <g stroke="#1d436e" stroke-width="1" fill="none" opacity="0.8">
+    <path d="M40 90 H250"/>
+    <path d="M550 90 H760"/>
+  </g>
+</svg>
