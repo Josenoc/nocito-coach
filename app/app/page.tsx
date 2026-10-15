@@ -304,8 +304,7 @@ export default function ClientApp() {
         <div className="auth-card" style={{ maxWidth: mode === "register" ? 560 : 400 }}>
           <div style={{ textAlign: "center", marginBottom: 18 }}>
             <span className="brand">
-              <span className="brand-mark">J</span>
-              <span className="brand-name">nocito.coach</span>
+              <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
             </span>
           </div>
           <div className="card">
@@ -566,8 +565,7 @@ export default function ClientApp() {
         <div className="auth-card" style={{ maxWidth: 480 }}>
           <div style={{ textAlign: "center", marginBottom: 18 }}>
             <span className="brand">
-              <span className="brand-mark">J</span>
-              <span className="brand-name">nocito.coach</span>
+              <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
             </span>
           </div>
           <div className="card">
@@ -601,8 +599,7 @@ export default function ClientApp() {
       <header className="app-header">
         <div className="app-header-inner">
           <span className="brand">
-            <span className="brand-mark">J</span>
-            <span className="brand-name">nocito.coach</span>
+            <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span className="muted hide-sm" style={{ fontSize: ".86rem" }}>
