@@ -123,6 +123,17 @@ export default function ClientApp() {
       .finally(() => setChecking(false));
   }, []);
 
+  useEffect(() => {
+    for (const routine of routines) {
+      for (const ex of routine.exercises ?? []) {
+        if (embedUrl(ex.video_url).kind === "none") {
+          const img = new Image();
+          img.src = exerciseAnatomySrc(ex.name);
+        }
+      }
+    }
+  }, [routines]);
+
   const loadRoutine = async () => {
     setLoadingData(true);
     try {
@@ -770,11 +781,12 @@ export default function ClientApp() {
                         )}
                         {media.kind === "none" && (
                           <figure className="anatomy-fallback">
+                            <span className="anatomy-badge">3D</span>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={exerciseAnatomySrc(ex.name)}
                               alt={`Técnica y biomecánica de ${ex.name} (guía 3D)`}
-                              loading="lazy"
+                              loading="eager"
                               onError={(e) => {
                                 const img = e.currentTarget;
                                 if (img.dataset.fallback !== "1" && img.src.indexOf(GENERIC_ANATOMY_SRC) === -1) {
@@ -783,7 +795,10 @@ export default function ClientApp() {
                                 }
                               }}
                             />
-                            <figcaption>Técnica y Biomecánica (Guía 3D)</figcaption>
+                            <figcaption>
+                              <span className="anatomy-label">Técnica y Biomecánica (Guía 3D)</span>
+                              <span className="anatomy-sub">Observá alineación, ejes y rango de movimiento</span>
+                            </figcaption>
                           </figure>
                         )}
                         {notes.length > 0 && (
