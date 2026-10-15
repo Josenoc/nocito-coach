@@ -6,7 +6,7 @@ import type { Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/ap
 import {
   exerciseAnatomySrc,
   exerciseGifSrc,
-  exercisePdFrames,
+  exercisePdStill,
   exerciseDemoPreload,
   EXERCISE_MEDIA_MODE,
   GENERIC_ANATOMY_SRC,
@@ -67,48 +67,46 @@ function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src
 }
 
 function ExerciseDemo({ name }: { name: string }) {
-  const useGif = EXERCISE_MEDIA_MODE === "gif";
-  const gif = useGif ? exerciseGifSrc(name) : null;
-  const pdFrames = !useGif ? exercisePdFrames(name) : null;
+  const gif = EXERCISE_MEDIA_MODE === "gif" ? exerciseGifSrc(name) : null;
+  const still = exercisePdStill(name);
   const anatomy = exerciseAnatomySrc(name);
-  const single = Array.from(new Set([gif, anatomy, GENERIC_ANATOMY_SRC].filter(Boolean))) as string[];
-  const [broken, setBroken] = useState(false);
+  const fallback = Array.from(
+    new Set([still, anatomy, GENERIC_ANATOMY_SRC].filter(Boolean))
+  ) as string[];
+  const [gifBroken, setGifBroken] = useState(false);
   const [idx, setIdx] = useState(0);
 
-  if (pdFrames && !broken) {
+  if (gif && !gifBroken) {
     return (
       <figure className="anatomy-fallback is-motion">
-        <span className="anatomy-badge">ANIM</span>
+        <span className="anatomy-badge">LOOP</span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="pd-frame pd-a" src={pdFrames[0]} alt={`${name} posición inicial`} loading="eager" onError={() => setBroken(true)} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="pd-frame pd-b" src={pdFrames[1]} alt={`${name} posición final`} loading="eager" onError={() => setBroken(true)} />
+        <img
+          className="demo-media"
+          src={gif}
+          alt={`Demostración animada de ${name}`}
+          loading="eager"
+          onError={() => setGifBroken(true)}
+        />
       </figure>
     );
   }
 
-  const safeIdx = Math.min(idx, single.length - 1);
-  const src = single[safeIdx];
-  const isMotion = !!gif && src === gif;
+  const src = fallback[Math.min(idx, fallback.length - 1)];
+  const isGeneric = src === GENERIC_ANATOMY_SRC;
   return (
-    <figure className={`anatomy-fallback${isMotion ? " is-motion" : ""}`}>
-      <span className="anatomy-badge">{isMotion ? "LOOP" : "3D"}</span>
+    <figure className="anatomy-fallback">
+      <span className="anatomy-badge">{isGeneric ? "3D" : "FOTO"}</span>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        className="demo-media"
         src={src}
-        alt={`Demostración de ${name}`}
+        alt={`Imagen de referencia de ${name}`}
         loading="eager"
-        onError={() => setIdx((i) => (i < single.length - 1 ? i + 1 : i))}
+        onError={() => setIdx((i) => (i < fallback.length - 1 ? i + 1 : i))}
       />
       <figcaption>
-        {!isMotion && (
-          <span className="anatomy-label">Técnica y Biomecánica (Guía 3D)</span>
-        )}
-        <span className="anatomy-sub">
-          {isMotion
-            ? "Reproducción en loop · observá el rango de movimiento"
-            : "Observá alineación, ejes y rango de movimiento"}
-        </span>
+        <span className="anatomy-sub">Imagen de referencia de la técnica</span>
       </figcaption>
     </figure>
   );
@@ -918,7 +916,7 @@ export default function ClientApp() {
                         <table className="track-table">
                           <thead>
                             <tr>
-                              <th>Set</th>
+                              <th>Series</th>
                               <th>Reps</th>
                               <th>Peso ({ex.unit})</th>
                               <th />

@@ -122,13 +122,13 @@ export function exerciseGifSrc(name: string): string | null {
 
 /**
  * Modo de media para las demostraciones:
- *  - "pd"  (default): imagenes de dominio publico (free-exercise-db, Unlicense)
- *          mostradas como animación de 2 frames (inicio/fin). Seguro para uso comercial.
- *  - "gif": GIF animados del CDN ExerciseGymGifsDB (© Gym visual; verificar licencia).
- * Se controla con NEXT_PUBLIC_EXERCISE_MEDIA ("pd" | "gif").
+ *  - "gif" (default): GIF animado real (movimiento fluido, sin parpadeo) del CDN
+ *          ExerciseGymGifsDB (© Gym visual; verificar licencia para uso comercial).
+ *  - "pd": imagenes fijas de dominio publico (free-exercise-db, Unlicense). Sin animación.
+ * Se controla con NEXT_PUBLIC_EXERCISE_MEDIA ("gif" | "pd").
  */
 export const EXERCISE_MEDIA_MODE: "gif" | "pd" =
-  process.env.NEXT_PUBLIC_EXERCISE_MEDIA === "gif" ? "gif" : "pd";
+  process.env.NEXT_PUBLIC_EXERCISE_MEDIA === "pd" ? "pd" : "gif";
 
 const PD_CDN = "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises";
 
@@ -173,13 +173,20 @@ export function exercisePdFrames(name: string): string[] | null {
   return [`${PD_CDN}/${id}/0.jpg`, `${PD_CDN}/${id}/1.jpg`];
 }
 
+/** Un solo fotograma fijo (posición inicial) de free-exercise-db, o null. */
+export function exercisePdStill(name: string): string | null {
+  const frames = exercisePdFrames(name);
+  return frames ? frames[0] : null;
+}
+
 /** Fuentes a precargar según el modo activo. */
 export function exerciseDemoPreload(name: string): string[] {
   if (EXERCISE_MEDIA_MODE === "gif") {
     const gif = exerciseGifSrc(name);
-    return gif ? [gif] : [exerciseAnatomySrc(name)];
+    if (gif) return [gif];
   }
-  return exercisePdFrames(name) ?? [exerciseAnatomySrc(name)];
+  const still = exercisePdStill(name);
+  return still ? [still] : [exerciseAnatomySrc(name)];
 }
 
 
