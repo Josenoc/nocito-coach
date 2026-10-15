@@ -54,6 +54,8 @@ type SetRow = {
   saved?: boolean;
 };
 
+type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
+
 function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src: string } {
   if (!url) return { kind: "none", src: "" };
   const yt = url.match(
@@ -78,13 +80,9 @@ function ExerciseDemo({ name }: { name: string }) {
       <figure className="anatomy-fallback is-motion">
         <span className="anatomy-badge">ANIM</span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="pd-frame pd-a" src={pdFrames[0]} alt={`${name} · posición inicial`} loading="eager" onError={() => setBroken(true)} />
+        <img className="pd-frame pd-a" src={pdFrames[0]} alt={`${name} posición inicial`} loading="eager" onError={() => setBroken(true)} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="pd-frame pd-b" src={pdFrames[1]} alt={`${name} · posición final`} loading="eager" onError={() => setBroken(true)} />
-        <figcaption>
-          <span className="anatomy-label">Demostración animada</span>
-          <span className="anatomy-sub">Secuencia técnica en loop · posición inicial / final</span>
-        </figcaption>
+        <img className="pd-frame pd-b" src={pdFrames[1]} alt={`${name} posición final`} loading="eager" onError={() => setBroken(true)} />
       </figure>
     );
   }
@@ -103,9 +101,9 @@ function ExerciseDemo({ name }: { name: string }) {
         onError={() => setIdx((i) => (i < single.length - 1 ? i + 1 : i))}
       />
       <figcaption>
-        <span className="anatomy-label">
-          {isMotion ? "Demostración animada" : "Técnica y Biomecánica (Guía 3D)"}
-        </span>
+        {!isMotion && (
+          <span className="anatomy-label">Técnica y Biomecánica (Guía 3D)</span>
+        )}
         <span className="anatomy-sub">
           {isMotion
             ? "Reproducción en loop · observá el rango de movimiento"
@@ -154,6 +152,7 @@ export default function ClientApp() {
 
   const [recordingFor, setRecordingFor] = useState<string | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
+  const [voiceBusy, setVoiceBusy] = useState<string | null>(null);
   const [audioMsg, setAudioMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -341,7 +340,7 @@ export default function ClientApp() {
     }
   };
 
-  const startRec = async (exerciseId: string) => {
+  const startRec = async (ex: Exercise) => {
     setAudioMsg(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -351,11 +350,11 @@ export default function ClientApp() {
       mr.onstop = async () => {
         const blob = new Blob(c, { type: "audio/webm" });
         stream.getTracks().forEach((t) => t.stop());
-        await uploadAudio(blob, exerciseId);
+        await processVoice(blob, ex);
       };
       mediaRef.current = mr;
       mr.start();
-      setRecordingFor(exerciseId);
+      setRecordingFor(ex.id);
     } catch {
       setAudioMsg("No se pudo acceder al micrófono.");
     }
@@ -368,18 +367,76 @@ export default function ClientApp() {
     setRecordingFor(null);
   };
 
-  const uploadAudio = async (blob: Blob, exerciseId: string) => {
-    const fd = new FormData();
-    fd.append("audio", blob, "nota.webm");
-    fd.append("exercise_id", exerciseId);
+  const applyVoiceSets = async (ex: Exercise, sets: VoiceSet[]) => {
+    const lastSet = sets.reduce((m, s) => Math.max(m, s.set_number), 0);
+    const total = Math.min(12, Math.max(lastSet, rows[ex.id]?.length ?? 0, ex.target_sets ?? 0));
+    setRows((prev) => {
+      const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
+      while (base.length < total) {
+        base.push({ set_number: base.length + 1, actual_reps: "", actual_weight: "" });
+      }
+      for (const s of sets) {
+        const r = base.find((x) => x.set_number === s.set_number);
+        if (!r) continue;
+        if (s.reps !== null) r.actual_reps = String(s.reps);
+        if (s.weight !== null) r.actual_weight = String(s.weight);
+      }
+      return { ...prev, [ex.id]: base };
+    });
+
+    for (const s of sets) {
+      try {
+        await fetch("/api/app/sets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            exercise_id: ex.id,
+            set_number: s.set_number,
+            actual_reps: s.reps,
+            actual_weight: s.weight,
+            target_reps: ex.target_reps,
+            target_weight: ex.target_weight,
+            phantom_reference_10_percent: ex.target_weight,
+          }),
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
+    setRows((prev) => ({
+      ...prev,
+      [ex.id]: (prev[ex.id] ?? []).map((r) =>
+        sets.some((s) => s.set_number === r.set_number) ? { ...r, saved: true } : r
+      ),
+    }));
+  };
+
+  const processVoice = async (blob: Blob, ex: Exercise) => {
+    setVoiceBusy(ex.id);
+    setAudioMsg("Procesando audio…");
     try {
-      const res = await fetch("/api/app/audio", { method: "POST", body: fd });
+      const fd = new FormData();
+      fd.append("audio", blob, "nota.webm");
+      fd.append("exercise_id", ex.id);
+      const res = await fetch("/api/app/voice-sets", { method: "POST", body: fd });
       const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "No se pudo procesar el audio");
+      const sets: VoiceSet[] = Array.isArray(json.sets) ? json.sets : [];
+      if (sets.length === 0) {
+        setAudioMsg("No se detectaron series. Probá de nuevo.");
+        return;
+      }
+      await applyVoiceSets(ex, sets);
       setAudioMsg(
-        json.ok ? "Nota de voz enviada al coach." : json.error || "Error subiendo audio"
+        `Listo: ${sets.length} serie${sets.length === 1 ? "" : "s"} cargada${
+          sets.length === 1 ? "" : "s"
+        } por voz.`
       );
-    } catch {
-      setAudioMsg("Error subiendo audio");
+    } catch (err: any) {
+      setAudioMsg(err?.message || "No se pudo procesar el audio.");
+    } finally {
+      setVoiceBusy(null);
     }
   };
 
@@ -805,6 +862,7 @@ export default function ClientApp() {
                 const media = embedUrl(ex.video_url);
                 const notes = (ex.technique_notes ?? "").split("\n").filter(Boolean);
                 const recording = recordingFor === ex.id;
+                const processing = voiceBusy === ex.id;
                 return (
                   <div className="exercise-card" key={ex.id}>
                     <div className="workout-grid">
@@ -914,11 +972,20 @@ export default function ClientApp() {
                         <div style={{ marginTop: 14 }}>
                           <button
                             className={`mic-btn ${recording ? "rec" : ""}`}
-                            onClick={() => (recording ? stopRec() : startRec(ex.id))}
+                            disabled={processing || (voiceBusy !== null && !processing)}
+                            onClick={() => (recording ? stopRec() : startRec(ex))}
                           >
                             <MicIcon />
-                            {recording ? "Detener y enviar" : "Nota de voz para el coach"}
+                            {processing
+                              ? "Procesando…"
+                              : recording
+                              ? "Detener y cargar"
+                              : "Dictar series por voz"}
                           </button>
+                          <p className="muted" style={{ fontSize: ".82rem", marginTop: 8 }}>
+                            Decí por voz lo que hiciste (ej. «3 series de 10 con 50 kilos») y se
+                            completan y guardan las series solas. Podés volver a grabar o corregir a mano.
+                          </p>
                         </div>
                       </div>
                     </div>
