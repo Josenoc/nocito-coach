@@ -836,7 +836,7 @@
   <header>
     <div class="container nav">
       <a class="brand" href="#inicio" aria-label="nocito.coach">
-        <img class="brand-logo" src="img/logo-nocitocoach.jpeg?v=2" alt="nocito.coach">
+        <img class="brand-logo" src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
       </a>
       <nav class="nav-links" aria-label="Navegación principal">
         <a href="#inicio">Sobre mí</a>
@@ -917,63 +917,87 @@
         <div style="text-align:center;">
           <span class="section-label" style="justify-content:center;"><span class="sec-num">01</span> Planes y asesorías</span>
           <h2 class="section-title">Elegí tu plan de <span class="grad-text">seguimiento personalizado</span></h2>
-          <p class="section-sub" style="margin-inline:auto;">Elegí el plan que mejor se ajuste a tu objetivo, con precios y bonificaciones en pesos argentinos. Al confirmar el pago completás tus datos y arrancamos con tu rutina y pauta nutricional.</p>
+          <p class="section-sub" style="margin-inline:auto;">No es un PDF ni una rutina estática: es acceso a mi Web App privada con supervisión profesional directa. Elegí tu plan, confirmá el pago y completá tu ficha para arrancar.</p>
         </div>
 
         <div class="pricing-grid">
 
-          <!-- Plan 1 · RUT&NUT -->
-          <article class="price-card reveal">
+          <!-- Plan 1 · ESTÁNDAR (3 días) -->
+          <article class="price-card reveal" style="background: linear-gradient(180deg, #2c2c2c, #232323);">
+            <div>
+              <h3 class="plan-name">Plan Estándar</h3>
+              <span class="plan-tag">3 días / semana</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">45.000</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Ideal para optimizar tiempos con alta efectividad</p>
+              <p class="price-total">Programación de 3 días a medida</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Acceso inmediato a la Web App privada (nocito.coach/app): panel 24/7 en tu celular</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Demostraciones técnicas en video/GIF en cada ejercicio</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Registro de cargas con historial de cada serie</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Programación mensual a medida según tu anamnesis (omnívoro, vegetariano, carnívoro o vegano)</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
+            </ul>
+            <button class="btn-plan" data-plan="0">Elegir plan y configurar cuenta</button>
+          </article>
+
+          <!-- Plan 2 · PRO (4 días) · DESTACADO -->
+          <article class="price-card featured reveal reveal-d1" style="background: linear-gradient(180deg, #201d1b, #171412);">
+            <span class="featured-badge">MÁS POPULAR</span>
+            <div>
+              <h3 class="plan-name">Plan Pro</h3>
+              <span class="plan-tag">4 días / semana</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">60.000</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">El equilibrio perfecto entre volumen, frecuencia y recuperación</p>
+              <p class="price-total">Programación de 4 días a medida</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Acceso inmediato a la Web App privada (nocito.coach/app): panel 24/7 en tu celular</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Demostraciones técnicas en video/GIF en cada ejercicio</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Registro de cargas con historial de cada serie</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Programación mensual a medida según tu anamnesis (omnívoro, vegetariano, carnívoro o vegano)</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
+            </ul>
+            <button class="btn-plan" data-plan="1">Elegir plan y configurar cuenta</button>
+          </article>
+
+          <!-- Plan 3 · ELITE (5 días) -->
+          <article class="price-card reveal reveal-d2" style="background: linear-gradient(180deg, #161616, #0e0e0e);">
+            <div>
+              <h3 class="plan-name">Plan Elite</h3>
+              <span class="plan-tag">5 días / semana</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">75.000</span> <span class="per">ARS / mes</span></div>
+              <p class="price-sub">Para alta disponibilidad enfocado en rendimiento superior</p>
+              <p class="price-total">Programación de 5 días a medida</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Acceso inmediato a la Web App privada (nocito.coach/app): panel 24/7 en tu celular</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Demostraciones técnicas en video/GIF en cada ejercicio</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Registro de cargas con historial de cada serie</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Programación mensual a medida según tu anamnesis (omnívoro, vegetariano, carnívoro o vegano)</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
+            </ul>
+            <button class="btn-plan" data-plan="2">Elegir plan y configurar cuenta</button>
+          </article>
+
+          <!-- Plan 4 · RUT&NUT -->
+          <article class="price-card reveal reveal-d3">
             <div>
               <h3 class="plan-name">Rut&Nut</h3>
               <span class="plan-tag">Solo rutina + plan nutricional</span>
               <div class="plan-price"><span class="cur">$</span><span class="amount">50</span> <span class="per">ARS · pago único</span></div>
               <p class="price-sub">Sin seguimiento personalizado</p>
+              <p class="price-total">Para quien solo quiere la rutina y la pauta</p>
             </div>
             <ul class="plan-features">
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina 100% personalizada (PDF imprimible A4)</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina 100% personalizada</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Sin seguimiento ni ajustes</li>
             </ul>
-            <button class="btn-plan" data-plan="0">Elegir este plan</button>
-          </article>
-
-<!-- Plan 2 DESTACADO -->
-          <article class="price-card featured reveal reveal-d2">
-            <span class="featured-badge">MÁS POPULAR</span>
-            <div>
-              <h3 class="plan-name">Plan Hábito &amp; Resultados</h3>
-              <span class="plan-tag">~26% de ahorro · Mejor valor</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">33.500</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">Total en 1 pago de <b>$100.500 ARS</b></p>
-              <p class="price-total">3 meses completos de transformación</p>
-            </div>
-            <ul class="plan-features">
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Todo lo anterior por 90 días completos</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Cobro por adelantado con descuento garantizado</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Seguimiento de la escala de esfuerzo</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Dos videollamadas por semana</li>
-            </ul>
-            <button class="btn-plan" data-plan="1">Elegir este plan</button>
-          </article>
-
-          <!-- Plan 3 FULL PRESENCIAL -->
-          <article class="price-card featured reveal reveal-d3">
-            <span class="featured-badge">PRESENCIAL</span>
-            <div>
-              <h3 class="plan-name">Full Presencial</h3>
-              <span class="plan-tag">Entrenamiento 1 a 1 en persona</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">105.000</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">Renovable mes a mes</p>
-              <p class="price-total">Seguimiento completo conmigo en gimnasio</p>
-            </div>
-            <ul class="plan-features">
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Entrenamiento presencial guiado en tu gimnasio</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina personalizada con corrección de técnica en vivo</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan nutricional y ajustes semanales</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5722" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Comunicación directa por WhatsApp</li>
-            </ul>
-            <button class="btn-plan" data-plan="2">Elegir este plan</button>
+            <button class="btn-plan" data-plan="3">Elegir plan y configurar cuenta</button>
           </article>
         </div>
 
@@ -982,7 +1006,7 @@
           Una vez hecho el pago, enviar comprobante al número de Whatsapp
           <a class="payment-wa" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20te%20env%C3%ADo%20el%20comprobante%20de%20mi%20pago." target="_blank" rel="noopener">+54 9 2616 22-4718</a>
         </p>
-        <p class="plans-footnote">Los planes multimes se abonan al contado o en 1 pago mediante transferencia/tarjeta al momento de inscribirse para asegurar la bonificación.</p>
+        <p class="plans-footnote">Los planes por frecuencia se abonan mensualmente mediante transferencia/tarjeta. El pago habilita tu acceso a la Web App privada nocito.coach/app.</p>
       </div>
     </section>
 
@@ -1055,7 +1079,7 @@
         <div class="contact-wrap">
           <a class="contact-card reveal" id="whatsappLinkMain" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
             <div class="ico">
-              <img src="img/logo-nocitocoach.jpeg?v=2" alt="nocito.coach">
+              <img src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
             </div>
             <div>
               <h3>WhatsApp directo</h3>
@@ -1064,7 +1088,7 @@
           </a>
           <a class="contact-card reveal reveal-d1" id="emailLinkMain" href="mailto:nocito.coach@gmail.com" target="_blank" rel="noopener">
             <div class="ico">
-              <img src="img/logo-nocitocoach.jpeg?v=2" alt="nocito.coach">
+              <img src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
             </div>
             <div>
               <h3>Correo electrónico</h3>
@@ -1074,7 +1098,7 @@
           </a>
           <a class="contact-card reveal reveal-d2" id="instagramLinkMain" href="https://www.instagram.com/nocito.coach" target="_blank" rel="noopener">
             <div class="ico">
-              <img src="img/logo-nocitocoach.jpeg?v=2" alt="nocito.coach">
+              <img src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
             </div>
             <div>
               <h3>Instagram</h3>
@@ -1083,7 +1107,7 @@
             </div>
           </a>
         </div>
-        <img class="contact-logo" src="img/logo-nocitocoach.jpeg?v=2" alt="Logo nocito.coach">
+        <img class="contact-logo" src="img/logo-nocitocoach.jpeg?v=3" alt="Logo nocito.coach">
       </div>
     </section>
 
