@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { hashPin, setSessionCookie, type Role } from "@/lib/auth";
 import { isDeliverableEmail } from "@/app/lib/alumnos";
+import { generateOnboardingDraft } from "@/app/lib/onboarding";
+import type { Anamnesis } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
 
@@ -70,13 +72,13 @@ export async function POST(req: NextRequest) {
       return bad("Ya existe una cuenta con ese email. Iniciá sesión.", 409);
     }
 
-    const anamnesis = {
+    const anamnesis: Anamnesis = {
       sex,
-      age,
-      height_cm,
+      age: age as number,
+      height_cm: height_cm as number,
       weight_kg: Math.round(weight_kg * 10) / 10,
       goal,
-      training_days,
+      training_days: training_days as number,
       nutrition,
       completedAt: new Date().toISOString(),
     };
@@ -101,6 +103,8 @@ export async function POST(req: NextRequest) {
     if (error || !data) {
       return bad(error?.message || "No se pudo crear el usuario.", 500);
     }
+
+    await generateOnboardingDraft(data.id as string, anamnesis);
 
     const profile = {
       id: data.id as string,

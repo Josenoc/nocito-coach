@@ -11,6 +11,17 @@ export interface Anamnesis {
   completedAt?: string;
 }
 
+export type RoutineStatus = "pending_review" | "active";
+
+export interface NutritionPlan {
+  cal: number;
+  prot: number;
+  carbs: number;
+  fat: number;
+  proteinSources: string;
+  meals: [string, string][];
+}
+
 export interface Profile {
   id: string;
   email: string;
@@ -20,6 +31,9 @@ export interface Profile {
   created_at: string;
   phone?: string | null;
   anamnesis?: Anamnesis | null;
+  routine_status?: RoutineStatus | null;
+  nutrition_plan?: NutritionPlan | null;
+  approved_at?: string | null;
 }
 
 export interface Routine {

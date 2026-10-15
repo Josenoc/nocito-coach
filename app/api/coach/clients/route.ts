@@ -11,7 +11,7 @@ export async function GET() {
   }
   const { data, error } = await getSupabaseAdmin()
     .from("profiles")
-    .select("id, email, full_name, activo, created_at, pin_hash")
+    .select("id, email, full_name, activo, created_at, pin_hash, routine_status")
     .eq("role", "client")
     .order("full_name", { ascending: true });
   if (error) {
@@ -24,6 +24,7 @@ export async function GET() {
     activo: c.activo,
     created_at: c.created_at,
     has_pin: Boolean(c.pin_hash),
+    routine_status: c.routine_status ?? "active",
   }));
   return NextResponse.json({ ok: true, clients });
 }

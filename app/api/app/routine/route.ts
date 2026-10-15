@@ -54,7 +54,23 @@ export async function GET(req: NextRequest) {
       logs = logData ?? [];
     }
 
-    return NextResponse.json({ ok: true, date, routines, logs });
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("routine_status, nutrition_plan")
+      .eq("id", clientId)
+      .single();
+
+    const status = prof?.routine_status ?? "active";
+    const pending = session.role === "client" && status !== "active";
+
+    return NextResponse.json({
+      ok: true,
+      date,
+      routines: pending ? [] : routines,
+      logs: pending ? [] : logs,
+      status,
+      nutrition: pending ? null : prof?.nutrition_plan ?? null,
+    });
   } catch {
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
   }

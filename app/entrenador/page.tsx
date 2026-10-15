@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Profile } from "@/lib/app-types";
+import type { NutritionPlan, Profile } from "@/lib/app-types";
 
 interface ClientRow {
   id: string;
@@ -10,6 +10,7 @@ interface ClientRow {
   full_name: string;
   activo: boolean;
   has_pin: boolean;
+  routine_status: "pending_review" | "active";
 }
 
 interface ExRow {
@@ -49,6 +50,15 @@ const emptyDraft = (): Draft => ({
   position: "0",
   active: true,
   exercises: [emptyEx()],
+});
+
+const emptyNutrition = (): NutritionPlan => ({
+  cal: 0,
+  prot: 0,
+  carbs: 0,
+  fat: 0,
+  proteinSources: "",
+  meals: [],
 });
 
 const GOAL_LABELS: Record<string, string> = {
@@ -92,9 +102,12 @@ export default function CoachDashboard() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
-  const [tab, setTab] = useState<"historial" | "rutinas" | "acceso">("historial");
+  const [tab, setTab] = useState<"historial" | "rutinas" | "nutricion" | "acceso">(
+    "historial"
+  );
 
   const [draft, setDraft] = useState<Draft>(emptyDraft());
+  const [nutrition, setNutrition] = useState<NutritionPlan>(emptyNutrition());
   const [newClient, setNewClient] = useState({ email: "", full_name: "", pin: "" });
   const [pinFor, setPinFor] = useState("");
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -154,6 +167,15 @@ export default function CoachDashboard() {
     setDetail(null);
   };
 
+  const syncNutrition = (json: any) => {
+    const np = json?.profile?.nutrition_plan as NutritionPlan | null | undefined;
+    setNutrition(
+      np
+        ? { ...emptyNutrition(), ...np, meals: Array.isArray(np.meals) ? np.meals : [] }
+        : emptyNutrition()
+    );
+  };
+
   const selectClient = async (id: string) => {
     setSelectedId(id);
     setTab("historial");
@@ -161,14 +183,62 @@ export default function CoachDashboard() {
     setDraft(emptyDraft());
     const res = await fetch(`/api/coach/client?id=${id}`);
     const json = await res.json();
-    if (json.ok) setDetail(json);
+    if (json.ok) {
+      setDetail(json);
+      syncNutrition(json);
+    }
   };
 
   const reloadDetail = async () => {
     if (!selectedId) return;
     const res = await fetch(`/api/coach/client?id=${selectedId}`);
     const json = await res.json();
-    if (json.ok) setDetail(json);
+    if (json.ok) {
+      setDetail(json);
+      syncNutrition(json);
+    }
+  };
+
+  const setMeal = (idx: number, col: 0 | 1, value: string) => {
+    setNutrition((n) => ({
+      ...n,
+      meals: n.meals.map((m, i) =>
+        i === idx ? (col === 0 ? [value, m[1]] : [m[0], value]) : m
+      ) as [string, string][],
+    }));
+  };
+
+  const saveNutrition = async () => {
+    if (!selectedId) return;
+    const res = await fetch("/api/coach/nutrition", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: selectedId, nutrition }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setMsg({ type: "ok", text: "Plan nutricional guardado." });
+      await reloadDetail();
+    } else {
+      setMsg({ type: "err", text: json.error || "Error" });
+    }
+  };
+
+  const approve = async () => {
+    if (!selectedId) return;
+    const res = await fetch("/api/coach/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: selectedId }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setMsg({ type: "ok", text: "Rutina aprobada y publicada." });
+      await loadClients();
+      await reloadDetail();
+    } else {
+      setMsg({ type: "err", text: json.error || "Error" });
+    }
   };
 
   const setEx = (idx: number, patch: Partial<ExRow>) => {
@@ -375,7 +445,8 @@ export default function CoachDashboard() {
                 <strong>{c.full_name || c.email}</strong>
                 <br />
                 <small>
-                  {c.email} · {c.has_pin ? "PIN ok" : "sin PIN"}
+                  {c.email} · {c.has_pin ? "PIN ok" : "sin PIN"} ·{" "}
+                  {c.routine_status === "pending_review" ? "Pendiente" : "Activa"}
                 </small>
               </button>
             ))}
@@ -390,24 +461,43 @@ export default function CoachDashboard() {
 
             {selected && (
               <>
-                <div className="row-between" style={{ marginBottom: 16 }}>
-                  <h2 style={{ margin: 0, fontSize: "1.3rem" }}>
-                    {selected.full_name || selected.email}
-                  </h2>
-                  <div className="tabs" style={{ margin: 0 }}>
-                    {(["historial", "rutinas", "acceso"] as const).map((t) => (
-                      <button
-                        key={t}
-                        className={`chip ${tab === t ? "active" : ""}`}
-                        onClick={() => setTab(t)}
-                      >
-                        {t === "historial"
-                          ? "Historial"
-                          : t === "rutinas"
-                          ? "Rutinas"
-                          : "Acceso"}
+                <div
+                  className="row-between"
+                  style={{ marginBottom: 16, flexWrap: "wrap", gap: 10 }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <h2 style={{ margin: 0, fontSize: "1.3rem" }}>
+                      {selected.full_name || selected.email}
+                    </h2>
+                    <span className="badge">
+                      {selected.routine_status === "pending_review"
+                        ? "Pendiente de revisión"
+                        : "Rutina activa"}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    {selected.routine_status === "pending_review" && (
+                      <button className="btn btn-primary" onClick={approve}>
+                        Aprobar y Publicar Rutina
                       </button>
-                    ))}
+                    )}
+                    <div className="tabs" style={{ margin: 0 }}>
+                      {(["historial", "rutinas", "nutricion", "acceso"] as const).map((t) => (
+                        <button
+                          key={t}
+                          className={`chip ${tab === t ? "active" : ""}`}
+                          onClick={() => setTab(t)}
+                        >
+                          {t === "historial"
+                            ? "Historial"
+                            : t === "rutinas"
+                            ? "Rutinas"
+                            : t === "nutricion"
+                            ? "Nutrición"
+                            : "Acceso"}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -693,6 +783,117 @@ export default function CoachDashboard() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {tab === "nutricion" && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="card">
+                      <h3 style={{ marginTop: 0 }}>Plan nutricional</h3>
+                      <div className="grid-4" style={{ marginBottom: 10 }}>
+                        <div>
+                          <label className="lbl">Calorías (kcal)</label>
+                          <input
+                            className="input"
+                            inputMode="numeric"
+                            value={nutrition.cal}
+                            onChange={(e) =>
+                              setNutrition({
+                                ...nutrition,
+                                cal: Number(e.target.value.replace(/\D/g, "")) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="lbl">Proteínas (g)</label>
+                          <input
+                            className="input"
+                            inputMode="numeric"
+                            value={nutrition.prot}
+                            onChange={(e) =>
+                              setNutrition({
+                                ...nutrition,
+                                prot: Number(e.target.value.replace(/\D/g, "")) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="lbl">Carbohidratos (g)</label>
+                          <input
+                            className="input"
+                            inputMode="numeric"
+                            value={nutrition.carbs}
+                            onChange={(e) =>
+                              setNutrition({
+                                ...nutrition,
+                                carbs: Number(e.target.value.replace(/\D/g, "")) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <label className="lbl">Grasas (g)</label>
+                          <input
+                            className="input"
+                            inputMode="numeric"
+                            value={nutrition.fat}
+                            onChange={(e) =>
+                              setNutrition({
+                                ...nutrition,
+                                fat: Number(e.target.value.replace(/\D/g, "")) || 0,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="lbl">Fuentes de proteína</label>
+                        <input
+                          className="input"
+                          value={nutrition.proteinSources}
+                          onChange={(e) =>
+                            setNutrition({ ...nutrition, proteinSources: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <h4 style={{ margin: "18px 0 8px" }}>Comidas</h4>
+                      {nutrition.meals.map((m, i) => (
+                        <div className="grid-2" key={i} style={{ marginBottom: 8 }}>
+                          <input
+                            className="input"
+                            placeholder="Comida (ej. Desayuno)"
+                            value={m[0]}
+                            onChange={(e) => setMeal(i, 0, e.target.value)}
+                          />
+                          <input
+                            className="input"
+                            placeholder="Sugerencia"
+                            value={m[1]}
+                            onChange={(e) => setMeal(i, 1, e.target.value)}
+                          />
+                        </div>
+                      ))}
+
+                      <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+                        <button
+                          className="btn btn-outline"
+                          onClick={() =>
+                            setNutrition((n) => ({
+                              ...n,
+                              meals: [...n.meals, ["", ""] as [string, string]],
+                            }))
+                          }
+                        >
+                          + Comida
+                        </button>
+                        <button className="btn btn-primary" onClick={saveNutrition}>
+                          Guardar nutrición
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 

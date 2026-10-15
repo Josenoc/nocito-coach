@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Exercise, Profile, Routine, SetLog } from "@/lib/app-types";
+import type { Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/app-types";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const OBJETIVOS_REG: [string, string][] = [
@@ -84,6 +84,8 @@ export default function ClientApp() {
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const [rows, setRows] = useState<Record<string, SetRow[]>>({});
   const [loadingData, setLoadingData] = useState(false);
+  const [planStatus, setPlanStatus] = useState<string>("active");
+  const [nutrition, setNutrition] = useState<NutritionPlan | null>(null);
 
   const [recordingFor, setRecordingFor] = useState<string | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
@@ -124,6 +126,8 @@ export default function ClientApp() {
       const rl: Routine[] = json.routines ?? [];
       const logs: SetLog[] = json.logs ?? [];
       setRoutines(rl);
+      setPlanStatus(json.status ?? "active");
+      setNutrition((json.nutrition as NutritionPlan | null) ?? null);
       setActiveDay((prev) => prev ?? rl[0]?.id ?? null);
 
       const next: Record<string, SetRow[]> = {};
@@ -207,6 +211,8 @@ export default function ClientApp() {
     setRoutines([]);
     setRows({});
     setActiveDay(null);
+    setPlanStatus("active");
+    setNutrition(null);
   };
 
   const updateRow = (exId: string, setNumber: number, patch: Partial<SetRow>) => {
@@ -626,10 +632,22 @@ export default function ClientApp() {
 
           {!loadingData && routines.length === 0 && (
             <div className="card">
-              <span className="badge">Sin rutina asignada</span>
-              <p className="muted" style={{ marginBottom: 0 }}>
-                Tu coach todavía no cargó una rutina. Volvé a intentar más tarde.
-              </p>
+              {planStatus === "pending_review" ? (
+                <>
+                  <span className="badge">Rutina en revisión</span>
+                  <p className="muted" style={{ marginBottom: 0 }}>
+                    Tu coach está revisando tu rutina. En cuanto la apruebe vas a poder verla
+                    acá. Si en unos minutos no aparece, volvé a entrar con tu email y PIN.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="badge">Sin rutina asignada</span>
+                  <p className="muted" style={{ marginBottom: 0 }}>
+                    Tu coach todavía no cargó una rutina. Volvé a intentar más tarde.
+                  </p>
+                </>
+              )}
             </div>
           )}
 
@@ -790,6 +808,51 @@ export default function ClientApp() {
                 );
               })}
             </>
+          )}
+
+          {planStatus === "active" && nutrition && (
+            <div className="card" style={{ marginTop: 22 }}>
+              <h3 style={{ marginTop: 0 }}>Sugerencia nutricional</h3>
+              <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginBottom: 14 }}>
+                <span className="badge">{nutrition.cal} kcal/día</span>
+                <span className="muted">
+                  Proteínas: <b>{nutrition.prot} g</b>
+                </span>
+                <span className="muted">
+                  Carbohidratos: <b>{nutrition.carbs} g</b>
+                </span>
+                <span className="muted">
+                  Grasas: <b>{nutrition.fat} g</b>
+                </span>
+              </div>
+              {nutrition.proteinSources && (
+                <p className="muted" style={{ marginTop: 0 }}>
+                  Fuentes de proteína sugeridas: {nutrition.proteinSources}
+                </p>
+              )}
+              {nutrition.meals?.length > 0 && (
+                <div className="scroll-x">
+                  <table className="data-table" style={{ minWidth: 480 }}>
+                    <thead>
+                      <tr>
+                        <th>Comida</th>
+                        <th>Sugerencia</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nutrition.meals.map((m, i) => (
+                        <tr key={i}>
+                          <td>
+                            <b>{m[0]}</b>
+                          </td>
+                          <td>{m[1]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </main>
