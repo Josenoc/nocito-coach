@@ -259,7 +259,7 @@ h1, h2, h3, h4 {
 .exercise-card {
   position: relative;
   background: linear-gradient(180deg, var(--surface), var(--bg-2));
-  border: 1.5px solid rgba(255, 196, 0, 0.4);
+  border: 3px solid rgba(255, 196, 0, 0.4);
   border-radius: var(--radius);
   padding: 20px;
   overflow: hidden;
