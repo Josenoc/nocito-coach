@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = {
-      model: 'llama-3.1-8b-instant',
+      model: 'openai/gpt-oss-20b',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: text }
