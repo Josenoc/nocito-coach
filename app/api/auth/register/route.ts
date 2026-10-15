@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
           pin_hash: hashPin(pin),
           activo: true,
           anamnesis,
+          routine_status: "pending_review",
         },
         { onConflict: "email" }
       )
