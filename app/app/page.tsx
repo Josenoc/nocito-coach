@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/app-types";
-import { exerciseAnatomySrc, GENERIC_ANATOMY_SRC } from "@/app/lib/exercise-media";
+import { exerciseAnatomySrc, exerciseGifSrc, GENERIC_ANATOMY_SRC } from "@/app/lib/exercise-media";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const OBJETIVOS_REG: [string, string][] = [
@@ -55,6 +55,38 @@ function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src
   if (yt) return { kind: "iframe", src: `https://www.youtube.com/embed/${yt[1]}` };
   if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) return { kind: "video", src: url };
   return { kind: "iframe", src: url };
+}
+
+function ExerciseDemo({ name }: { name: string }) {
+  const gif = exerciseGifSrc(name);
+  const anatomy = exerciseAnatomySrc(name);
+  const sources = Array.from(new Set([gif, anatomy, GENERIC_ANATOMY_SRC].filter(Boolean))) as string[];
+  const [idx, setIdx] = useState(0);
+  const safeIdx = Math.min(idx, sources.length - 1);
+  const src = sources[safeIdx];
+  const isMotion = !!gif && src === gif;
+  return (
+    <figure className={`anatomy-fallback${isMotion ? " is-motion" : ""}`}>
+      <span className="anatomy-badge">{isMotion ? "LOOP" : "3D"}</span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={`Demostración de ${name}`}
+        loading="eager"
+        onError={() => setIdx((i) => (i < sources.length - 1 ? i + 1 : i))}
+      />
+      <figcaption>
+        <span className="anatomy-label">
+          {isMotion ? "Demostración animada" : "Técnica y Biomecánica (Guía 3D)"}
+        </span>
+        <span className="anatomy-sub">
+          {isMotion
+            ? "Reproducción en loop · observá el rango de movimiento"
+            : "Observá alineación, ejes y rango de movimiento"}
+        </span>
+      </figcaption>
+    </figure>
+  );
 }
 
 function MicIcon() {
@@ -124,15 +156,14 @@ export default function ClientApp() {
   }, []);
 
   useEffect(() => {
-    for (const routine of routines) {
-      for (const ex of routine.exercises ?? []) {
-        if (embedUrl(ex.video_url).kind === "none") {
-          const img = new Image();
-          img.src = exerciseAnatomySrc(ex.name);
-        }
+    const day = routines.find((r) => r.id === activeDay) ?? routines[0];
+    for (const ex of day?.exercises ?? []) {
+      if (embedUrl(ex.video_url).kind === "none") {
+        const img = new Image();
+        img.src = exerciseGifSrc(ex.name) ?? exerciseAnatomySrc(ex.name);
       }
     }
-  }, [routines]);
+  }, [routines, activeDay]);
 
   const loadRoutine = async () => {
     setLoadingData(true);
@@ -779,28 +810,7 @@ export default function ClientApp() {
                             <video src={media.src} controls playsInline />
                           </div>
                         )}
-                        {media.kind === "none" && (
-                          <figure className="anatomy-fallback">
-                            <span className="anatomy-badge">3D</span>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={exerciseAnatomySrc(ex.name)}
-                              alt={`Técnica y biomecánica de ${ex.name} (guía 3D)`}
-                              loading="eager"
-                              onError={(e) => {
-                                const img = e.currentTarget;
-                                if (img.dataset.fallback !== "1" && img.src.indexOf(GENERIC_ANATOMY_SRC) === -1) {
-                                  img.dataset.fallback = "1";
-                                  img.src = GENERIC_ANATOMY_SRC;
-                                }
-                              }}
-                            />
-                            <figcaption>
-                              <span className="anatomy-label">Técnica y Biomecánica (Guía 3D)</span>
-                              <span className="anatomy-sub">Observá alineación, ejes y rango de movimiento</span>
-                            </figcaption>
-                          </figure>
-                        )}
+                        {media.kind === "none" && <ExerciseDemo name={ex.name} />}
                         {notes.length > 0 && (
                           <ul className="tech-list">
                             {notes.map((n, i) => (

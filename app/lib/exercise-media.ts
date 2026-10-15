@@ -28,7 +28,8 @@ const RULES: Rule[] = [
   },
   { match: /extension de triceps|triceps en polea/, slug: "triceps-pushdown", en: "Triceps Pushdown" },
   { match: /fondos en banco|fondos/, slug: "bench-dips", en: "Bench Dips" },
-  { match: /dominadas|jalon/, slug: "lat-pulldown", en: "Lat Pulldown" },
+  { match: /dominadas/, slug: "pull-up", en: "Pull-Up" },
+  { match: /jalon/, slug: "lat-pulldown", en: "Lat Pulldown" },
   { match: /remo con barra/, slug: "barbell-row", en: "Barbell Row" },
   { match: /remo (sentado|en polea)/, slug: "seated-cable-row", en: "Seated Cable Row" },
   { match: /peso muerto rumano/, slug: "romanian-deadlift", en: "Romanian Deadlift" },
@@ -72,3 +73,50 @@ export function exerciseAnatomySrc(name: string): string {
   const slug = exerciseAnatomySlug(name);
   return slug ? `${ANATOMY_DIR}/${slug}.${ANATOMY_EXT}` : GENERIC_ANATOMY_SRC;
 }
+
+/**
+ * Demostraciones animadas (GIF en loop) hosteadas en un CDN público, por slug.
+ * Fuente: ExerciseGymGifsDB (https://github.com/JahelCuadrado/ExerciseGymGifsDB).
+ * La app cae a la ilustracion 3D si el GIF no está disponible.
+ */
+const GIF_CDN = "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0";
+
+const GIF_BY_SLUG: Record<string, string> = {
+  "barbell-bench-press": "pectorals/barbell-bench-press",
+  "incline-dumbbell-press": "pectorals/dumbbell-incline-bench-press",
+  "dumbbell-fly": "pectorals/dumbbell-fly",
+  "overhead-press": "delts/barbell-standing-wide-military-press",
+  "lateral-raise": "delts/dumbbell-lateral-raise",
+  "front-raise": "delts/dumbbell-front-raise",
+  "rear-delt-fly": "delts/dumbbell-rear-lateral-raise",
+  "triceps-pushdown": "triceps/cable-pushdown",
+  "overhead-triceps-extension": "triceps/barbell-standing-overhead-triceps-extension",
+  "bench-dips": "triceps/bench-dip-knees-bent",
+  "pull-up": "lats/pull-up",
+  "lat-pulldown": "lats/cable-pulldown",
+  "barbell-row": "upper-back/barbell-bent-over-row",
+  "seated-cable-row": "upper-back/cable-seated-row",
+  "barbell-curl": "biceps/barbell-curl",
+  "hammer-curl": "biceps/dumbbell-alternate-seated-hammer-curl",
+  "biceps-curl": "biceps/dumbbell-biceps-curl",
+  "preacher-curl": "biceps/barbell-preacher-curl",
+  "barbell-squat": "glutes/barbell-low-bar-squat",
+  "leg-press": "glutes/sled-45-leg-press",
+  "romanian-deadlift": "glutes/barbell-romanian-deadlift",
+  "hip-thrust": "glutes/resistance-band-hip-thrusts-on-knees-female",
+  "leg-extension": "quads/lever-leg-extension",
+  "lying-leg-curl": "hamstrings/lever-lying-leg-curl",
+  "standing-calf-raise": "calves/standing-calves",
+  "seated-calf-raise": "calves/lever-seated-calf-raise",
+  "plank": "abs/weighted-front-plank",
+  "hanging-leg-raise": "abs/hanging-leg-raise",
+  "hiit-cardio": "cardio/burpee",
+};
+
+export function exerciseGifSrc(name: string): string | null {
+  const slug = exerciseAnatomySlug(name);
+  if (!slug) return null;
+  const path = GIF_BY_SLUG[slug];
+  return path ? `${GIF_CDN}/${path}.gif` : null;
+}
+
