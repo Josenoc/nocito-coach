@@ -100,6 +100,7 @@ export default function CoachDashboard() {
   const [authLoading, setAuthLoading] = useState(false);
 
   const [clients, setClients] = useState<ClientRow[]>([]);
+  const [filter, setFilter] = useState<"pending" | "all">("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
   const [tab, setTab] = useState<"historial" | "rutinas" | "nutricion" | "acceso">(
@@ -423,6 +424,13 @@ export default function CoachDashboard() {
   }
 
   const selected = clients.find((c) => c.id === selectedId);
+  const pendingCount = clients.filter(
+    (c) => c.routine_status === "pending_review"
+  ).length;
+  const visibleClients =
+    filter === "pending"
+      ? clients.filter((c) => c.routine_status === "pending_review")
+      : clients;
 
   return (
     <main className="section">
@@ -448,9 +456,36 @@ export default function CoachDashboard() {
           }}
         >
           <aside className="card">
-            <h3 style={{ margin: "0 0 12px" }}>Clientes</h3>
-            {clients.length === 0 && <p className="muted">Sin clientes todavía.</p>}
-            {clients.map((c) => {
+            <div className="row-between" style={{ marginBottom: 12, gap: 8 }}>
+              <h3 style={{ margin: 0 }}>Clientes</h3>
+              {pendingCount > 0 && (
+                <span className="pill pending">
+                  {pendingCount} pendiente{pendingCount > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+            <div className="tabs" style={{ margin: "0 0 12px" }}>
+              <button
+                className={`chip ${filter === "pending" ? "active" : ""}`}
+                onClick={() => setFilter("pending")}
+              >
+                Pendientes ({pendingCount})
+              </button>
+              <button
+                className={`chip ${filter === "all" ? "active" : ""}`}
+                onClick={() => setFilter("all")}
+              >
+                Todos ({clients.length})
+              </button>
+            </div>
+            {visibleClients.length === 0 && (
+              <p className="muted">
+                {clients.length === 0
+                  ? "Sin clientes todavía."
+                  : "No hay clientes pendientes."}
+              </p>
+            )}
+            {visibleClients.map((c) => {
               const pending = c.routine_status === "pending_review";
               return (
                 <button
@@ -500,7 +535,7 @@ export default function CoachDashboard() {
                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                     {selected.routine_status === "pending_review" && (
                       <button className="btn btn-primary" onClick={approve}>
-                        Aprobar y Publicar Rutina
+                        Aprobar y Publicar
                       </button>
                     )}
                     <div className="tabs" style={{ margin: 0 }}>

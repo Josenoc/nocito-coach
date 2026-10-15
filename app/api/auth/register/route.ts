@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { hashPin, setSessionCookie, type Role } from "@/lib/auth";
 import { isDeliverableEmail } from "@/app/lib/alumnos";
 import { generateOnboardingDraft } from "@/app/lib/onboarding";
+import { sendCoachPendingReviewEmail } from "@/app/lib/notify";
 import type { Anamnesis } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
@@ -121,6 +122,14 @@ export async function POST(req: NextRequest) {
     }
 
     await generateOnboardingDraft(data.id as string, anamnesis);
+
+    // Aviso al coach: nuevo cliente pendiente de revisión (no bloquea el registro).
+    sendCoachPendingReviewEmail({
+      name: full_name,
+      email,
+      phone,
+      anamnesis,
+    }).catch((err) => console.error("[register] aviso al coach:", err));
 
     const profile = {
       id: data.id as string,
