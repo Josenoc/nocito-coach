@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getCoach } from "@/lib/auth";
+import { generateOnboardingDraft } from "@/app/lib/onboarding";
+import type { Anamnesis } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
+
+const PROFILE_FIELDS =
+  "id, email, full_name, activo, created_at, phone, anamnesis, routine_status, nutrition_plan, approved_at";
 
 export async function GET(req: NextRequest) {
   const coach = await getCoach();
@@ -16,18 +21,43 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin();
-  const [profileRes, routinesRes, logsRes, audioRes] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, email, full_name, activo, created_at, phone, anamnesis, routine_status, nutrition_plan, approved_at")
-      .eq("id", id)
-      .single(),
+  const [profileRes, routinesRes] = await Promise.all([
+    supabase.from("profiles").select(PROFILE_FIELDS).eq("id", id).single(),
     supabase
       .from("routines")
       .select("*, exercises(*)")
       .eq("client_id", id)
       .order("week_number", { ascending: false })
       .order("position", { ascending: true }),
+  ]);
+
+  if (profileRes.error || !profileRes.data) {
+    return NextResponse.json({ ok: false, error: "Cliente no encontrado" }, { status: 404 });
+  }
+
+  let profile = profileRes.data;
+  let routines = routinesRes.data ?? [];
+
+  if (profile.anamnesis && !profile.nutrition_plan && routines.length === 0) {
+    try {
+      await generateOnboardingDraft(id, profile.anamnesis as Anamnesis);
+      const [profileAgain, routinesAgain] = await Promise.all([
+        supabase.from("profiles").select(PROFILE_FIELDS).eq("id", id).single(),
+        supabase
+          .from("routines")
+          .select("*, exercises(*)")
+          .eq("client_id", id)
+          .order("week_number", { ascending: false })
+          .order("position", { ascending: true }),
+      ]);
+      if (profileAgain.data) profile = profileAgain.data;
+      routines = routinesAgain.data ?? routines;
+    } catch {
+      // si falla la generación, seguimos devolviendo lo que haya
+    }
+  }
+
+  const [logsRes, audioRes] = await Promise.all([
     supabase
       .from("sets_logs")
       .select("*, exercises(name)")
@@ -43,14 +73,10 @@ export async function GET(req: NextRequest) {
       .limit(100),
   ]);
 
-  if (profileRes.error || !profileRes.data) {
-    return NextResponse.json({ ok: false, error: "Cliente no encontrado" }, { status: 404 });
-  }
-
   return NextResponse.json({
     ok: true,
-    profile: profileRes.data,
-    routines: routinesRes.data ?? [],
+    profile,
+    routines,
     logs: logsRes.data ?? [],
     audio: audioRes.data ?? [],
   });

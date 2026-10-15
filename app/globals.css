@@ -90,6 +90,7 @@ h1, h2, h3, h4 {
 }
 .brand-logo { display: block; height: 38px; width: auto; }
 .app-header .brand-logo { height: 34px; }
+.auth-wrap .brand-logo { height: 152px; }
 
 /* ---------- Botones ---------- */
 .btn {

@@ -62,38 +62,38 @@ export async function generateOnboardingDraft(
     .select("id", { count: "exact", head: true })
     .eq("client_id", clientId);
 
+  if (count) return;
+
   const { routine, nutrition } = buildOnboardingPlan(anamnesis);
 
-  if (!count) {
-    for (let d = 0; d < routine.days.length; d++) {
-      const day = routine.days[d];
-      const { data: row } = await supabase
-        .from("routines")
-        .insert({
-          client_id: clientId,
-          name: day.name,
-          day_name: day.name,
-          week_number: 1,
-          position: d,
-          active: false,
-        })
-        .select("id")
-        .single();
+  for (let d = 0; d < routine.days.length; d++) {
+    const day = routine.days[d];
+    const { data: row } = await supabase
+      .from("routines")
+      .insert({
+        client_id: clientId,
+        name: day.name,
+        day_name: day.name,
+        week_number: 1,
+        position: d,
+        active: false,
+      })
+      .select("id")
+      .single();
 
-      if (!row) continue;
+    if (!row) continue;
 
-      const exercises = day.items.map((item, index) => ({
-        routine_id: row.id,
-        name: item[0],
-        order_index: index,
-        target_sets: intOrNull(item[1]) ?? 3,
-        target_reps: intOrNull(item[2]) ?? 10,
-        target_weight: null,
-        unit: "kg" as const,
-      }));
-      if (exercises.length) {
-        await supabase.from("exercises").insert(exercises);
-      }
+    const exercises = day.items.map((item, index) => ({
+      routine_id: row.id,
+      name: item[0],
+      order_index: index,
+      target_sets: intOrNull(item[1]) ?? 3,
+      target_reps: intOrNull(item[2]) ?? 10,
+      target_weight: null,
+      unit: "kg" as const,
+    }));
+    if (exercises.length) {
+      await supabase.from("exercises").insert(exercises);
     }
   }
 
