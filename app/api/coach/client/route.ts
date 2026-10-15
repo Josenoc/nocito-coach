@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const [profileRes, routinesRes, logsRes, audioRes] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, email, full_name, activo, created_at")
+      .select("id, email, full_name, activo, created_at, phone, anamnesis")
       .eq("id", id)
       .single(),
     supabase

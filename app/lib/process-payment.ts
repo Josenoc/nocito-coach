@@ -97,7 +97,6 @@ async function deliverAccess(
     const mail = await sendAlumnoAccessEmail({
       name,
       email: prov.email,
-      pin: prof.pin,
       existing: prof.existing || prov.existing,
     });
     if (!mail.ok) console.error("[access] email:", mail.error);

@@ -51,6 +51,34 @@ const emptyDraft = (): Draft => ({
   exercises: [emptyEx()],
 });
 
+const GOAL_LABELS: Record<string, string> = {
+  hipertrofia: "Hipertrofia",
+  "perdida-grasa": "Pérdida de grasa",
+  fuerza: "Fuerza",
+  "rendimiento-deportivo": "Rendimiento deportivo",
+};
+
+const NUTRITION_LABELS: Record<string, string> = {
+  omnivoro: "Omnívoro",
+  vegetariano: "Vegetariano",
+  carnivoro: "Carnívoro",
+  vegano: "Vegano",
+};
+
+function Dato({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div
+        className="muted"
+        style={{ fontSize: ".72rem", textTransform: "uppercase", letterSpacing: ".04em" }}
+      >
+        {label}
+      </div>
+      <div style={{ fontWeight: 600 }}>{value}</div>
+    </div>
+  );
+}
+
 export default function CoachDashboard() {
   const router = useRouter();
 
@@ -384,6 +412,49 @@ export default function CoachDashboard() {
                 </div>
 
                 {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
+
+                {detail && (
+                  <div className="card" style={{ marginTop: 12 }}>
+                    <h3 style={{ marginTop: 0 }}>Datos y anamnesis</h3>
+                    {detail.profile?.anamnesis ? (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))",
+                          gap: 10,
+                        }}
+                      >
+                        <Dato label="Edad" value={`${detail.profile.anamnesis.age} años`} />
+                        <Dato label="Sexo" value={detail.profile.anamnesis.sex} />
+                        <Dato label="Altura" value={`${detail.profile.anamnesis.height_cm} cm`} />
+                        <Dato label="Peso" value={`${detail.profile.anamnesis.weight_kg} kg`} />
+                        <Dato
+                          label="Objetivo"
+                          value={
+                            GOAL_LABELS[detail.profile.anamnesis.goal] ??
+                            detail.profile.anamnesis.goal
+                          }
+                        />
+                        <Dato
+                          label="Días/semana"
+                          value={`${detail.profile.anamnesis.training_days}`}
+                        />
+                        <Dato
+                          label="Alimentación"
+                          value={
+                            NUTRITION_LABELS[detail.profile.anamnesis.nutrition] ??
+                            detail.profile.anamnesis.nutrition
+                          }
+                        />
+                        <Dato label="Teléfono" value={detail.profile.phone || "-"} />
+                      </div>
+                    ) : (
+                      <p className="muted" style={{ margin: 0 }}>
+                        El cliente todavía no completó su anamnesis.
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {tab === "historial" && detail && (
                   <div className="card" style={{ marginTop: 12 }}>

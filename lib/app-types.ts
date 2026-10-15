@@ -1,5 +1,16 @@
 export type Role = "client" | "coach";
 
+export interface Anamnesis {
+  sex: string;
+  age: number;
+  height_cm: number;
+  weight_kg: number;
+  goal: string;
+  training_days: number;
+  nutrition: string;
+  completedAt?: string;
+}
+
 export interface Profile {
   id: string;
   email: string;
@@ -7,6 +18,8 @@ export interface Profile {
   full_name: string;
   activo: boolean;
   created_at: string;
+  phone?: string | null;
+  anamnesis?: Anamnesis | null;
 }
 
 export interface Routine {

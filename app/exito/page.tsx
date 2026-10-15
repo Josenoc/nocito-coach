@@ -49,8 +49,26 @@ export default async function ExitoPage({
         <p style={{ color: "#aaa", lineHeight: 1.6, margin: "0 0 24px" }}>
           {pending
             ? "Cuando completes el pago, escribinos por WhatsApp para recibir tu rutina."
-            : "Gracias por tu compra. En cuanto Mercado Pago confirme la operación, te enviamos automáticamente por email tu rutina y tu pauta nutricional. Si no la recibís en unos minutos, escribinos por WhatsApp."}
+            : "Gracias por tu compra. En cuanto Mercado Pago confirme la operación, entrá a tu panel para completar tus datos y elegir tu PIN; José te prepara la rutina y la pauta nutricional. Si no recibís el acceso en unos minutos, escribinos por WhatsApp."}
         </p>
+        {!pending && (
+          <a
+            href="/app"
+            style={{
+              display: "inline-block",
+              background: "#FFC400",
+              color: "#111",
+              fontWeight: 700,
+              textDecoration: "none",
+              padding: "14px 30px",
+              borderRadius: "999px",
+              fontSize: "16px",
+              marginBottom: "12px",
+            }}
+          >
+            Completar mis datos en mi panel
+          </a>
+        )}
         <a
           href={waLink}
           target="_blank"

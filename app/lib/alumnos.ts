@@ -120,55 +120,53 @@ export async function provisionProfile(input: {
   return { ok: true, pin, existing: Boolean(existing) };
 }
 
-function accessEmailHtml(name: string, email: string, pin: string, base: string): string {
-  const link = `${base}/app`;
+function accessEmailHtml(name: string, email: string, base: string): string {
+  const link = `${base}/app?registro=1`;
   return [
     `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;">`,
     `<div style="background:#0b0b0b;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">`,
     `<p style="margin:0;font-size:11px;letter-spacing:2px;color:#FFC400;">NOCITO COACH</p>`,
-    `<h1 style="margin:8px 0 0;font-size:22px;">Tu acceso está listo</h1>`,
+    `<h1 style="margin:8px 0 0;font-size:22px;">Creá tu acceso</h1>`,
     `</div>`,
     `<div style="background:#fff;padding:28px;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;">`,
     `<p style="margin:0 0 16px;color:#222;font-size:15px;">Hola ${name},</p>`,
-    `<p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.6;">Ya podés entrar a tu panel privado para ver tu rutina, cargar tu progreso y completar tu perfil (peso, edad, altura y preferencias) para tu plan nutricional.</p>`,
-    `<p style="margin:0 0 8px;color:#444;font-size:14px;">Tu email de acceso es <strong>${email}</strong> y tu PIN es:</p>`,
-    `<p style="margin:0 0 16px;"><span style="display:inline-block;background:#111;color:#FFC400;font-size:24px;font-weight:700;letter-spacing:6px;padding:12px 22px;border-radius:8px;">${pin}</span></p>`,
-    `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Entrar a mi panel</a></p>`,
-    `<p style="margin:0;color:#888;font-size:12px;">Guardá este email: podés volver cuando quieras e ingresar con tu email y PIN en ${link}.</p>`,
+    `<p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.6;">Tu compra fue confirmada. Creá tu acceso al panel privado en un minuto: completás tus datos (peso, edad, altura y preferencias) y elegís un PIN de 4 dígitos.</p>`,
+    `<p style="margin:0 0 16px;color:#444;font-size:14px;">Vas a ingresar siempre con tu email <strong>${email}</strong> y el PIN que elijas.</p>`,
+    `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Crear mi acceso</a></p>`,
+    `<p style="margin:0;color:#888;font-size:12px;">Guardá este email: podés volver cuando quieras e ingresar con tu email y PIN en ${base}/app.</p>`,
     `</div>`,
     `</div>`,
   ].join("\n");
 }
 
-function accessEmailText(name: string, email: string, pin: string, base: string): string {
+function accessEmailText(name: string, email: string, base: string): string {
   return [
-    "NOCITO COACH — TU ACCESO ESTÁ LISTO",
+    "NOCITO COACH — CREÁ TU ACCESO",
     "",
     `Hola ${name},`,
     "",
-    "Ya podés entrar a tu panel privado para ver tu rutina, cargar tu progreso",
-    "y completar tu perfil (peso, edad, altura y preferencias) para tu plan nutricional.",
+    "Tu compra fue confirmada. Creá tu acceso al panel privado en un minuto:",
+    "completás tus datos (peso, edad, altura y preferencias) y elegís un PIN de 4 dígitos.",
     "",
     "Email de acceso: " + email,
-    "PIN: " + pin,
-    "Entrá a: " + `${base}/app`,
+    "Vas a ingresar siempre con este email y el PIN que elijas.",
+    "Creá tu acceso en: " + `${base}/app?registro=1`,
     "",
-    "Guardá este email: podés volver cuando quieras e ingresar con tu email y PIN.",
+    "Guardá este email: podés volver cuando quieras e ingresar en " + `${base}/app`,
   ].join("\n");
 }
 
 export async function sendAlumnoAccessEmail(input: {
   name: string;
   email: string;
-  pin: string;
   existing?: boolean;
 }): Promise<{ ok: boolean; to?: string; error?: string }> {
   const base = siteBaseUrl();
   const subject = input.existing
     ? "Tu acceso a Nocito Coach"
-    : "Bienvenido a Nocito Coach — tu acceso";
-  const html = accessEmailHtml(input.name, input.email, input.pin, base);
-  const text = accessEmailText(input.name, input.email, input.pin, base);
+    : "Bienvenido a Nocito Coach — creá tu acceso";
+  const html = accessEmailHtml(input.name, input.email, base);
+  const text = accessEmailText(input.name, input.email, base);
 
   let resend;
   try {
