@@ -35,6 +35,10 @@ const EMPTY_REG = {
   pin_confirm: "",
 };
 
+const TEST_LOGIN_ENABLED =
+  process.env.NODE_ENV !== "production" ||
+  process.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
+
 type SetRow = {
   set_number: number;
   actual_reps: string;
@@ -179,6 +183,22 @@ export default function ClientApp() {
       await loadRoutine();
     } catch (err: any) {
       setAuthError(err.message || "No se pudo ingresar");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const testLogin = async () => {
+    setAuthError(null);
+    setAuthLoading(true);
+    try {
+      const res = await fetch("/api/auth/test-login", { method: "POST" });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      setProfile(json.profile);
+      await loadRoutine();
+    } catch (err: any) {
+      setAuthError(err.message || "No se pudo iniciar sesión de prueba");
     } finally {
       setAuthLoading(false);
     }
@@ -346,6 +366,25 @@ export default function ClientApp() {
                   </button>
                   {authError && <div className="toast err">{authError}</div>}
                 </form>
+                {TEST_LOGIN_ENABLED && (
+                  <div style={{ marginTop: 14 }}>
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      style={{ width: "100%", fontSize: ".82rem" }}
+                      disabled={authLoading}
+                      onClick={testLogin}
+                    >
+                      {authLoading ? "Entrando…" : "Test Student Login"}
+                    </button>
+                    <p
+                      className="muted"
+                      style={{ marginTop: 8, fontSize: ".74rem", textAlign: "center" }}
+                    >
+                      Solo para pruebas: entra como Alumno Test (plan de 4 días).
+                    </p>
+                  </div>
+                )}
                 <p className="muted" style={{ marginTop: 14, textAlign: "center", fontSize: ".9rem" }}>
                   ¿Primera vez?{" "}
                   <a
