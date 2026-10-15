@@ -309,6 +309,20 @@ h1, h2, h3, h4 {
 }
 .anatomy-fallback img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .anatomy-fallback.is-motion img { object-fit: contain; background: #05080f; }
+.anatomy-fallback .pd-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #05080f;
+}
+.anatomy-fallback.is-motion .pd-frame { animation: pdCross 1.6s ease-in-out infinite; }
+.anatomy-fallback.is-motion .pd-b { animation-delay: -0.8s; }
+@keyframes pdCross {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
 .anatomy-fallback .anatomy-badge {
   position: absolute;
   top: 10px;

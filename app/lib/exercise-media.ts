@@ -120,3 +120,66 @@ export function exerciseGifSrc(name: string): string | null {
   return path ? `${GIF_CDN}/${path}.gif` : null;
 }
 
+/**
+ * Modo de media para las demostraciones:
+ *  - "pd"  (default): imagenes de dominio publico (free-exercise-db, Unlicense)
+ *          mostradas como animación de 2 frames (inicio/fin). Seguro para uso comercial.
+ *  - "gif": GIF animados del CDN ExerciseGymGifsDB (© Gym visual; verificar licencia).
+ * Se controla con NEXT_PUBLIC_EXERCISE_MEDIA ("pd" | "gif").
+ */
+export const EXERCISE_MEDIA_MODE: "gif" | "pd" =
+  process.env.NEXT_PUBLIC_EXERCISE_MEDIA === "gif" ? "gif" : "pd";
+
+const PD_CDN = "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises";
+
+const PD_BY_SLUG: Record<string, string> = {
+  "barbell-bench-press": "Barbell_Bench_Press_-_Medium_Grip",
+  "incline-dumbbell-press": "Incline_Dumbbell_Press",
+  "dumbbell-fly": "Dumbbell_Flyes",
+  "overhead-press": "Standing_Military_Press",
+  "lateral-raise": "Side_Lateral_Raise",
+  "front-raise": "Front_Dumbbell_Raise",
+  "rear-delt-fly": "Cable_Rear_Delt_Fly",
+  "triceps-pushdown": "Triceps_Pushdown",
+  "overhead-triceps-extension": "Cable_Rope_Overhead_Triceps_Extension",
+  "bench-dips": "Bench_Dips",
+  "pull-up": "Pullups",
+  "lat-pulldown": "Wide-Grip_Lat_Pulldown",
+  "barbell-row": "Bent_Over_Barbell_Row",
+  "seated-cable-row": "Seated_Cable_Rows",
+  "barbell-curl": "Barbell_Curl",
+  "hammer-curl": "Hammer_Curls",
+  "biceps-curl": "Dumbbell_Bicep_Curl",
+  "preacher-curl": "Preacher_Curl",
+  "barbell-squat": "Barbell_Squat",
+  "leg-press": "Leg_Press",
+  "romanian-deadlift": "Romanian_Deadlift",
+  "hip-thrust": "Barbell_Hip_Thrust",
+  "leg-extension": "Leg_Extensions",
+  "lying-leg-curl": "Lying_Leg_Curls",
+  "standing-calf-raise": "Standing_Calf_Raises",
+  "seated-calf-raise": "Seated_Calf_Raise",
+  "plank": "Plank",
+  "hanging-leg-raise": "Hanging_Leg_Raise",
+  "hiit-cardio": "Mountain_Climbers",
+};
+
+/** Dos fotogramas (posición inicial/final) de free-exercise-db, o null. */
+export function exercisePdFrames(name: string): string[] | null {
+  const slug = exerciseAnatomySlug(name);
+  if (!slug) return null;
+  const id = PD_BY_SLUG[slug];
+  if (!id) return null;
+  return [`${PD_CDN}/${id}/0.jpg`, `${PD_CDN}/${id}/1.jpg`];
+}
+
+/** Fuentes a precargar según el modo activo. */
+export function exerciseDemoPreload(name: string): string[] {
+  if (EXERCISE_MEDIA_MODE === "gif") {
+    const gif = exerciseGifSrc(name);
+    return gif ? [gif] : [exerciseAnatomySrc(name)];
+  }
+  return exercisePdFrames(name) ?? [exerciseAnatomySrc(name)];
+}
+
+

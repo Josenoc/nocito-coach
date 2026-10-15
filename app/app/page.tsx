@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/app-types";
-import { exerciseAnatomySrc, exerciseGifSrc, GENERIC_ANATOMY_SRC } from "@/app/lib/exercise-media";
+import {
+  exerciseAnatomySrc,
+  exerciseGifSrc,
+  exercisePdFrames,
+  exerciseDemoPreload,
+  EXERCISE_MEDIA_MODE,
+  GENERIC_ANATOMY_SRC,
+} from "@/app/lib/exercise-media";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const OBJETIVOS_REG: [string, string][] = [
@@ -58,12 +65,32 @@ function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src
 }
 
 function ExerciseDemo({ name }: { name: string }) {
-  const gif = exerciseGifSrc(name);
+  const useGif = EXERCISE_MEDIA_MODE === "gif";
+  const gif = useGif ? exerciseGifSrc(name) : null;
+  const pdFrames = !useGif ? exercisePdFrames(name) : null;
   const anatomy = exerciseAnatomySrc(name);
-  const sources = Array.from(new Set([gif, anatomy, GENERIC_ANATOMY_SRC].filter(Boolean))) as string[];
+  const single = Array.from(new Set([gif, anatomy, GENERIC_ANATOMY_SRC].filter(Boolean))) as string[];
+  const [broken, setBroken] = useState(false);
   const [idx, setIdx] = useState(0);
-  const safeIdx = Math.min(idx, sources.length - 1);
-  const src = sources[safeIdx];
+
+  if (pdFrames && !broken) {
+    return (
+      <figure className="anatomy-fallback is-motion">
+        <span className="anatomy-badge">ANIM</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="pd-frame pd-a" src={pdFrames[0]} alt={`${name} · posición inicial`} loading="eager" onError={() => setBroken(true)} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="pd-frame pd-b" src={pdFrames[1]} alt={`${name} · posición final`} loading="eager" onError={() => setBroken(true)} />
+        <figcaption>
+          <span className="anatomy-label">Demostración animada</span>
+          <span className="anatomy-sub">Secuencia técnica en loop · posición inicial / final</span>
+        </figcaption>
+      </figure>
+    );
+  }
+
+  const safeIdx = Math.min(idx, single.length - 1);
+  const src = single[safeIdx];
   const isMotion = !!gif && src === gif;
   return (
     <figure className={`anatomy-fallback${isMotion ? " is-motion" : ""}`}>
@@ -73,7 +100,7 @@ function ExerciseDemo({ name }: { name: string }) {
         src={src}
         alt={`Demostración de ${name}`}
         loading="eager"
-        onError={() => setIdx((i) => (i < sources.length - 1 ? i + 1 : i))}
+        onError={() => setIdx((i) => (i < single.length - 1 ? i + 1 : i))}
       />
       <figcaption>
         <span className="anatomy-label">
@@ -159,8 +186,10 @@ export default function ClientApp() {
     const day = routines.find((r) => r.id === activeDay) ?? routines[0];
     for (const ex of day?.exercises ?? []) {
       if (embedUrl(ex.video_url).kind === "none") {
-        const img = new Image();
-        img.src = exerciseGifSrc(ex.name) ?? exerciseAnatomySrc(ex.name);
+        for (const src of exerciseDemoPreload(ex.name)) {
+          const img = new Image();
+          img.src = src;
+        }
       }
     }
   }, [routines, activeDay]);
