@@ -25,6 +25,7 @@ export interface NutritionPlan {
 export interface Profile {
   id: string;
   email: string;
+  username?: string | null;
   role: Role;
   full_name: string;
   activo: boolean;

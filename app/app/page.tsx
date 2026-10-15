@@ -22,6 +22,7 @@ const NUTRICION_REG: [string, string][] = [
 const EMPTY_REG = {
   full_name: "",
   email: "",
+  username: "",
   phone: "",
   sex: "Masculino",
   age: "",
@@ -312,15 +313,15 @@ export default function ClientApp() {
               <>
                 <h1 style={{ margin: "0 0 4px", fontSize: "1.42rem" }}>Mi entrenamiento</h1>
                 <p className="muted" style={{ marginTop: 0 }}>
-                  Ingresá con tu email y tu PIN de 4 dígitos.
+                  Ingresá con tu usuario o email y tu PIN de 4 dígitos.
                 </p>
                 <form onSubmit={login} style={{ display: "grid", gap: 14, marginTop: 16 }}>
                   <div>
-                    <label className="lbl">Email</label>
+                    <label className="lbl">Usuario o email</label>
                     <input
                       className="input"
-                      type="email"
-                      autoComplete="email"
+                      type="text"
+                      autoComplete="username"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -372,6 +373,22 @@ export default function ClientApp() {
                       className="input"
                       value={reg.full_name}
                       onChange={(e) => setReg({ ...reg, full_name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="lbl">Nombre de usuario (para ingresar rápido)</label>
+                    <input
+                      className="input"
+                      autoComplete="username"
+                      placeholder="ej: juanperez"
+                      value={reg.username}
+                      onChange={(e) =>
+                        setReg({
+                          ...reg,
+                          username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20),
+                        })
+                      }
                       required
                     />
                   </div>

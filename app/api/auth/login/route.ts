@@ -8,25 +8,30 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const email = String(body?.email ?? "").trim().toLowerCase();
+    const username = String(body?.username ?? "").trim().toLowerCase();
+    const identifier = email || username;
     const pin = String(body?.pin ?? "").trim();
 
-    if (!email || !/^\d{4}$/.test(pin)) {
+    if (!identifier || !/^\d{4}$/.test(pin)) {
       return NextResponse.json(
-        { ok: false, error: "Ingresá tu email y un PIN de 4 dígitos." },
+        { ok: false, error: "Ingresá tu usuario/email y un PIN de 4 dígitos." },
         { status: 400 }
       );
     }
 
-    const { data, error } = await getSupabaseAdmin()
+    const query = getSupabaseAdmin()
       .from("profiles")
-      .select("id, email, role, full_name, pin_hash, activo")
-      .eq("email", email)
-      .eq("activo", true)
-      .single();
+      .select("id, email, username, role, full_name, pin_hash, activo")
+      .eq("activo", true);
+
+    const { data, error } = await (identifier.includes("@")
+      ? query.eq("email", identifier)
+      : query.eq("username", identifier)
+    ).maybeSingle();
 
     if (error || !data || !verifyPin(pin, data.pin_hash)) {
       return NextResponse.json(
-        { ok: false, error: "Email o PIN incorrectos." },
+        { ok: false, error: "Usuario/email o PIN incorrectos." },
         { status: 401 }
       );
     }
@@ -34,6 +39,7 @@ export async function POST(req: NextRequest) {
     const profile = {
       id: data.id as string,
       email: data.email as string,
+      username: (data.username as string) || "",
       role: data.role as Role,
       full_name: (data.full_name as string) || "",
     };

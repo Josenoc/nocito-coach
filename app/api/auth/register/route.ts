@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
 
     const email = String(body?.email ?? "").trim().toLowerCase();
+    const username = String(body?.username ?? "").trim().toLowerCase();
     const full_name = String(body?.full_name ?? "").trim();
     const phone = String(body?.phone ?? "").trim();
     const sex = String(body?.sex ?? "");
@@ -40,6 +41,8 @@ export async function POST(req: NextRequest) {
     const pin_confirm = String(body?.pin_confirm ?? "").trim();
 
     if (!isDeliverableEmail(email)) return bad("Ingresá un email válido.");
+    if (!/^[a-z0-9_]{3,20}$/.test(username))
+      return bad("El usuario debe tener 3 a 20 caracteres (letras, números o guión bajo).");
     if (!full_name) return bad("Ingresá tu nombre completo.");
     if (phone.replace(/\D/g, "").length < 6) return bad("Ingresá un teléfono/WhatsApp válido.");
     if (!SEXOS.includes(sex)) return bad("Elegí tu sexo.");
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
 
     const { data: existing } = await supabase
       .from("profiles")
-      .select("id, anamnesis")
+      .select("id, anamnesis, username")
       .eq("email", email)
       .maybeSingle();
 
@@ -70,6 +73,17 @@ export async function POST(req: NextRequest) {
 
     if (yaOnboarded) {
       return bad("Ya existe una cuenta con ese email. Iniciá sesión.", 409);
+    }
+
+    const { data: usernameTaken } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("username", username)
+      .neq("id", existing?.id ?? "00000000-0000-0000-0000-000000000000")
+      .maybeSingle();
+
+    if (usernameTaken) {
+      return bad("Ese nombre de usuario ya está en uso. Elegí otro.", 409);
     }
 
     const anamnesis: Anamnesis = {
@@ -88,6 +102,7 @@ export async function POST(req: NextRequest) {
       .upsert(
         {
           email,
+          username,
           role: "client",
           full_name,
           phone,
@@ -98,7 +113,7 @@ export async function POST(req: NextRequest) {
         },
         { onConflict: "email" }
       )
-      .select("id, email, role, full_name")
+      .select("id, email, username, role, full_name")
       .single();
 
     if (error || !data) {
@@ -110,6 +125,7 @@ export async function POST(req: NextRequest) {
     const profile = {
       id: data.id as string,
       email: data.email as string,
+      username: (data.username as string) || username,
       role: data.role as Role,
       full_name: (data.full_name as string) || "",
     };
