@@ -581,7 +581,7 @@ export default function CoachDashboard() {
                           <tr>
                             <th>Fecha</th>
                             <th>Ejercicio</th>
-                            <th>Set</th>
+                              <th>Series</th>
                             <th>Reps</th>
                             <th>Peso</th>
                             <th>Objetivo</th>
