@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- Nocito Coach - Nombre de usuario del cliente (login rápido)
 -- Ejecutar en Supabase -> SQL Editor -> New query -> Run
 -- Agrega a profiles el nombre de usuario único para el login.
