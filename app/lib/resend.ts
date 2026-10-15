@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
-export const SENDER_EMAIL = "onboarding@resend.dev";
+export const SENDER_EMAIL =
+  process.env.RESEND_FROM ?? process.env.SENDER_EMAIL ?? "onboarding@resend.dev";
 
 export function getDestinationEmail(): string {
   return (process.env.DESTINATION_EMAIL ?? "").toLowerCase();

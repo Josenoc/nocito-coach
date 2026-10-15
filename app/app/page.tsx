@@ -78,6 +78,7 @@ export default function ClientApp() {
   const [reg, setReg] = useState({ ...EMPTY_REG });
   const [regError, setRegError] = useState<string | null>(null);
   const [regLoading, setRegLoading] = useState(false);
+  const [confirm, setConfirm] = useState(false);
 
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [activeDay, setActiveDay] = useState<string | null>(null);
@@ -191,6 +192,7 @@ export default function ClientApp() {
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
       setProfile(json.profile);
+      setConfirm(true);
       await loadRoutine();
     } catch (err: any) {
       setRegError(err.message || "No se pudo crear la cuenta");
@@ -546,6 +548,39 @@ export default function ClientApp() {
                 </p>
               </>
             )}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (confirm) {
+    return (
+      <main className="auth-wrap">
+        <div className="auth-card" style={{ maxWidth: 480 }}>
+          <div style={{ textAlign: "center", marginBottom: 18 }}>
+            <span className="brand">
+              <span className="brand-mark">J</span>
+              <span className="brand-name">nocito.coach</span>
+            </span>
+          </div>
+          <div className="card">
+            <span className="badge">¡Datos registrados!</span>
+            <h1 style={{ margin: "12px 0 8px", fontSize: "1.42rem" }}>
+              ¡Listo, {profile.full_name || profile.email.split("@")[0]}!
+            </h1>
+            <p className="muted" style={{ marginTop: 0, lineHeight: 1.6 }}>
+              En unos momentos vas a recibir tu rutina y sugerencia nutricional en esta
+              pantalla. Si en unos minutos no aparece, por las dudas volvé a entrar con el
+              mismo usuario y contraseña que elegiste.
+            </p>
+            <button
+              className="btn btn-primary"
+              style={{ marginTop: 18, width: "100%" }}
+              onClick={() => setConfirm(false)}
+            >
+              Ver mi entrenamiento
+            </button>
           </div>
         </div>
       </main>

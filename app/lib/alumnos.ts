@@ -126,13 +126,13 @@ function accessEmailHtml(name: string, email: string, base: string): string {
     `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;">`,
     `<div style="background:#0b0b0b;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">`,
     `<p style="margin:0;font-size:11px;letter-spacing:2px;color:#FFC400;">NOCITO COACH</p>`,
-    `<h1 style="margin:8px 0 0;font-size:22px;">Creá tu acceso</h1>`,
+    `<h1 style="margin:8px 0 0;font-size:22px;">Tu acceso está listo</h1>`,
     `</div>`,
     `<div style="background:#fff;padding:28px;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;">`,
     `<p style="margin:0 0 16px;color:#222;font-size:15px;">Hola ${name},</p>`,
-    `<p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.6;">Tu compra fue confirmada. Creá tu acceso al panel privado en un minuto: completás tus datos (peso, edad, altura y preferencias) y elegís un PIN de 4 dígitos.</p>`,
+    `<p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.6;">Tu compra fue confirmada y tu cuenta ya está creada. Entrá, completá tus datos (peso, edad, altura y preferencias) y elegí un PIN de 4 dígitos para ingresar por primera vez.</p>`,
     `<p style="margin:0 0 16px;color:#444;font-size:14px;">Vas a ingresar siempre con tu email <strong>${email}</strong> y el PIN que elijas.</p>`,
-    `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Crear mi acceso</a></p>`,
+    `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Ingresar y completar mis datos</a></p>`,
     `<p style="margin:0;color:#888;font-size:12px;">Guardá este email: podés volver cuando quieras e ingresar con tu email y PIN en ${base}/app.</p>`,
     `</div>`,
     `</div>`,
@@ -141,16 +141,16 @@ function accessEmailHtml(name: string, email: string, base: string): string {
 
 function accessEmailText(name: string, email: string, base: string): string {
   return [
-    "NOCITO COACH — CREÁ TU ACCESO",
+    "NOCITO COACH — TU ACCESO ESTÁ LISTO",
     "",
     `Hola ${name},`,
     "",
-    "Tu compra fue confirmada. Creá tu acceso al panel privado en un minuto:",
-    "completás tus datos (peso, edad, altura y preferencias) y elegís un PIN de 4 dígitos.",
+    "Tu compra fue confirmada y tu cuenta ya está creada. Entrá, completá tus datos",
+    "(peso, edad, altura y preferencias) y elegí un PIN de 4 dígitos para ingresar por primera vez.",
     "",
     "Email de acceso: " + email,
     "Vas a ingresar siempre con este email y el PIN que elijas.",
-    "Creá tu acceso en: " + `${base}/app?registro=1`,
+    "Ingresá y completá tus datos en " + `${base}/app?registro=1`,
     "",
     "Guardá este email: podés volver cuando quieras e ingresar en " + `${base}/app`,
   ].join("\n");
@@ -164,7 +164,7 @@ export async function sendAlumnoAccessEmail(input: {
   const base = siteBaseUrl();
   const subject = input.existing
     ? "Tu acceso a Nocito Coach"
-    : "Bienvenido a Nocito Coach — creá tu acceso";
+    : "Tu acceso a Nocito Coach — completá tus datos";
   const html = accessEmailHtml(input.name, input.email, base);
   const text = accessEmailText(input.name, input.email, base);
 
