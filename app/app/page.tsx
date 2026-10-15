@@ -497,7 +497,7 @@ export default function ClientApp() {
                     <button
                       type="button"
                       className="btn btn-outline"
-                      style={{ width: "100%", fontSize: ".82rem" }}
+                      style={{ width: "100%", fontSize: ".9rem" }}
                       disabled={authLoading}
                       onClick={testLogin}
                     >
@@ -505,13 +505,13 @@ export default function ClientApp() {
                     </button>
                     <p
                       className="muted"
-                      style={{ marginTop: 8, fontSize: ".74rem", textAlign: "center" }}
+                      style={{ marginTop: 8, fontSize: ".82rem", textAlign: "center" }}
                     >
                       Solo para pruebas: entra como Alumno Test (plan de 4 días).
                     </p>
                   </div>
                 )}
-                <p className="muted" style={{ marginTop: 14, textAlign: "center", fontSize: ".9rem" }}>
+                <p className="muted" style={{ marginTop: 14, textAlign: "center", fontSize: ".95rem" }}>
                   ¿Primera vez?{" "}
                   <a
                     href="#"
@@ -720,7 +720,7 @@ export default function ClientApp() {
                   </button>
                   {regError && <div className="toast err">{regError}</div>}
                 </form>
-                <p className="muted" style={{ marginTop: 14, textAlign: "center", fontSize: ".9rem" }}>
+                <p className="muted" style={{ marginTop: 14, textAlign: "center", fontSize: ".95rem" }}>
                   ¿Ya tenés cuenta?{" "}
                   <a
                     href="#"
@@ -784,7 +784,7 @@ export default function ClientApp() {
             <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span className="muted hide-sm" style={{ fontSize: ".86rem" }}>
+            <span className="muted hide-sm" style={{ fontSize: ".9rem" }}>
               {profile.full_name || profile.email.split("@")[0]}
             </span>
             <button className="btn btn-outline" onClick={logout} style={{ padding: "8px 14px" }}>
@@ -847,9 +847,6 @@ export default function ClientApp() {
               <div className="row-between" style={{ marginBottom: 14 }}>
                 <span className="badge">
                   {exList.length} ejercicio{exList.length === 1 ? "" : "s"}
-                </span>
-                <span className="legend">
-                  Número tenue = objetivo · <span className="legend-dot">objetivo</span>
                 </span>
               </div>
 
@@ -979,9 +976,8 @@ export default function ClientApp() {
                               ? "Detener y cargar"
                               : "Dictar series por voz"}
                           </button>
-                          <p className="muted" style={{ fontSize: ".82rem", marginTop: 8 }}>
-                            Decí por voz lo que hiciste (ej. «3 series de 10 con 50 kilos») y se
-                            completan y guardan las series solas. Podés volver a grabar o corregir a mano.
+                          <p className="muted" style={{ fontSize: ".9rem", marginTop: 8 }}>
+                            Dictá tus series por voz, por ejemplo «3 series de 10 con 50 kilos».
                           </p>
                         </div>
                       </div>
