@@ -79,7 +79,6 @@ function ExerciseDemo({ name }: { name: string }) {
   if (gif && !gifBroken) {
     return (
       <figure className="anatomy-fallback is-motion">
-        <span className="anatomy-badge">LOOP</span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="demo-media"
