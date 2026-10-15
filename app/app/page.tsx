@@ -21,6 +21,18 @@ function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src
   return { kind: "iframe", src: url };
 }
 
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  );
+}
+
 export default function ClientApp() {
   const router = useRouter();
 
@@ -216,208 +228,261 @@ export default function ClientApp() {
   if (!profile) {
     return (
       <main className="auth-wrap">
-        <div className="auth-card card">
-          <p className="auth-logo">Nocito Coach</p>
-          <h1 style={{ margin: "0 0 4px", fontSize: "1.5rem" }}>Mi entrenamiento</h1>
-          <p className="muted" style={{ marginTop: 0 }}>
-            Ingresá con tu email y tu PIN de 4 dígitos.
-          </p>
-          <form onSubmit={login} style={{ display: "grid", gap: 14, marginTop: 16 }}>
-            <div>
-              <label className="lbl">Email</label>
-              <input
-                className="input"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="lbl">PIN (4 dígitos)</label>
-              <input
-                className="input"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={4}
-                autoComplete="one-time-code"
-                value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                style={{ letterSpacing: "0.5em", textAlign: "center", fontSize: "1.3rem" }}
-                required
-              />
-            </div>
-            <button className="btn btn-primary" disabled={authLoading}>
-              {authLoading ? "Ingresando…" : "Ingresar"}
-            </button>
-            {authError && <div className="toast err">{authError}</div>}
-          </form>
+        <div className="auth-card">
+          <div style={{ textAlign: "center", marginBottom: 18 }}>
+            <span className="brand">
+              <span className="brand-mark">J</span>
+              <span className="brand-name">nocito.coach</span>
+            </span>
+          </div>
+          <div className="card">
+            <h1 style={{ margin: "0 0 4px", fontSize: "1.42rem" }}>Mi entrenamiento</h1>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Ingresá con tu email y tu PIN de 4 dígitos.
+            </p>
+            <form onSubmit={login} style={{ display: "grid", gap: 14, marginTop: 16 }}>
+              <div>
+                <label className="lbl">Email</label>
+                <input
+                  className="input"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="lbl">PIN (4 dígitos)</label>
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={4}
+                  autoComplete="one-time-code"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  style={{ letterSpacing: "0.5em", textAlign: "center", fontSize: "1.3rem" }}
+                  required
+                />
+              </div>
+              <button className="btn btn-primary" disabled={authLoading}>
+                {authLoading ? "Ingresando…" : "Ingresar"}
+              </button>
+              {authError && <div className="toast err">{authError}</div>}
+            </form>
+          </div>
         </div>
       </main>
     );
   }
 
   const current = routines.find((r) => r.id === activeDay) ?? routines[0];
+  const exList = current?.exercises ?? [];
 
   return (
-    <main className="section">
-      <div className="container">
-        <div className="topbar">
-          <div>
-            <h1>Hola, {profile.full_name || profile.email.split("@")[0]}</h1>
-            <span className="muted" style={{ fontSize: ".9rem" }}>
-              Tu entrenamiento de hoy
+    <>
+      <header className="app-header">
+        <div className="app-header-inner">
+          <span className="brand">
+            <span className="brand-mark">J</span>
+            <span className="brand-name">nocito.coach</span>
+          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span className="muted hide-sm" style={{ fontSize: ".86rem" }}>
+              {profile.full_name || profile.email.split("@")[0]}
             </span>
+            <button className="btn btn-outline" onClick={logout} style={{ padding: "8px 14px" }}>
+              Salir
+            </button>
           </div>
-          <button className="btn btn-outline" onClick={logout}>
-            Salir
-          </button>
         </div>
+      </header>
 
-        {loadingData && <p className="muted">Cargando tu rutina…</p>}
-
-        {!loadingData && routines.length === 0 && (
-          <div className="card">
-            <span className="badge">Sin rutina asignada</span>
-            <p className="muted">
-              Tu coach todavía no cargó una rutina. Volvé a intentar más tarde.
-            </p>
-          </div>
-        )}
-
-        {routines.length > 0 && (
-          <>
-            <div className="tabs">
-              {routines.map((r) => (
-                <button
-                  key={r.id}
-                  className={`chip ${r.id === current?.id ? "active" : ""}`}
-                  onClick={() => setActiveDay(r.id)}
-                >
-                  {r.day_name || r.name}
-                </button>
-              ))}
+      <main className="section">
+        <div className="container">
+          <div className="row-between" style={{ marginBottom: 18 }}>
+            <div>
+              <h1 style={{ margin: "0 0 2px", fontSize: "1.6rem" }}>
+                Hola, {profile.full_name || profile.email.split("@")[0]}
+              </h1>
+              <span className="muted" style={{ fontSize: ".92rem" }}>
+                Tu entrenamiento de hoy
+              </span>
             </div>
+          </div>
 
-            {audioMsg && <div className="toast ok">{audioMsg}</div>}
+          {loadingData && <p className="muted">Cargando tu rutina…</p>}
 
-            {(current?.exercises ?? []).map((ex) => {
-              const media = embedUrl(ex.video_url);
-              const notes = (ex.technique_notes ?? "").split("\n").filter(Boolean);
-              return (
-                <div className="exercise-card" key={ex.id}>
-                  <div className="workout-grid">
-                    <div>
-                      <div className="exercise-head">
-                        <h3 className="exercise-name">{ex.name}</h3>
-                        <span className="muted" style={{ fontSize: ".88rem" }}>
-                          {ex.target_sets ?? "-"} series × {ex.target_reps ?? "-"} reps
-                          {ex.target_weight ? ` · ${ex.target_weight} ${ex.unit}` : ""}
-                        </span>
+          {!loadingData && routines.length === 0 && (
+            <div className="card">
+              <span className="badge">Sin rutina asignada</span>
+              <p className="muted" style={{ marginBottom: 0 }}>
+                Tu coach todavía no cargó una rutina. Volvé a intentar más tarde.
+              </p>
+            </div>
+          )}
+
+          {routines.length > 0 && (
+            <>
+              <div className="day-tabs">
+                {routines.map((r) => (
+                  <button
+                    key={r.id}
+                    className={`chip ${r.id === current?.id ? "active" : ""}`}
+                    onClick={() => setActiveDay(r.id)}
+                  >
+                    {r.day_name || r.name}
+                  </button>
+                ))}
+              </div>
+
+              <div className="row-between" style={{ marginBottom: 14 }}>
+                <span className="badge">
+                  {exList.length} ejercicio{exList.length === 1 ? "" : "s"}
+                </span>
+                <span className="legend">
+                  Número tenue = objetivo · <span className="legend-dot">objetivo</span>
+                </span>
+              </div>
+
+              {audioMsg && <div className="toast ok">{audioMsg}</div>}
+
+              {exList.map((ex, idx) => {
+                const media = embedUrl(ex.video_url);
+                const notes = (ex.technique_notes ?? "").split("\n").filter(Boolean);
+                const recording = recordingFor === ex.id;
+                return (
+                  <div className="exercise-card" key={ex.id}>
+                    <div className="workout-grid">
+                      <div>
+                        <div className="exercise-head">
+                          <span className="ex-badge">{idx + 1}</span>
+                          <h3 className="exercise-name">{ex.name}</h3>
+                          <span className="target-chip">
+                            <b>{ex.target_sets ?? "-"}</b> × <b>{ex.target_reps ?? "-"}</b>
+                            {ex.target_weight ? (
+                              <>
+                                {" · "}
+                                <b>
+                                  {ex.target_weight} {ex.unit}
+                                </b>
+                              </>
+                            ) : null}
+                          </span>
+                        </div>
+                        {media.kind === "iframe" && (
+                          <div className="video-frame">
+                            <iframe
+                              src={media.src}
+                              title={ex.name}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        )}
+                        {media.kind === "video" && (
+                          <div className="video-frame">
+                            <video src={media.src} controls playsInline />
+                          </div>
+                        )}
+                        {media.kind === "none" && (
+                          <div
+                            className="video-frame"
+                            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                          >
+                            <span className="muted">Sin video de referencia</span>
+                          </div>
+                        )}
+                        {notes.length > 0 && (
+                          <ul className="tech-list">
+                            {notes.map((n, i) => (
+                              <li key={i}>{n.replace(/^[-•]\s*/, "")}</li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-                      {media.kind === "iframe" && (
-                        <div className="video-frame">
-                          <iframe
-                            src={media.src}
-                            title={ex.name}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
-                        </div>
-                      )}
-                      {media.kind === "video" && (
-                        <div className="video-frame">
-                          <video src={media.src} controls playsInline />
-                        </div>
-                      )}
-                      {media.kind === "none" && (
-                        <div className="video-frame" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span className="muted">Sin video de referencia</span>
-                        </div>
-                      )}
-                      {notes.length > 0 && (
-                        <ul className="tech-list">
-                          {notes.map((n, i) => (
-                            <li key={i}>{n.replace(/^[-•]\s*/, "")}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
 
-                    <div>
-                      <table className="track-table">
-                        <thead>
-                          <tr>
-                            <th>Set</th>
-                            <th>Reps</th>
-                            <th>Peso ({ex.unit})</th>
-                            <th />
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(rows[ex.id] ?? []).map((r) => (
-                            <tr key={r.set_number}>
-                              <td className="set-index">{r.set_number}</td>
-                              <td>
-                                <div className="cell-wrap">
-                                  <span className="phantom">{ex.target_reps ?? ""}</span>
-                                  <input
-                                    className="num-input"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    value={r.actual_reps}
-                                    onChange={(e) =>
-                                      updateRow(ex.id, r.set_number, {
-                                        actual_reps: e.target.value.replace(/[^\d]/g, ""),
-                                      })
-                                    }
-                                    onBlur={() => saveSet(ex, r.set_number)}
-                                  />
-                                </div>
-                              </td>
-                              <td>
-                                <div className="cell-wrap">
-                                  <span className="phantom">{ex.target_weight ?? ""}</span>
-                                  <input
-                                    className="num-input"
-                                    inputMode="decimal"
-                                    value={r.actual_weight}
-                                    onChange={(e) =>
-                                      updateRow(ex.id, r.set_number, {
-                                        actual_weight: e.target.value.replace(/[^\d.,]/g, ""),
-                                      })
-                                    }
-                                    onBlur={() => saveSet(ex, r.set_number)}
-                                  />
-                                </div>
-                              </td>
-                              <td style={{ width: 24, textAlign: "center", color: "var(--ok)" }}>
-                                {r.saved ? "✓" : ""}
-                              </td>
+                      <div>
+                        <div className="track-head">
+                          <h4>Mis series</h4>
+                          <span className="legend">
+                            <span className="legend-dot">{ex.target_reps ?? "-"}</span>
+                            reps objetivo
+                          </span>
+                        </div>
+                        <table className="track-table">
+                          <thead>
+                            <tr>
+                              <th>Set</th>
+                              <th>Reps</th>
+                              <th>Peso ({ex.unit})</th>
+                              <th />
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {(rows[ex.id] ?? []).map((r) => (
+                              <tr key={r.set_number}>
+                                <td className="set-index">{r.set_number}</td>
+                                <td>
+                                  <div className="cell-wrap">
+                                    <span className="phantom">{ex.target_reps ?? ""}</span>
+                                    <input
+                                      className="num-input"
+                                      inputMode="numeric"
+                                      pattern="[0-9]*"
+                                      value={r.actual_reps}
+                                      onChange={(e) =>
+                                        updateRow(ex.id, r.set_number, {
+                                          actual_reps: e.target.value.replace(/[^\d]/g, ""),
+                                        })
+                                      }
+                                      onBlur={() => saveSet(ex, r.set_number)}
+                                    />
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="cell-wrap">
+                                    <span className="phantom">{ex.target_weight ?? ""}</span>
+                                    <input
+                                      className="num-input"
+                                      inputMode="decimal"
+                                      value={r.actual_weight}
+                                      onChange={(e) =>
+                                        updateRow(ex.id, r.set_number, {
+                                          actual_weight: e.target.value.replace(/[^\d.,]/g, ""),
+                                        })
+                                      }
+                                      onBlur={() => saveSet(ex, r.set_number)}
+                                    />
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="save-flag">{r.saved ? "✓" : ""}</div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
 
-                      <div style={{ marginTop: 12 }}>
-                        <button
-                          className={`mic-btn ${recordingFor === ex.id ? "rec" : ""}`}
-                          onClick={() =>
-                            recordingFor === ex.id ? stopRec() : startRec(ex.id)
-                          }
-                        >
-                          {recordingFor === ex.id ? "● Detener" : "🎙️ Nota de voz"}
-                        </button>
+                        <div style={{ marginTop: 14 }}>
+                          <button
+                            className={`mic-btn ${recording ? "rec" : ""}`}
+                            onClick={() => (recording ? stopRec() : startRec(ex.id))}
+                          >
+                            <MicIcon />
+                            {recording ? "Detener y enviar" : "Nota de voz para el coach"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </>
-        )}
-      </div>
-    </main>
+                );
+              })}
+            </>
+          )}
+        </div>
+      </main>
+    </>
   );
 }

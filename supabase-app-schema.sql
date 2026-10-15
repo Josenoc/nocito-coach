@@ -1,10 +1,15 @@
 -- ============================================================
 -- Nocito Coach - Web App privada (nocito.coach/app)
 -- Ejecutar en Supabase -> SQL Editor -> New query -> Run
--- Crea el esquema nuevo e idempotente y migra los datos
--- existentes (alumnos / rutinas / ejercicios_asignados /
--- registros_progreso) hacia las nuevas tablas.
+-- Esquema idempotente y SIN bloques PL/pgSQL (nada de `do $$`),
+-- para que el editor de Supabase no rompa el dollar-quoting.
+-- Migra los datos existentes (alumnos / rutinas /
+-- ejercicios_asignados / registros_progreso).
 -- ============================================================
+
+-- NOTA: la tabla legacy public.routines (columnas ref, payload,
+-- vacía y sin uso) ya fue renombrada a public.routines_legacy
+-- para liberar el nombre `routines`.
 
 -- ------------------------------------------------------------
 -- 1) PERFILES (clientes y coach)
@@ -88,11 +93,10 @@ create index if not exists idx_audio_client
   on public.audio_reports (client_id, created_at desc);
 
 -- ============================================================
--- SEED / MIGRACIÓN
+-- SEED / MIGRACIÓN (SQL puro, sin PL/pgSQL)
 -- ============================================================
 
 -- Coach (José). PIN por defecto: 7319  -> CAMBIARLO.
--- (mismo algoritmo que usa la app: scrypt N=16384 salt 16B keylen 64)
 insert into public.profiles (email, role, full_name, pin_hash)
 values (
   'nocito.coach@gmail.com',
@@ -113,108 +117,68 @@ select
 from public.alumnos a
 on conflict (email) do nothing;
 
--- Migrar rutinas / ejercicios / registros con un bloque PL/pgSQL
-do $$
-declare
-  r record;
-  e record;
-  g record;
-  v_client uuid;
-  v_routine uuid;
-  v_exercise uuid;
-begin
-  -- Solo migrar si todavía no hay rutinas nuevas para ese cliente.
-  for r in
-    select ru.*, a.email
-    from public.rutinas ru
-    join public.alumnos a on a.id = ru.alumno_id
-  loop
-    select p.id into v_client
-    from public.profiles p
-    where lower(p.email) = lower(r.email);
+-- Migrar rutinas -> routines.
+insert into public.routines (client_id, name, day_name, week_number, active)
+select p.id, ru.nombre, '', 1, coalesce(ru.activa, true)
+from public.rutinas ru
+join public.alumnos a on a.id = ru.alumno_id
+join public.profiles p on lower(p.email) = lower(a.email)
+where not exists (
+  select 1 from public.routines nr
+  where nr.client_id = p.id and nr.name = ru.nombre
+);
 
-    if v_client is null then
-      continue;
-    end if;
+-- Migrar ejercicios_asignados -> exercises.
+insert into public.exercises (
+  routine_id, name, order_index, target_sets, target_reps, target_weight, unit
+)
+select
+  nr.id,
+  ea.nombre,
+  coalesce(ea.orden, 0),
+  coalesce(ea.series_default, 3),
+  coalesce(ea.reps_default, 10),
+  ea.peso_default,
+  coalesce(ea.unidad_peso, 'kg')
+from public.ejercicios_asignados ea
+join public.rutinas ru on ru.id = ea.rutina_id
+join public.alumnos a on a.id = ru.alumno_id
+join public.profiles p on lower(p.email) = lower(a.email)
+join public.routines nr on nr.client_id = p.id and nr.name = ru.nombre
+where not exists (
+  select 1 from public.exercises ex
+  where ex.routine_id = nr.id and lower(ex.name) = lower(ea.nombre)
+);
 
-    if exists (
-      select 1 from public.routines nr
-      where nr.client_id = v_client and nr.name = r.nombre
-    ) then
-      continue;
-    end if;
+-- Migrar registros_progreso -> sets_logs (solo si matchea el ejercicio).
+insert into public.sets_logs (
+  exercise_id, client_id, set_number, actual_reps, actual_weight,
+  target_reps, target_weight, log_date
+)
+select
+  ex.id, p.id, 1, rp.repeticiones, rp.peso_utilizado,
+  rp.repeticiones, rp.peso_utilizado, rp.fecha
+from public.registros_progreso rp
+join public.alumnos a on a.id = rp.alumno_id
+join public.profiles p on lower(p.email) = lower(a.email)
+join public.exercises ex on lower(ex.name) = lower(rp.ejercicio)
+join public.routines nr on nr.id = ex.routine_id and nr.client_id = p.id
+on conflict (exercise_id, client_id, log_date, set_number) do nothing;
 
-    insert into public.routines (client_id, name, day_name, week_number, active)
-    values (v_client, r.nombre, '', 1, coalesce(r.activa, true))
-    returning id into v_routine;
-
-    for e in
-      select * from public.ejercicios_asignados ea
-      where ea.rutina_id = r.id
-      order by ea.orden
-    loop
-      insert into public.exercises (
-        routine_id, name, order_index, target_sets, target_reps, target_weight, unit
-      ) values (
-        v_routine,
-        e.nombre,
-        coalesce(e.orden, 0),
-        coalesce(e.series_default, 3),
-        coalesce(e.reps_default, 10),
-        e.peso_default,
-        coalesce(e.unidad_peso, 'kg')
-      );
-    end loop;
-  end loop;
-
-  -- Migrar registros de progreso -> sets_logs (1 fila por registro).
-  -- sets_logs.exercise_id es NOT NULL, así que solo se migran los registros
-  -- cuyo ejercicio matchee (por nombre) con un ejercicio del cliente.
-  for g in
-    select rp.*, a.email
-    from public.registros_progreso rp
-    join public.alumnos a on a.id = rp.alumno_id
-  loop
-    select p.id into v_client
-    from public.profiles p
-    where lower(p.email) = lower(g.email);
-
-    if v_client is null then
-      continue;
-    end if;
-
-    select ex.id into v_exercise
-    from public.exercises ex
-    join public.routines ro on ro.id = ex.routine_id
-    where ro.client_id = v_client
-      and lower(ex.name) = lower(g.ejercicio)
-    order by ex.order_index
-    limit 1;
-
-    if v_exercise is null then
-      continue;
-    end if;
-
-    insert into public.sets_logs (
-      exercise_id, client_id, set_number, actual_reps, actual_weight,
-      target_reps, target_weight, log_date
-    ) values (
-      v_exercise, v_client, 1, g.repeticiones, g.peso_utilizado,
-      g.repeticiones, g.peso_utilizado, g.fecha
-    )
-    on conflict (exercise_id, client_id, log_date, set_number) do nothing;
-  end loop;
-end $$;
+-- ============================================================
+-- Seguridad: RLS activado (solo el service role accede; la app
+-- usa exclusivamente el service role a través de sus API routes).
+-- ============================================================
+alter table public.profiles      enable row level security;
+alter table public.routines      enable row level security;
+alter table public.exercises     enable row level security;
+alter table public.sets_logs     enable row level security;
+alter table public.audio_reports enable row level security;
 
 -- ============================================================
 -- Utilidades
 -- ============================================================
-
 -- Ver perfiles:
 -- select email, role, full_name, activo from public.profiles order by role, full_name;
-
--- Resetear PIN del coach a 7319 (o cambiar por otro hasheado desde el panel):
--- update public.profiles set pin_hash = null where role = 'coach';
-
--- Clientes que todavía no tienen PIN asignado:
+-- Clientes sin PIN asignado:
 -- select email, full_name from public.profiles where role = 'client' and pin_hash is null;
