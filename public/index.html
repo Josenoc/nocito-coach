@@ -836,7 +836,7 @@
   <header>
     <div class="container nav">
       <a class="brand" href="#inicio" aria-label="nocito.coach">
-        <img class="brand-logo" src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
+        <img class="brand-logo" src="img/logo-nocitocoach.jpeg?v=4" alt="nocito.coach">
       </a>
       <nav class="nav-links" aria-label="Navegación principal">
         <a href="#inicio">Sobre mí</a>
@@ -896,7 +896,7 @@
 
         <div class="hero-side">
           <div class="hero-motivation reveal">
-            <img class="hero-motivation-photo" src="img/hero-nocito.jpeg" alt="José Nocito entrenando">
+            <img class="hero-motivation-photo" src="img/hero-nocito.jpeg?v=2" alt="José Nocito entrenando">
             <p class="hero-motivation-cta">Contactame hoy por WhatsApp o correo para coordinar tu plan</p>
             <div class="hero-contact-btns">
               <a class="btn btn-primary btn-icon" id="heroWhatsApp" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
@@ -922,8 +922,25 @@
 
         <div class="pricing-grid">
 
-          <!-- Plan 1 · ESTÁNDAR (3 días) -->
-          <article class="price-card reveal" style="background: linear-gradient(180deg, #2c2c2c, #232323);">
+          <!-- Plan 1 · RUT&NUT -->
+          <article class="price-card reveal" style="background: linear-gradient(180deg, rgba(255,196,0,.32), rgba(255,196,0,.12)), var(--surface);">
+            <div>
+              <h3 class="plan-name">Rut&Nut</h3>
+              <span class="plan-tag">Solo rutina + plan nutricional</span>
+              <div class="plan-price"><span class="cur">$</span><span class="amount">50</span> <span class="per">ARS · pago único</span></div>
+              <p class="price-sub">Sin seguimiento personalizado</p>
+              <p class="price-total">Para quien solo quiere la rutina y la pauta</p>
+            </div>
+            <ul class="plan-features">
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina 100% personalizada</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Sin seguimiento ni ajustes</li>
+            </ul>
+            <button class="btn-plan" data-plan="3">Elegir plan y configurar cuenta</button>
+          </article>
+
+          <!-- Plan 2 · ESTÁNDAR (3 días) -->
+          <article class="price-card reveal reveal-d1" style="background: linear-gradient(180deg, rgba(255,196,0,.22), rgba(255,196,0,.06)), var(--surface);">
             <div>
               <h3 class="plan-name">Plan Estándar</h3>
               <span class="plan-tag">3 días / semana</span>
@@ -942,8 +959,8 @@
             <button class="btn-plan" data-plan="0">Elegir plan y configurar cuenta</button>
           </article>
 
-          <!-- Plan 2 · PRO (4 días) · DESTACADO -->
-          <article class="price-card featured reveal reveal-d1" style="background: linear-gradient(180deg, #201d1b, #171412);">
+          <!-- Plan 3 · PRO (4 días) · DESTACADO -->
+          <article class="price-card featured reveal reveal-d2" style="background: linear-gradient(180deg, rgba(255,196,0,.15), rgba(255,196,0,.035)), var(--surface);">
             <div>
               <h3 class="plan-name">Plan Pro</h3>
               <span class="plan-tag">4 días / semana</span>
@@ -962,8 +979,8 @@
             <button class="btn-plan" data-plan="1">Elegir plan y configurar cuenta</button>
           </article>
 
-          <!-- Plan 3 · ELITE (5 días) -->
-          <article class="price-card reveal reveal-d2" style="background: linear-gradient(180deg, #161616, #0e0e0e);">
+          <!-- Plan 4 · ELITE (5 días) -->
+          <article class="price-card reveal reveal-d3" style="background: linear-gradient(180deg, rgba(255,196,0,.08), rgba(255,196,0,.015)), var(--surface);">
             <div>
               <h3 class="plan-name">Plan Elite</h3>
               <span class="plan-tag">5 días / semana</span>
@@ -980,23 +997,6 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
             </ul>
             <button class="btn-plan" data-plan="2">Elegir plan y configurar cuenta</button>
-          </article>
-
-          <!-- Plan 4 · RUT&NUT -->
-          <article class="price-card reveal reveal-d3">
-            <div>
-              <h3 class="plan-name">Rut&Nut</h3>
-              <span class="plan-tag">Solo rutina + plan nutricional</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">50</span> <span class="per">ARS · pago único</span></div>
-              <p class="price-sub">Sin seguimiento personalizado</p>
-              <p class="price-total">Para quien solo quiere la rutina y la pauta</p>
-            </div>
-            <ul class="plan-features">
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Rutina 100% personalizada</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Sin seguimiento ni ajustes</li>
-            </ul>
-            <button class="btn-plan" data-plan="3">Elegir plan y configurar cuenta</button>
           </article>
         </div>
 
@@ -1078,7 +1078,7 @@
         <div class="contact-wrap">
           <a class="contact-card reveal" id="whatsappLinkMain" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
             <div class="ico">
-              <img src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
+              <img src="img/logo-nocitocoach.jpeg?v=4" alt="nocito.coach">
             </div>
             <div>
               <h3>WhatsApp directo</h3>
@@ -1087,7 +1087,7 @@
           </a>
           <a class="contact-card reveal reveal-d1" id="emailLinkMain" href="mailto:nocito.coach@gmail.com" target="_blank" rel="noopener">
             <div class="ico">
-              <img src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
+              <img src="img/logo-nocitocoach.jpeg?v=4" alt="nocito.coach">
             </div>
             <div>
               <h3>Correo electrónico</h3>
@@ -1097,7 +1097,7 @@
           </a>
           <a class="contact-card reveal reveal-d2" id="instagramLinkMain" href="https://www.instagram.com/nocito.coach" target="_blank" rel="noopener">
             <div class="ico">
-              <img src="img/logo-nocitocoach.jpeg?v=3" alt="nocito.coach">
+              <img src="img/logo-nocitocoach.jpeg?v=4" alt="nocito.coach">
             </div>
             <div>
               <h3>Instagram</h3>
@@ -1106,7 +1106,7 @@
             </div>
           </a>
         </div>
-        <img class="contact-logo" src="img/logo-nocitocoach.jpeg?v=3" alt="Logo nocito.coach">
+        <img class="contact-logo" src="img/logo-nocitocoach.jpeg?v=4" alt="Logo nocito.coach">
       </div>
     </section>
 
