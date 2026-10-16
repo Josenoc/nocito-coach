@@ -143,6 +143,15 @@ function Dato({ label, value }: { label: string; value: string }) {
   );
 }
 
+function waLink(phone?: string | null): string | null {
+  if (!phone) return null;
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("0054")) digits = digits.slice(2);
+  if (digits.startsWith("0")) digits = digits.slice(1);
+  if (!digits.startsWith("54")) digits = `54${digits}`;
+  return `https://wa.me/${digits}`;
+}
+
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -669,6 +678,7 @@ export default function CoachDashboard() {
 
   const selected = clients.find((c) => c.id === selectedId);
   const foodLogs = ((detail?.profile?.anamnesis?.foodLogs ?? {}) as FoodLogs);
+  const clientWa = waLink(detail?.profile?.phone);
   const foodDates = Object.keys(foodLogs)
     .sort((a, b) => b.localeCompare(a))
     .slice(0, 14);
@@ -933,6 +943,31 @@ export default function CoachDashboard() {
                           }
                         />
                         <Dato label="Teléfono" value={detail.profile.phone || "Sin dato"} />
+                        {(clientWa || detail.profile.phone) && (
+                          <div
+                            style={{
+                              gridColumn: "1 / -1",
+                              display: "flex",
+                              gap: 10,
+                              flexWrap: "wrap",
+                              marginTop: 4,
+                            }}
+                          >
+                            {clientWa && (
+                              <a
+                                className="btn btn-outline"
+                                href={clientWa}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                WhatsApp
+                              </a>
+                            )}
+                            <a className="btn btn-outline" href={`tel:${detail.profile.phone}`}>
+                              Llamar
+                            </a>
+                          </div>
+                        )}
                       </div>
                       <div className="notes-block">
                         <div className="note-item">
