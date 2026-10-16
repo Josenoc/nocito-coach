@@ -171,6 +171,7 @@ export default function CoachDashboard() {
   const [tab, setTab] = useState<"historial" | "rutinas" | "importar" | "nutricion" | "acceso">(
     "historial"
   );
+  const [focus, setFocus] = useState<null | "rutinas" | "nutricion">(null);
 
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [baseline, setBaseline] = useState<ExRow[] | null>(null);
@@ -185,6 +186,20 @@ export default function CoachDashboard() {
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
+
+  useEffect(() => {
+    if (!focus) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFocus(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [focus]);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -553,6 +568,7 @@ export default function CoachDashboard() {
     });
     setBaseline(exercises.map((e) => ({ ...e })));
     setTab("rutinas");
+    setFocus("rutinas");
     setMsg(null);
   };
 
@@ -784,7 +800,21 @@ export default function CoachDashboard() {
             )}
 
             {selected && (
-              <>
+              <div className={focus ? "coach-focus" : undefined}>
+                {focus && (
+                  <div className="focus-bar">
+                    <div>
+                      <span className="focus-eyebrow">Editor en pantalla completa</span>
+                      <h2 style={{ margin: "4px 0 0", fontSize: "1.15rem" }}>
+                        {focus === "nutricion" ? "Plan nutricional" : "Rutinas"} —{" "}
+                        {selected.full_name || selected.email}
+                      </h2>
+                    </div>
+                    <button className="btn btn-outline" onClick={() => setFocus(null)}>
+                      Cerrar (Esc)
+                    </button>
+                  </div>
+                )}
                 <div
                   className="row-between"
                   style={{ marginBottom: 16, flexWrap: "wrap", gap: 10 }}
@@ -1118,9 +1148,20 @@ export default function CoachDashboard() {
                 {tab === "rutinas" && detail && (
                   <div style={{ marginTop: 12 }}>
                     <div className="card" style={{ marginBottom: 16 }}>
-                      <h3 style={{ marginTop: 0 }}>
-                        {draft.id ? "Editar rutina" : "Nueva rutina (día)"}
-                      </h3>
+                      <div className="row-between" style={{ marginBottom: 6 }}>
+                        <h3 style={{ margin: 0 }}>
+                          {draft.id ? "Editar rutina" : "Nueva rutina (día)"}
+                        </h3>
+                        {focus !== "rutinas" && (
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: "6px 12px", fontSize: ".8rem" }}
+                            onClick={() => setFocus("rutinas")}
+                          >
+                            Pantalla completa
+                          </button>
+                        )}
+                      </div>
                       <div className="grid-4" style={{ marginBottom: 12 }}>
                         <div>
                           <label className="lbl">Día</label>
@@ -1335,7 +1376,18 @@ export default function CoachDashboard() {
                 {tab === "nutricion" && (
                   <div style={{ marginTop: 12 }}>
                     <div className="card">
-                      <h3 style={{ marginTop: 0 }}>Plan nutricional</h3>
+                      <div className="row-between" style={{ marginBottom: 6 }}>
+                        <h3 style={{ margin: 0 }}>Plan nutricional</h3>
+                        {focus !== "nutricion" && (
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: "6px 12px", fontSize: ".8rem" }}
+                            onClick={() => setFocus("nutricion")}
+                          >
+                            Pantalla completa
+                          </button>
+                        )}
+                      </div>
                       <div className="grid-4" style={{ marginBottom: 10 }}>
                         <div>
                           <label className="lbl">Calorías (kcal)</label>
@@ -1581,7 +1633,7 @@ export default function CoachDashboard() {
                 )}
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </section>
         </div>

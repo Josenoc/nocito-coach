@@ -142,6 +142,9 @@ export default function ClientApp() {
     if (params.has("registro") || params.get("onboarding") === "1") {
       setMode("register");
     }
+    if (params.get("tab") === "nutrition") {
+      setView("nutrition");
+    }
   }, []);
 
   useEffect(() => {
