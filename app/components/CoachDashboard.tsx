@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FoodItem, FoodLogs, MealSlot, NutritionPlan, Profile } from "@/lib/app-types";
+import { waLink } from "@/app/lib/coach";
 
 interface ClientRow {
   id: string;
@@ -141,15 +142,6 @@ function Dato({ label, value }: { label: string; value: string }) {
       <div style={{ fontWeight: 600 }}>{value}</div>
     </div>
   );
-}
-
-function waLink(phone?: string | null): string | null {
-  if (!phone) return null;
-  let digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("0054")) digits = digits.slice(2);
-  if (digits.startsWith("0")) digits = digits.slice(1);
-  if (!digits.startsWith("54")) digits = `54${digits}`;
-  return `https://wa.me/${digits}`;
 }
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";

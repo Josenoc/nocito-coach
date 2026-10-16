@@ -2,8 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { Anamnesis, PhotoSlot } from "@/lib/app-types";
-
-const COACH_EMAIL = "nocito.coach@gmail.com";
+import { COACH_EMAIL, COACH_TEL, coachWhatsApp } from "@/app/lib/coach";
 
 const GOAL_LABELS: Record<string, string> = {
   hipertrofia: "Hipertrofia",
@@ -277,11 +276,19 @@ export default function PendingReviewDashboard({
             objetivo, tu experiencia y tu disponibilidad.
           </p>
           <div className="coach-actions">
-            <a className="btn btn-primary" href={contact("Consulta antes de arrancar")}>
-              Enviar mensaje
+            <a
+              className="btn btn-primary"
+              href={coachWhatsApp("Hola José, soy alumno de Nocito Coach.")}
+              target="_blank"
+              rel="noreferrer"
+            >
+              WhatsApp
             </a>
-            <a className="btn btn-outline" href={contact("Quiero agendar una llamada")}>
-              Agendar llamada
+            <a className="btn btn-outline" href={COACH_TEL}>
+              Llamar
+            </a>
+            <a className="btn btn-outline" href={contact("Consulta antes de arrancar")}>
+              Email
             </a>
           </div>
         </div>
