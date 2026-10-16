@@ -1506,12 +1506,12 @@ export default function CoachDashboard() {
                         return (
                         <div
                           key={idx}
-                          className="card"
-                          style={{ background: "var(--surface)", marginBottom: 10 }}
+                          className="card ex-edit-block"
+                          style={{ marginBottom: 10 }}
                         >
                           <div className="grid-4">
                             <input
-                              className="input"
+                              className="input ex-name-input"
                               placeholder="Ejercicio"
                               value={ex.name}
                               onChange={(e) => setEx(idx, { name: e.target.value })}

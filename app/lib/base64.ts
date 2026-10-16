@@ -41,3 +41,22 @@ export function safeBase64ToUint8Array(input: string): Uint8Array | null {
  * (`applicationServerKey`) a Uint8Array de forma segura.
  */
 export const urlBase64ToUint8Array = base64ToUint8Array;
+
+/**
+ * Decodifica Base64 (estándar o URL-safe) a texto de forma segura: normaliza
+ * espacios/alfabeto y devuelve `null` en lugar de lanzar si algo falla.
+ */
+export function safeAtob(input: string): string | null {
+  try {
+    const clean = String(input ?? "")
+      .replace(/\s+/g, "")
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    if (!clean) return null;
+    const pad = clean.length % 4;
+    const padded = pad === 0 ? clean : clean + "=".repeat(4 - pad);
+    return atob(padded);
+  } catch {
+    return null;
+  }
+}

@@ -187,7 +187,7 @@ export default function ProgramEditor({
                       <tr key={ei}>
                         <td>
                           <input
-                            className="input"
+                            className="input ex-name-input"
                             value={ex.ejercicio}
                             onChange={(e) => patchEx(di, ei, { ejercicio: e.target.value })}
                           />
