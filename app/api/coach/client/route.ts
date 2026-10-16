@@ -81,3 +81,65 @@ export async function GET(req: NextRequest) {
     audio: audioRes.data ?? [],
   });
 }
+
+export async function DELETE(req: NextRequest) {
+  const coach = await getCoach();
+  if (!coach) {
+    return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
+  const id = new URL(req.url).searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ ok: false, error: "id requerido" }, { status: 400 });
+  }
+
+  const supabase = getSupabaseAdmin();
+
+  const { data: target } = await supabase
+    .from("profiles")
+    .select("id, role")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!target) {
+    return NextResponse.json({ ok: false, error: "Cliente no encontrado" }, { status: 404 });
+  }
+  if (target.role !== "client") {
+    return NextResponse.json(
+      { ok: false, error: "Solo se pueden eliminar cuentas de clientes" },
+      { status: 400 }
+    );
+  }
+
+  const { data: routines } = await supabase.from("routines").select("id").eq("client_id", id);
+  const routineIds = (routines ?? []).map((r: { id: string }) => r.id);
+
+  const logsDel = await supabase.from("sets_logs").delete().eq("client_id", id);
+  if (logsDel.error) {
+    return NextResponse.json({ ok: false, error: logsDel.error.message }, { status: 500 });
+  }
+
+  const audioDel = await supabase.from("audio_reports").delete().eq("client_id", id);
+  if (audioDel.error) {
+    return NextResponse.json({ ok: false, error: audioDel.error.message }, { status: 500 });
+  }
+
+  if (routineIds.length) {
+    const exDel = await supabase.from("exercises").delete().in("routine_id", routineIds);
+    if (exDel.error) {
+      return NextResponse.json({ ok: false, error: exDel.error.message }, { status: 500 });
+    }
+  }
+
+  const routinesDel = await supabase.from("routines").delete().eq("client_id", id);
+  if (routinesDel.error) {
+    return NextResponse.json({ ok: false, error: routinesDel.error.message }, { status: 500 });
+  }
+
+  const profileDel = await supabase.from("profiles").delete().eq("id", id);
+  if (profileDel.error) {
+    return NextResponse.json({ ok: false, error: profileDel.error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, deleted: id });
+}

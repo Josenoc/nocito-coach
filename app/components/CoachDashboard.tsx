@@ -6,6 +6,7 @@ import type { FoodItem, FoodLogs, MealSlot, NutritionPlan, Profile } from "@/lib
 import { waLink } from "@/app/lib/coach";
 import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
+import ProgramEditor from "@/app/components/ProgramEditor";
 
 interface ClientRow {
   id: string;
@@ -181,7 +182,10 @@ export default function CoachDashboard() {
   const [importing, setImporting] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [program, setProgram] = useState<GeneratedProgram | null>(null);
-  const [applyingProgram, setApplyingProgram] = useState<null | "routine" | "nutrition">(null);
+  const [editingProgram, setEditingProgram] = useState(false);
+  const [publishingProgram, setPublishingProgram] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
@@ -400,6 +404,8 @@ export default function CoachDashboard() {
     setImportText("");
     setImportDays(null);
     setProgram(null);
+    setEditingProgram(false);
+    setConfirmDelete(false);
     const res = await fetch(`/api/coach/client?id=${id}`);
     const json = await res.json();
     if (json.ok) {
@@ -548,7 +554,8 @@ export default function CoachDashboard() {
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
       setProgram(json.program);
-      setMsg({ type: "ok", text: "Plan generado. Revisalo antes de aplicarlo." });
+      setEditingProgram(true);
+      setMsg({ type: "ok", text: "Plan generado. Editalo y publicalo cuando esté listo." });
     } catch (err: any) {
       setMsg({ type: "err", text: err.message || "No se pudo generar el plan." });
     } finally {
@@ -556,53 +563,60 @@ export default function CoachDashboard() {
     }
   };
 
-  const applyProgramRoutine = async () => {
-    if (!selectedId || !program?.days?.length) return;
+  const publishProgram = async (edited: GeneratedProgram) => {
+    if (!selectedId) return;
     setMsg(null);
-    setApplyingProgram("routine");
+    setPublishingProgram(true);
     try {
-      const res = await fetch("/api/coach/import-routine", {
+      const routineRes = await fetch("/api/coach/import-routine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId: selectedId, days: program.days }),
+        body: JSON.stringify({ clientId: selectedId, days: edited.days }),
       });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error);
-      setMsg({ type: "ok", text: "Rutina aplicada y publicada para el cliente." });
+      const routineJson = await routineRes.json();
+      if (!routineJson.ok) throw new Error(routineJson.error);
+
+      const nutritionRes = await fetch("/api/coach/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: selectedId, nutrition: edited.nutrition }),
+      });
+      const nutritionJson = await nutritionRes.json();
+      if (!nutritionJson.ok) throw new Error(nutritionJson.error);
+
+      setNutrition(edited.nutrition);
+      setEditingProgram(false);
+      setProgram(null);
+      setTab("rutinas");
+      setMsg({ type: "ok", text: "Plan publicado para el cliente." });
       await loadClients();
       await reloadDetail();
     } catch (err: any) {
-      setMsg({ type: "err", text: err.message || "No se pudo aplicar la rutina." });
+      setMsg({ type: "err", text: err.message || "No se pudo publicar el plan." });
     } finally {
-      setApplyingProgram(null);
+      setPublishingProgram(false);
     }
   };
 
-  const applyProgramNutrition = async () => {
-    if (!selectedId || !program) return;
+  const deleteClient = async () => {
+    if (!selectedId) return;
     setMsg(null);
-    setApplyingProgram("nutrition");
+    setDeleting(true);
     try {
-      const res = await fetch("/api/coach/nutrition", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId: selectedId, nutrition: program.nutrition }),
-      });
+      const res = await fetch(`/api/coach/client?id=${selectedId}`, { method: "DELETE" });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error);
-      setNutrition(program.nutrition);
-      setMsg({ type: "ok", text: "Plan nutricional aplicado." });
-      await reloadDetail();
+      setConfirmDelete(false);
+      setSelectedId(null);
+      setDetail(null);
+      setProgram(null);
+      setMsg({ type: "ok", text: "Cliente eliminado." });
+      await loadClients();
     } catch (err: any) {
-      setMsg({ type: "err", text: err.message || "No se pudo aplicar la nutrición." });
+      setMsg({ type: "err", text: err.message || "No se pudo eliminar el cliente." });
     } finally {
-      setApplyingProgram(null);
+      setDeleting(false);
     }
-  };
-
-  const applyProgramAll = async () => {
-    await applyProgramRoutine();
-    await applyProgramNutrition();
   };
 
 
@@ -972,8 +986,56 @@ export default function CoachDashboard() {
                         </button>
                       ))}
                     </div>
+                    <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
+                      Eliminar cliente
+                    </button>
                   </div>
                 </div>
+
+                {confirmDelete && (
+                  <div
+                    className="modal-overlay"
+                    onClick={() => !deleting && setConfirmDelete(false)}
+                  >
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                      <h3 style={{ marginTop: 0 }}>Eliminar cliente</h3>
+                      <p style={{ marginTop: 0, lineHeight: 1.6 }}>
+                        ¿Seguro que querés eliminar a{" "}
+                        <strong>{selected.full_name || selected.email}</strong>? Se borran su perfil,
+                        rutinas, registros de entrenamiento y audios. Esta acción no se puede deshacer.
+                      </p>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 10,
+                          justifyContent: "flex-end",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <button
+                          className="btn btn-outline"
+                          onClick={() => setConfirmDelete(false)}
+                          disabled={deleting}
+                        >
+                          Cancelar
+                        </button>
+                        <button className="btn btn-danger" onClick={deleteClient} disabled={deleting}>
+                          {deleting ? "Eliminando…" : "Eliminar definitivamente"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {editingProgram && program && (
+                  <ProgramEditor
+                    program={program}
+                    clientName={selected.full_name || selected.email}
+                    onClose={() => setEditingProgram(false)}
+                    onPublish={publishProgram}
+                    publishing={publishingProgram}
+                  />
+                )}
 
                 {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
 
@@ -1289,8 +1351,8 @@ export default function CoachDashboard() {
                       <h3 style={{ marginTop: 0 }}>Generar plan con IA</h3>
                       <p className="muted" style={{ marginTop: 0, fontSize: ".88rem" }}>
                         Analiza la anamnesis del alumno (edad, sexo, peso, altura, nivel y objetivo) y
-                        propone una rutina y una nutrición 100% personalizadas, con justificación
-                        técnica. Revisá el resultado antes de aplicarlo.
+                        crea un borrador de rutina + nutrición personalizadas. Se abre en el editor
+                        para que lo revises, edites todo y recién ahí lo publiques.
                       </p>
                       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                         <button
@@ -1305,150 +1367,27 @@ export default function CoachDashboard() {
                             : "Generar plan con IA"}
                         </button>
                         {program && (
-                          <button className="btn btn-outline" onClick={() => setProgram(null)}>
-                            Limpiar
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {program && (
-                      <>
-                        {(program.perfil || program.justificacion) && (
-                          <div className="card">
-                            <h3 style={{ marginTop: 0 }}>Análisis del perfil</h3>
-                            {program.esquema && (
-                              <p className="muted" style={{ marginTop: 0 }}>
-                                Esquema: <strong>{program.esquema}</strong>
-                              </p>
-                            )}
-                            {program.perfil && (
-                              <>
-                                <h4 style={{ margin: "8px 0 4px" }}>Perfil analizado</h4>
-                                <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{program.perfil}</p>
-                              </>
-                            )}
-                            {program.justificacion && (
-                              <>
-                                <h4 style={{ margin: "14px 0 4px" }}>
-                                  Justificación técnica y nutricional
-                                </h4>
-                                <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>
-                                  {program.justificacion}
-                                </p>
-                              </>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="card">
-                          <h3 style={{ marginTop: 0 }}>Rutina propuesta</h3>
-                          <p className="muted" style={{ marginTop: 0, fontSize: ".85rem" }}>
-                            Al aplicar, se <strong>reemplazan</strong> las rutinas actuales del cliente.
-                          </p>
-                          {program.days.map((d, di) => (
-                            <div className="day-section" key={di}>
-                              <h4>
-                                {d.nombre}
-                                {d.nombre !== d.dia ? (
-                                  <span className="muted"> · {d.dia}</span>
-                                ) : null}
-                              </h4>
-                              <div className="scroll-x">
-                                <table className="data-table" style={{ minWidth: 620 }}>
-                                  <thead>
-                                    <tr>
-                                      <th>Ejercicio</th>
-                                      <th>Series</th>
-                                      <th>Reps</th>
-                                      <th>Descanso</th>
-                                      <th>Notas</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {d.ejercicios.map((ex, ei) => (
-                                      <tr key={ei}>
-                                        <td>
-                                          <b>{ex.ejercicio}</b>
-                                        </td>
-                                        <td>{ex.series ?? "—"}</td>
-                                        <td>{ex.reps ?? "—"}</td>
-                                        <td>{ex.descanso ?? "—"}</td>
-                                        <td>{ex.notas ?? "—"}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="card">
-                          <h3 style={{ marginTop: 0 }}>Nutrición propuesta</h3>
-                          <div className="grid-4" style={{ marginBottom: 10 }}>
-                            <Dato label="Calorías" value={`${program.nutrition.cal} kcal`} />
-                            <Dato label="Proteínas" value={`${program.nutrition.prot} g`} />
-                            <Dato label="Carbohidratos" value={`${program.nutrition.carbs} g`} />
-                            <Dato label="Grasas" value={`${program.nutrition.fat} g`} />
-                          </div>
-                          {program.nutrition.proteinSources && (
-                            <p style={{ margin: "0 0 10px" }}>
-                              <span className="muted">Fuentes de proteína: </span>
-                              {program.nutrition.proteinSources}
-                            </p>
-                          )}
-                          <div className="scroll-x">
-                            <table className="data-table" style={{ minWidth: 560 }}>
-                              <thead>
-                                <tr>
-                                  <th>Comida</th>
-                                  <th>Sugerencia</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {program.nutrition.meals.map((m, mi) => (
-                                  <tr key={mi}>
-                                    <td>
-                                      <b>{m[0]}</b>
-                                    </td>
-                                    <td>{m[1]}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                        <div className="card">
-                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                          <>
                             <button
                               className="btn btn-success"
-                              onClick={applyProgramAll}
-                              disabled={applyingProgram !== null}
+                              onClick={() => setEditingProgram(true)}
+                              disabled={generating}
                             >
-                              {applyingProgram ? "Aplicando…" : "Aplicar todo (rutina + nutrición)"}
+                              Abrir editor (borrador)
                             </button>
-                            <button
-                              className="btn btn-primary"
-                              onClick={applyProgramRoutine}
-                              disabled={applyingProgram !== null}
-                            >
-                              {applyingProgram === "routine" ? "Aplicando…" : "Aplicar solo rutina"}
+                            <button className="btn btn-outline" onClick={() => setProgram(null)}>
+                              Limpiar
                             </button>
-                            <button
-                              className="btn btn-outline"
-                              onClick={applyProgramNutrition}
-                              disabled={applyingProgram !== null}
-                            >
-                              {applyingProgram === "nutrition"
-                                ? "Aplicando…"
-                                : "Aplicar solo nutrición"}
-                            </button>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                          </>
+                        )}
+                      </div>
+                      {program && (
+                        <p className="muted" style={{ margin: "12px 0 0", fontSize: ".9rem" }}>
+                          Borrador: <strong>{program.esquema || `${program.days.length} días`}</strong> ·{" "}
+                          {program.days.length} días · {program.nutrition.cal} kcal · sin publicar.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
