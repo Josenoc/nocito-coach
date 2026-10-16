@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RegisterWizard from "@/app/components/RegisterWizard";
 import PendingReviewDashboard from "@/app/components/PendingReviewDashboard";
+import NutritionTracker from "@/app/components/NutritionTracker";
 import type { Anamnesis, Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/app-types";
 import {
   exerciseAnatomySrc,
@@ -114,6 +115,7 @@ export default function ClientApp() {
   const [planStatus, setPlanStatus] = useState<string>("active");
   const [nutrition, setNutrition] = useState<NutritionPlan | null>(null);
   const [anamnesis, setAnamnesis] = useState<Anamnesis | null>(null);
+  const [view, setView] = useState<"train" | "nutrition">("train");
 
   const [recordingFor, setRecordingFor] = useState<string | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
@@ -548,6 +550,23 @@ export default function ClientApp() {
             </div>
           </div>
 
+          <div className="app-tabs">
+            <button
+              className={`chip ${view === "train" ? "active" : ""}`}
+              onClick={() => setView("train")}
+            >
+              Entrenamiento
+            </button>
+            <button
+              className={`chip ${view === "nutrition" ? "active" : ""}`}
+              onClick={() => setView("nutrition")}
+            >
+              Nutrición
+            </button>
+          </div>
+
+          {view === "train" && (
+            <>
           {loadingData && <p className="muted">Cargando tu rutina…</p>}
 
           {!loadingData && routines.length === 0 && (
@@ -737,50 +756,10 @@ export default function ClientApp() {
             </>
           )}
 
-          {planStatus === "active" && nutrition && (
-            <div className="card" style={{ marginTop: 22 }}>
-              <h3 style={{ marginTop: 0 }}>Sugerencia nutricional</h3>
-              <div style={{ display: "flex", gap: 18, flexWrap: "wrap", marginBottom: 14 }}>
-                <span className="badge">{nutrition.cal} kcal/día</span>
-                <span className="muted">
-                  Proteínas: <b>{nutrition.prot} g</b>
-                </span>
-                <span className="muted">
-                  Carbohidratos: <b>{nutrition.carbs} g</b>
-                </span>
-                <span className="muted">
-                  Grasas: <b>{nutrition.fat} g</b>
-                </span>
-              </div>
-              {nutrition.proteinSources && (
-                <p className="muted" style={{ marginTop: 0 }}>
-                  Fuentes de proteína sugeridas: {nutrition.proteinSources}
-                </p>
-              )}
-              {nutrition.meals?.length > 0 && (
-                <div className="scroll-x">
-                  <table className="data-table" style={{ minWidth: 480 }}>
-                    <thead>
-                      <tr>
-                        <th>Comida</th>
-                        <th>Sugerencia</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {nutrition.meals.map((m, i) => (
-                        <tr key={i}>
-                          <td>
-                            <b>{m[0]}</b>
-                          </td>
-                          <td>{m[1]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            </>
           )}
+
+          {view === "nutrition" && <NutritionTracker nutrition={nutrition} />}
             </>
           )}
         </div>

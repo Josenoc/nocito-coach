@@ -862,3 +862,56 @@ textarea.input { resize: vertical; }
   .metric-grid { grid-template-columns: repeat(2, 1fr); }
   .photo-slots { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ---- Nutrición (registro de comidas) ---- */
+.app-tabs { display: flex; gap: 8px; margin: 0 0 18px; }
+
+.nutri-wrap { display: grid; gap: 16px; }
+
+.macro-list { display: grid; gap: 14px; }
+.macro-row-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.macro-label { font-size: .9rem; color: var(--muted); }
+.macro-val { font-size: .9rem; color: var(--text, #eaeaea); }
+.macro-val.over { color: #ff8f6b; }
+.macro-bar { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.09); overflow: hidden; }
+.macro-bar > span { display: block; height: 100%; background: var(--gold); border-radius: 999px; transition: width 0.3s ease; }
+.macro-bar > span.over { background: #ff8f6b; }
+
+.food-input-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.food-input-row .input { flex: 1; min-width: 200px; }
+.food-voice { margin-top: 16px; }
+
+.food-slot { margin-top: 16px; }
+.food-slot:first-of-type { margin-top: 6px; }
+.food-slot-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: Montserrat, sans-serif; text-transform: uppercase; letter-spacing: 0.03em;
+  font-size: 0.78rem; color: var(--gold);
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  padding-bottom: 6px; margin-bottom: 8px;
+}
+.food-item {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  flex-wrap: wrap; padding: 8px 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+.food-item:last-child { border-bottom: none; }
+.food-item-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.food-qty { color: var(--muted); font-size: 0.85rem; }
+.food-src {
+  font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 2px 7px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--muted);
+}
+.food-src.voice { color: var(--gold); border-color: rgba(255, 196, 0, 0.4); }
+.food-item-macros { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--muted); }
+.food-item-macros span { white-space: nowrap; }
+.food-remove {
+  background: none; border: none; color: var(--muted); font-size: 1.15rem;
+  line-height: 1; cursor: pointer; padding: 0 4px; border-radius: 6px;
+}
+.food-remove:hover { color: #ff8f6b; }
+
+@media (max-width: 560px) {
+  .food-item { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .food-item-macros { flex-wrap: wrap; }
+}

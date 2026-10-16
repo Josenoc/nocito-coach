@@ -10,6 +10,25 @@ export interface ClientPhotos {
   back?: string | null;
 }
 
+export type MealSlot = "desayuno" | "almuerzo" | "merienda" | "cena" | "extra";
+
+export interface FoodItem {
+  id: string;
+  name: string;
+  quantity?: string | null;
+  cal: number;
+  prot: number;
+  carbs: number;
+  fat: number;
+  slot: MealSlot;
+  source: "manual" | "voice";
+  created_at: string;
+}
+
+export type ParsedFoodItem = Omit<FoodItem, "id" | "created_at" | "source">;
+
+export type FoodLogs = Record<string, FoodItem[]>;
+
 export interface Anamnesis {
   sex: string;
   age: number;
@@ -23,6 +42,7 @@ export interface Anamnesis {
   injuries?: string;
   food_restrictions?: string;
   photos?: ClientPhotos;
+  foodLogs?: FoodLogs;
   completedAt?: string;
   clientUpdatedAt?: string;
   coachSeenAt?: string;
