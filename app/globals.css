@@ -915,3 +915,14 @@ textarea.input { resize: vertical; }
   .food-item { flex-direction: column; align-items: flex-start; gap: 6px; }
   .food-item-macros { flex-wrap: wrap; }
 }
+
+.food-coach { display: grid; gap: 14px; }
+.food-coach-day { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 14px; }
+.food-coach-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 8px;
+}
+.food-coach-totals { font-size: 0.8rem; color: var(--muted); }
+.food-coach-slot { margin-top: 10px; }
+.food-coach-slot:first-of-type { margin-top: 4px; }
+.food-coach-slot .food-slot-head { font-size: 0.72rem; margin-bottom: 4px; }

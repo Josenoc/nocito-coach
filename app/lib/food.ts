@@ -23,7 +23,10 @@ Reglas:
 - Estimá porciones típicas argentinas si no se aclara cantidad (1 milanesa, 1 alfajor, 1 porción, 1 vaso, etc.).
 - "quantity" es la cantidad estimada en texto (ej: "1 unidad", "1 porción", "200 g", "1 vaso"). Si no aplica, null.
 - cal = kilocalorías (entero). prot, carbs y fat = gramos (enteros). No negativos.
-- Elegí el "slot" según el momento; si el texto menciona desayuno/almuerzo/merienda/cena usalo. Si no se aclara, inferí por el contexto (ej: alfajor a la tarde -> merienda; café por la mañana -> desayuno). Si no hay pista clara, usá "extra".
+- Elegí el "slot" de CADA ítem por separado según su tipo y cualquier horario mencionado. Nunca apliques un horario mencionado a un alimento que claramente es de otra comida.
+- Por tipo de alimento: platos principales (carnes, milanesa, pollo, pescado, pasta, arroz, guiso, tarta, empanadas, hamburguesa, ensalada como plato) => "almuerzo" o "cena" (usá "almuerzo" si es de día, "cena" si es de noche; sin pista, "almuerzo"). Dulces, postres, facturas, galletitas, alfajor, tortas y snacks => "merienda". Café, té, mate, tostadas, cereales o yogur por la mañana => "desayuno".
+- Si el texto menciona un horario ("a la tarde", "al mediodía", "a la noche", "por la mañana"), aplicalo solo a los ítems compatibles (ej: "milanesa con ensalada y un alfajor a la tarde" => milanesa y ensalada "almuerzo", alfajor "merienda").
+- Si recibís "horaActual" (0-23, hora de Argentina) y no hay otra pista de horario, usá: 5-10 desayuno, 12-15 almuerzo, 16-19 merienda, 20-23 cena, en otro caso "extra".
 - No inventes alimentos que no se mencionan. No agregues comentarios ni texto fuera del JSON.`;
 
 function clampNum(value: unknown, max: number): number {
@@ -77,9 +80,15 @@ export function foodTotals(items: FoodItem[]): {
   );
 }
 
-export async function estimateFoodItems(text: string): Promise<ParsedFoodItem[]> {
+export async function estimateFoodItems(
+  text: string,
+  hora?: number
+): Promise<ParsedFoodItem[]> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("GROQ_API_KEY faltante");
+
+  const userPayload: Record<string, unknown> = { texto: text };
+  if (typeof hora === "number" && Number.isFinite(hora)) userPayload.horaActual = hora;
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -91,7 +100,7 @@ export async function estimateFoodItems(text: string): Promise<ParsedFoodItem[]>
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: JSON.stringify({ texto: text }) },
+        { role: "user", content: JSON.stringify(userPayload) },
       ],
     }),
   });
@@ -107,6 +116,16 @@ export async function estimateFoodItems(text: string): Promise<ParsedFoodItem[]>
     parsed = {};
   }
   return normalizeFoodItems(parsed?.items);
+}
+
+export function argentinaHour(date = new Date()): number {
+  const h = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    hour12: false,
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(date);
+  const n = Number(h);
+  return Number.isFinite(n) ? n : 0;
 }
 
 export async function transcribeAudio(file: File): Promise<string> {

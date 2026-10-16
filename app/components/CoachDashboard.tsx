@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { NutritionPlan, Profile } from "@/lib/app-types";
+import type { FoodItem, FoodLogs, MealSlot, NutritionPlan, Profile } from "@/lib/app-types";
 
 interface ClientRow {
   id: string;
@@ -87,6 +87,33 @@ const EXPERIENCE_LABELS: Record<string, string> = {
   intermedio: "Intermedio",
   avanzado: "Avanzado",
 };
+
+const FOOD_SLOT_ORDER: MealSlot[] = ["desayuno", "almuerzo", "merienda", "cena", "extra"];
+const FOOD_SLOT_LABELS: Record<MealSlot, string> = {
+  desayuno: "Desayuno",
+  almuerzo: "Almuerzo",
+  merienda: "Merienda",
+  cena: "Cena",
+  extra: "Extras / antojos",
+};
+
+function sumFood(items: FoodItem[]) {
+  return items.reduce(
+    (acc, it) => ({
+      cal: acc.cal + (it.cal || 0),
+      prot: acc.prot + (it.prot || 0),
+      carbs: acc.carbs + (it.carbs || 0),
+      fat: acc.fat + (it.fat || 0),
+    }),
+    { cal: 0, prot: 0, carbs: 0, fat: 0 }
+  );
+}
+
+function formatFoodDay(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  if (!y || !m || !d) return iso;
+  return `${d}/${m}/${y}`;
+}
 
 type ParsedExercise = {
   ejercicio: string;
@@ -625,6 +652,11 @@ export default function CoachDashboard() {
   }
 
   const selected = clients.find((c) => c.id === selectedId);
+  const foodLogs = ((detail?.profile?.anamnesis?.foodLogs ?? {}) as FoodLogs);
+  const foodDates = Object.keys(foodLogs)
+    .sort((a, b) => b.localeCompare(a))
+    .slice(0, 14);
+  const foodTargets = (detail?.profile?.nutrition_plan ?? nutrition) as NutritionPlan;
   const pendingCount = clients.filter(
     (c) => c.routine_status === "pending_review"
   ).length;
@@ -1407,6 +1439,77 @@ export default function CoachDashboard() {
                           Guardar nutrición
                         </button>
                       </div>
+                    </div>
+
+                    <div className="card" style={{ marginTop: 16 }}>
+                      <h3 style={{ marginTop: 0 }}>Comidas registradas por el alumno</h3>
+                      <p className="muted" style={{ marginTop: 0 }}>
+                        Alimentos fuera del plan que registró el alumno (texto o voz), con el total
+                        del día frente a sus objetivos.
+                      </p>
+                      {foodDates.length === 0 ? (
+                        <p className="muted" style={{ margin: 0 }}>
+                          El alumno todavía no registró comidas fuera del plan.
+                        </p>
+                      ) : (
+                        <div className="food-coach">
+                          {foodDates.map((d) => {
+                            const items = (foodLogs[d] ?? []) as FoodItem[];
+                            if (items.length === 0) return null;
+                            const t = sumFood(items);
+                            return (
+                              <div className="food-coach-day" key={d}>
+                                <div className="food-coach-head">
+                                  <strong>{formatFoodDay(d)}</strong>
+                                  <span className="food-coach-totals">
+                                    {t.cal}
+                                    {foodTargets.cal ? ` / ${foodTargets.cal}` : ""} kcal · P{" "}
+                                    {t.prot}
+                                    {foodTargets.prot ? ` / ${foodTargets.prot}` : ""} · C {t.carbs}
+                                    {foodTargets.carbs ? ` / ${foodTargets.carbs}` : ""} · G {t.fat}
+                                    {foodTargets.fat ? ` / ${foodTargets.fat}` : ""}
+                                  </span>
+                                </div>
+                                {FOOD_SLOT_ORDER.map((slot) => {
+                                  const its = items.filter((it) => it.slot === slot);
+                                  if (its.length === 0) return null;
+                                  return (
+                                    <div className="food-coach-slot" key={slot}>
+                                      <div className="food-slot-head">
+                                        <span>{FOOD_SLOT_LABELS[slot]}</span>
+                                        <span>{sumFood(its).cal} kcal</span>
+                                      </div>
+                                      {its.map((it) => (
+                                        <div className="food-item" key={it.id}>
+                                          <div className="food-item-main">
+                                            <span>{it.name}</span>
+                                            {it.quantity && (
+                                              <span className="food-qty">{it.quantity}</span>
+                                            )}
+                                            <span
+                                              className={`food-src${
+                                                it.source === "voice" ? " voice" : ""
+                                              }`}
+                                            >
+                                              {it.source === "voice" ? "voz" : "manual"}
+                                            </span>
+                                          </div>
+                                          <div className="food-item-macros">
+                                            <span>{it.cal} kcal</span>
+                                            <span>P {it.prot}</span>
+                                            <span>C {it.carbs}</span>
+                                            <span>G {it.fat}</span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

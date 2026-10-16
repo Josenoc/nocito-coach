@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { estimateFoodItems, transcribeAudio } from "@/app/lib/food";
+import { estimateFoodItems, transcribeAudio, argentinaHour } from "@/app/lib/food";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const items = await estimateFoodItems(transcript);
+    const items = await estimateFoodItems(transcript, argentinaHour());
     if (items.length === 0) {
       return NextResponse.json({
         ok: true,

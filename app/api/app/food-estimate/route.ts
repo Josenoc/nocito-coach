@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { estimateFoodItems } from "@/app/lib/food";
+import { estimateFoodItems, argentinaHour } from "@/app/lib/food";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Escribí qué comiste" }, { status: 400 });
   }
   try {
-    const items = await estimateFoodItems(text);
+    const items = await estimateFoodItems(text, argentinaHour());
     if (items.length === 0) {
       return NextResponse.json(
         { ok: false, error: "No pudimos reconocer ningún alimento. Probá con más detalle." },
