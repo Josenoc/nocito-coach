@@ -205,6 +205,14 @@ h1, h2, h3, h4 {
   flex-wrap: wrap;
 }
 .topbar h1 { font-size: 1.2rem; margin: 0; }
+.topbar.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: linear-gradient(180deg, var(--bg) 78%, transparent);
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
 
 /* ---------- Tabs / chips ---------- */
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }

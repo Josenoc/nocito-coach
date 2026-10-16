@@ -619,6 +619,16 @@ export default function CoachDashboard() {
     }
   };
 
+  const backToClients = () => {
+    setFocus(null);
+    setSelectedId(null);
+    setDetail(null);
+    setProgram(null);
+    setEditingProgram(false);
+    setConfirmDelete(false);
+    setMsg(null);
+  };
+
 
   const setEx = (idx: number, patch: Partial<ExRow>) => {
     setDraft((d) => ({
@@ -812,7 +822,7 @@ export default function CoachDashboard() {
   return (
     <main className="section">
       <div className="container">
-        <div className="topbar">
+        <div className="topbar sticky">
           <div>
             <h1>Panel de {coach.full_name || "José"}</h1>
             <span className="muted" style={{ fontSize: ".9rem" }}>
@@ -820,6 +830,11 @@ export default function CoachDashboard() {
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            {selected && (
+              <button className="btn btn-outline" onClick={backToClients}>
+                ← Volver a Clientes
+              </button>
+            )}
             <button
               className={`btn ${pushStatus === "on" ? "btn-outline" : "btn-primary"}`}
               onClick={enablePush}
@@ -935,11 +950,17 @@ export default function CoachDashboard() {
                         {selected.full_name || selected.email}
                       </h2>
                     </div>
-                    <button className="btn btn-outline" onClick={() => setFocus(null)}>
-                      Cerrar (Esc)
-                    </button>
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <button className="btn btn-outline" onClick={backToClients}>
+                        ← Volver a Clientes
+                      </button>
+                      <button className="btn btn-outline" onClick={() => setFocus(null)}>
+                        Cerrar (Esc)
+                      </button>
+                    </div>
                   </div>
                 )}
+
                 <div
                   className="row-between"
                   style={{ marginBottom: 16, flexWrap: "wrap", gap: 10 }}
