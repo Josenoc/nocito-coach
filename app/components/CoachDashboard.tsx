@@ -478,14 +478,7 @@ export default function CoachDashboard() {
           </button>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(240px, 300px) 1fr",
-            gap: 22,
-            alignItems: "start",
-          }}
-        >
+        <div className="coach-layout">
           <aside className="card">
             <div className="row-between" style={{ marginBottom: 12, gap: 8 }}>
               <h3 style={{ margin: 0 }}>Clientes</h3>
@@ -565,6 +558,9 @@ export default function CoachDashboard() {
                         ? "Pendiente de revisión"
                         : "Rutina activa"}
                     </span>
+                    {selected.has_client_update && (
+                      <span className="pill update">● Actualizó datos</span>
+                    )}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                     {selected.routine_status === "pending_review" && (
@@ -643,7 +639,7 @@ export default function CoachDashboard() {
                           value={
                             PLACE_LABELS[detail.profile.anamnesis.training_place] ??
                             detail.profile.anamnesis.training_place ??
-                            "-"
+                            "Sin definir"
                           }
                         />
                         <Dato
@@ -651,52 +647,70 @@ export default function CoachDashboard() {
                           value={
                             EXPERIENCE_LABELS[detail.profile.anamnesis.experience] ??
                             detail.profile.anamnesis.experience ??
-                            "-"
+                            "Sin definir"
                           }
                         />
                         <Dato
-                          label="Lesiones"
-                          value={detail.profile.anamnesis.injuries || "-"}
+                          label="Días / semana"
+                          value={
+                            detail.profile.anamnesis.training_days
+                              ? `${detail.profile.anamnesis.training_days} días`
+                              : "Sin definir"
+                          }
                         />
-                        <Dato
-                          label="Restricciones alimentarias"
-                          value={detail.profile.anamnesis.food_restrictions || "-"}
-                        />
-                        <Dato label="Teléfono" value={detail.profile.phone || "-"} />
+                        <Dato label="Teléfono" value={detail.profile.phone || "Sin dato"} />
                       </div>
-                      {detail.profile.anamnesis.photos &&
-                        Object.values(detail.profile.anamnesis.photos).some(Boolean) && (
+                      <div className="notes-block">
+                        <div className="note-item">
+                          <span className="note-k">Lesiones / notas</span>
+                          <span
+                            className={`note-v${
+                              detail.profile.anamnesis.injuries ? "" : " note-empty"
+                            }`}
+                          >
+                            {detail.profile.anamnesis.injuries || "Sin notas"}
+                          </span>
+                        </div>
+                        <div className="note-item">
+                          <span className="note-k">Restricciones alimentarias</span>
+                          <span
+                            className={`note-v${
+                              detail.profile.anamnesis.food_restrictions ? "" : " note-empty"
+                            }`}
+                          >
+                            {detail.profile.anamnesis.food_restrictions || "Sin restricciones"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="photo-block">
+                        <h4>Fotos iniciales</h4>
+                        {detail.profile.anamnesis.photos &&
+                        Object.values(detail.profile.anamnesis.photos).some(Boolean) ? (
                           <div className="coach-photos">
-                            {(["front", "side", "back"] as const).map((k) =>
-                              detail.profile.anamnesis.photos[k] ? (
+                            {(["front", "side", "back"] as const).map((k) => {
+                              const url = detail.profile.anamnesis.photos[k];
+                              const label =
+                                k === "front" ? "Frente" : k === "side" ? "Perfil" : "Espalda";
+                              return url ? (
                                 <a
                                   key={k}
-                                  href={detail.profile.anamnesis.photos[k]}
+                                  href={url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  title={
-                                    k === "front"
-                                      ? "Frente"
-                                      : k === "side"
-                                      ? "Perfil"
-                                      : "Espalda"
-                                  }
+                                  title={`Ver ${label}`}
                                 >
-                                  <img
-                                    src={detail.profile.anamnesis.photos[k]}
-                                    alt={
-                                      k === "front"
-                                        ? "Frente"
-                                        : k === "side"
-                                        ? "Perfil"
-                                        : "Espalda"
-                                    }
-                                  />
+                                  <img src={url} alt={`Foto ${label}`} />
+                                  <span className="ph-label">{label}</span>
                                 </a>
-                              ) : null
-                            )}
+                              ) : null;
+                            })}
                           </div>
+                        ) : (
+                          <p className="muted note-empty" style={{ margin: 0 }}>
+                            Sin fotos cargadas.
+                          </p>
                         )}
+                      </div>
                       </>
                     ) : (
                       <p className="muted" style={{ margin: 0 }}>
