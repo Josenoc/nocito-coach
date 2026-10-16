@@ -823,11 +823,15 @@ export default function CoachDashboard() {
     <main className="section">
       <div className="container">
         <div className="topbar sticky">
-          <div>
-            <h1>Panel de {coach.full_name || "José"}</h1>
-            <span className="muted" style={{ fontSize: ".9rem" }}>
-              {clients.length} clientes
-            </span>
+          <div className="topbar-title">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
+            <div>
+              <h1>Panel de {coach.full_name || "José"}</h1>
+              <span className="muted" style={{ fontSize: ".9rem" }}>
+                {clients.length} clientes
+              </span>
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             {selected && (
