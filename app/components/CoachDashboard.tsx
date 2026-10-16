@@ -88,6 +88,20 @@ const EXPERIENCE_LABELS: Record<string, string> = {
   avanzado: "Avanzado",
 };
 
+type ParsedExercise = {
+  ejercicio: string;
+  series: number | null;
+  reps: string | null;
+  descanso: string | null;
+  notas: string | null;
+};
+
+type ParsedDay = {
+  dia: string;
+  nombre: string;
+  ejercicios: ParsedExercise[];
+};
+
 function Dato({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -116,7 +130,7 @@ export default function CoachDashboard() {
   const [filter, setFilter] = useState<"pending" | "all">("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
-  const [tab, setTab] = useState<"historial" | "rutinas" | "nutricion" | "acceso">(
+  const [tab, setTab] = useState<"historial" | "rutinas" | "importar" | "nutricion" | "acceso">(
     "historial"
   );
 
@@ -126,6 +140,10 @@ export default function CoachDashboard() {
   const [newClient, setNewClient] = useState({ email: "", full_name: "", pin: "" });
   const [pinFor, setPinFor] = useState("");
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [importText, setImportText] = useState("");
+  const [importDays, setImportDays] = useState<ParsedDay[] | null>(null);
+  const [parsing, setParsing] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -206,6 +224,8 @@ export default function CoachDashboard() {
     setMsg(null);
     setDraft(emptyDraft());
     setBaseline(null);
+    setImportText("");
+    setImportDays(null);
     const res = await fetch(`/api/coach/client?id=${id}`);
     const json = await res.json();
     if (json.ok) {
@@ -281,6 +301,59 @@ export default function CoachDashboard() {
       setSelectedId(selectedId);
     } else {
       setMsg({ type: "err", text: json.error || "Error" });
+    }
+  };
+
+  const parseImport = async () => {
+    if (!importText.trim()) {
+      setMsg({ type: "err", text: "Pegá el texto de la rutina primero." });
+      return;
+    }
+    setMsg(null);
+    setParsing(true);
+    setImportDays(null);
+    try {
+      const res = await fetch("/api/coach/parse-routine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: importText }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      if (!json.days?.length) {
+        setMsg({ type: "err", text: "No se pudo reconocer ninguna rutina en el texto." });
+        return;
+      }
+      setImportDays(json.days);
+      setMsg({ type: "ok", text: "Rutina estructurada. Revisá la vista previa." });
+    } catch (err: any) {
+      setMsg({ type: "err", text: err.message || "No se pudo procesar el texto." });
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const approveImport = async () => {
+    if (!selectedId || !importDays?.length) return;
+    setMsg(null);
+    setImporting(true);
+    try {
+      const res = await fetch("/api/coach/import-routine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: selectedId, days: importDays }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      setMsg({ type: "ok", text: "Rutina reemplazada y publicada para el cliente." });
+      setImportText("");
+      setImportDays(null);
+      await loadClients();
+      await reloadDetail();
+    } catch (err: any) {
+      setMsg({ type: "err", text: err.message || "No se pudo publicar la rutina." });
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -569,21 +642,25 @@ export default function CoachDashboard() {
                       </button>
                     )}
                     <div className="tabs" style={{ margin: 0 }}>
-                      {(["historial", "rutinas", "nutricion", "acceso"] as const).map((t) => (
-                        <button
-                          key={t}
-                          className={`chip ${tab === t ? "active" : ""}`}
-                          onClick={() => setTab(t)}
-                        >
-                          {t === "historial"
-                            ? "Historial"
-                            : t === "rutinas"
-                            ? "Rutinas"
-                            : t === "nutricion"
-                            ? "Nutrición"
-                            : "Acceso"}
-                        </button>
-                      ))}
+                      {(["historial", "rutinas", "importar", "nutricion", "acceso"] as const).map(
+                        (t) => (
+                          <button
+                            key={t}
+                            className={`chip ${tab === t ? "active" : ""}`}
+                            onClick={() => setTab(t)}
+                          >
+                            {t === "historial"
+                              ? "Historial"
+                              : t === "rutinas"
+                              ? "Rutinas"
+                              : t === "importar"
+                              ? "Importar"
+                              : t === "nutricion"
+                              ? "Nutrición"
+                              : "Acceso"}
+                          </button>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
@@ -781,6 +858,93 @@ export default function CoachDashboard() {
                         <audio src={a.audio_storage_url} controls preload="none" />
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {tab === "importar" && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="card">
+                      <h3 style={{ marginTop: 0 }}>Importar rutina desde texto</h3>
+                      <p className="muted" style={{ marginTop: 0 }}>
+                        Pegá la rutina del cuaderno o apunte. El sistema la estructura en días y
+                        ejercicios para que la revises antes de publicarla.
+                      </p>
+                      <textarea
+                        className="input import-textarea"
+                        rows={10}
+                        placeholder={"Ej: Lunes - Tren Superior A\nPress de Banca con Barra 4x6-8 (4-5 min)\nPress Inclinado con Mancuernas 3x8-10 (2-3 min)\n..."}
+                        value={importText}
+                        onChange={(e) => setImportText(e.target.value)}
+                      />
+                      <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+                        <button
+                          className="btn btn-primary"
+                          onClick={parseImport}
+                          disabled={parsing}
+                        >
+                          {parsing ? "Procesando…" : "Procesar y estructurar"}
+                        </button>
+                        {importDays && (
+                          <button className="btn btn-outline" onClick={() => setImportDays(null)}>
+                            Limpiar vista previa
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {importDays && (
+                      <div className="card">
+                        <h3 style={{ marginTop: 0 }}>Vista previa</h3>
+                        <p className="muted" style={{ marginTop: 0 }}>
+                          Verificá los bloques antes de enviarlos. Al aprobar, se{" "}
+                          <strong>reemplazan</strong> las rutinas actuales del cliente y se publican.
+                        </p>
+
+                        {importDays.map((d, di) => (
+                          <div className="day-section" key={di}>
+                            <h4>
+                              {d.nombre}
+                              {d.nombre !== d.dia ? (
+                                <span className="muted"> · {d.dia}</span>
+                              ) : null}
+                            </h4>
+                            <div className="scroll-x">
+                              <table className="data-table" style={{ minWidth: 560 }}>
+                                <thead>
+                                  <tr>
+                                    <th>Ejercicio</th>
+                                    <th>Series</th>
+                                    <th>Reps</th>
+                                    <th>Descanso</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {d.ejercicios.map((ex, ei) => (
+                                    <tr key={ei}>
+                                      <td>
+                                        <b>{ex.ejercicio}</b>
+                                      </td>
+                                      <td>{ex.series ?? "—"}</td>
+                                      <td>{ex.reps ?? "—"}</td>
+                                      <td>{ex.descanso ?? "—"}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        ))}
+
+                        <button
+                          className="btn btn-success"
+                          onClick={approveImport}
+                          disabled={importing}
+                          style={{ marginTop: 8 }}
+                        >
+                          {importing ? "Publicando…" : "Aprobar y enviar al cliente"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

@@ -843,6 +843,11 @@ textarea.input { resize: vertical; }
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
   color: #fff; font-size: .68rem; text-align: center; letter-spacing: .04em;
 }
+.import-textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; line-height: 1.5; }
+.btn-success { background: var(--ok); color: #04110b; }
+.btn-success:hover { background: #5ee7b0; }
+.day-section { margin: 18px 0; border-left: 3px solid var(--gold); padding-left: 12px; }
+.day-section h4 { margin: 0 0 8px; font-family: Montserrat, sans-serif; font-size: .95rem; text-transform: uppercase; letter-spacing: .02em; }
 
 @media (max-width: 900px) {
   .coach-layout { grid-template-columns: 1fr; }
