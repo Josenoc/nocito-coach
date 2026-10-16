@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
 import { sendClientUpdatedEmail } from "@/app/lib/notify";
+import { sendCoachPush } from "@/app/lib/push";
 import type { Anamnesis } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
@@ -169,6 +170,12 @@ export async function PATCH(req: NextRequest) {
       email: current.email,
       changes,
     }).catch((err) => console.error("[onboarding] aviso al coach:", err));
+
+    sendCoachPush({
+      title: "Nocito Coach",
+      body: `${current.full_name || current.email} actualizó sus datos`,
+      url: "/app/admin",
+    }).catch((err) => console.error("[onboarding] push al coach:", err));
 
     return NextResponse.json({ ok: true, anamnesis, changes });
   } catch {

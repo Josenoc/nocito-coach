@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
+import { sendCoachActivityEmail } from "@/app/lib/notify";
+import { sendCoachPush } from "@/app/lib/push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +48,33 @@ export async function POST(req: NextRequest) {
 
     const { data: pub } = supabase.storage.from("audios").getPublicUrl(path);
     const audioUrl = pub.publicUrl;
+
+    if (session.role === "client") {
+      const [profileRes, exRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("id", clientId)
+          .maybeSingle(),
+        exerciseId
+          ? supabase.from("exercises").select("name").eq("id", exerciseId).maybeSingle()
+          : Promise.resolve({ data: null } as { data: any }),
+      ]);
+      sendCoachActivityEmail({
+        kind: "voice",
+        name: profileRes?.data?.full_name || "",
+        email: profileRes?.data?.email || "",
+        detail: (exRes as any)?.data?.name
+          ? `Ejercicio: ${(exRes as any).data.name}`
+          : "Nota de voz general",
+      }).catch((err) => console.error("notify voice", err));
+
+      sendCoachPush({
+        title: "Nocito Coach",
+        body: `${profileRes?.data?.full_name || profileRes?.data?.email || "Tu alumno"} envió una nota de voz`,
+        url: "/app/admin",
+      }).catch((err) => console.error("push voice", err));
+    }
 
     const { data: report, error: insErr } = await supabase
       .from("audio_reports")

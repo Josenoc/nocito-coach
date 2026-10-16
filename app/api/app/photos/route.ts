@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
 import { sendClientUpdatedEmail } from "@/app/lib/notify";
+import { sendCoachPush } from "@/app/lib/push";
 import type { Anamnesis, ClientPhotos, PhotoSlot } from "@/lib/app-types";
 
 export const runtime = "nodejs";
@@ -93,6 +94,12 @@ export async function POST(req: NextRequest) {
       email: current.email,
       changes: [SLOT_LABELS[slot]],
     }).catch((err) => console.error("[photos] aviso al coach:", err));
+
+    sendCoachPush({
+      title: "Nocito Coach",
+      body: `${current.full_name || current.email} subió ${SLOT_LABELS[slot].toLowerCase()}`,
+      url: "/app/admin",
+    }).catch((err) => console.error("[photos] push al coach:", err));
 
     return NextResponse.json({ ok: true, url, anamnesis });
   } catch {

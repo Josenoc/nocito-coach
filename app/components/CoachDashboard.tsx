@@ -116,6 +116,17 @@ function Dato({ label, value }: { label: string; value: string }) {
   );
 }
 
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
+  return output;
+}
+
 export default function CoachDashboard() {
   const router = useRouter();
 
@@ -127,7 +138,7 @@ export default function CoachDashboard() {
   const [authLoading, setAuthLoading] = useState(false);
 
   const [clients, setClients] = useState<ClientRow[]>([]);
-  const [filter, setFilter] = useState<"pending" | "all">("pending");
+  const [filter, setFilter] = useState<"pending" | "active" | "all">("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
   const [tab, setTab] = useState<"historial" | "rutinas" | "importar" | "nutricion" | "acceso">(
@@ -144,6 +155,9 @@ export default function CoachDashboard() {
   const [importDays, setImportDays] = useState<ParsedDay[] | null>(null);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [pushStatus, setPushStatus] = useState<
+    "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
+  >("checking");
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -161,6 +175,33 @@ export default function CoachDashboard() {
       .catch(() => {})
       .finally(() => setChecking(false));
   }, []);
+
+  useEffect(() => {
+    if (!coach) return;
+    if (
+      typeof window === "undefined" ||
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window)
+    ) {
+      setPushStatus("unsupported");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      setPushStatus("denied");
+      return;
+    }
+    navigator.serviceWorker
+      .getRegistration()
+      .then(async (reg) => {
+        if (!reg) {
+          setPushStatus("idle");
+          return;
+        }
+        const sub = await reg.pushManager.getSubscription();
+        setPushStatus(sub ? "on" : "idle");
+      })
+      .catch(() => setPushStatus("idle"));
+  }, [coach]);
 
   const loadClients = async () => {
     const res = await fetch("/api/coach/clients");
@@ -208,6 +249,61 @@ export default function CoachDashboard() {
     setClients([]);
     setDetail(null);
   };
+
+  const enablePush = async () => {
+    try {
+      if (
+        typeof window === "undefined" ||
+        !("serviceWorker" in navigator) ||
+        !("PushManager" in window)
+      ) {
+        setPushStatus("unsupported");
+        setMsg({ type: "err", text: "Este navegador no soporta notificaciones." });
+        return;
+      }
+      if (!VAPID_PUBLIC_KEY) {
+        setPushStatus("unsupported");
+        setMsg({ type: "err", text: "Falta configurar las claves VAPID." });
+        return;
+      }
+      setPushStatus("busy");
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        setPushStatus("denied");
+        setMsg({ type: "err", text: "Permiso de notificaciones denegado." });
+        return;
+      }
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+        });
+      }
+      const res = await fetch("/api/coach/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: sub.toJSON() }),
+      });
+      const json = await res.json();
+      if (json.ok) {
+        setPushStatus("on");
+        setMsg({
+          type: "ok",
+          text: `Notificaciones activadas en este dispositivo${json.devices ? ` (${json.devices})` : ""}.`,
+        });
+      } else {
+        setPushStatus("idle");
+        setMsg({ type: "err", text: json.error || "No se pudieron activar." });
+      }
+    } catch (err: any) {
+      setPushStatus("idle");
+      setMsg({ type: "err", text: err?.message || "No se pudo activar las notificaciones." });
+    }
+  };
+
 
   const syncNutrition = (json: any) => {
     const np = json?.profile?.nutrition_plan as NutritionPlan | null | undefined;
@@ -279,6 +375,7 @@ export default function CoachDashboard() {
     const json = await res.json();
     if (json.ok) {
       setMsg({ type: "ok", text: "Rutina aprobada y publicada." });
+      setFilter("active");
       await loadClients();
       await reloadDetail();
     } else {
@@ -531,9 +628,12 @@ export default function CoachDashboard() {
   const pendingCount = clients.filter(
     (c) => c.routine_status === "pending_review"
   ).length;
+  const activeCount = clients.length - pendingCount;
   const visibleClients =
     filter === "pending"
       ? clients.filter((c) => c.routine_status === "pending_review")
+      : filter === "active"
+      ? clients.filter((c) => c.routine_status !== "pending_review")
       : clients;
 
   return (
@@ -546,9 +646,38 @@ export default function CoachDashboard() {
               {clients.length} clientes
             </span>
           </div>
-          <button className="btn btn-outline" onClick={logout}>
-            Salir
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <button
+              className={`btn ${pushStatus === "on" ? "btn-outline" : "btn-primary"}`}
+              onClick={enablePush}
+              disabled={
+                pushStatus === "busy" ||
+                pushStatus === "on" ||
+                pushStatus === "unsupported" ||
+                pushStatus === "checking"
+              }
+              title={
+                pushStatus === "unsupported"
+                  ? "Este navegador no soporta notificaciones push"
+                  : undefined
+              }
+            >
+              {pushStatus === "on"
+                ? "Notificaciones activadas"
+                : pushStatus === "busy"
+                ? "Activando…"
+                : pushStatus === "denied"
+                ? "Notificaciones bloqueadas"
+                : pushStatus === "unsupported"
+                ? "Notificaciones no disponibles"
+                : pushStatus === "checking"
+                ? "Verificando…"
+                : "Activar notificaciones"}
+            </button>
+            <button className="btn btn-outline" onClick={logout}>
+              Salir
+            </button>
+          </div>
         </div>
 
         <div className="coach-layout">
@@ -567,6 +696,12 @@ export default function CoachDashboard() {
                 onClick={() => setFilter("pending")}
               >
                 Pendientes ({pendingCount})
+              </button>
+              <button
+                className={`chip ${filter === "active" ? "active" : ""}`}
+                onClick={() => setFilter("active")}
+              >
+                Activos ({activeCount})
               </button>
               <button
                 className={`chip ${filter === "all" ? "active" : ""}`}

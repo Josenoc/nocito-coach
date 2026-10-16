@@ -168,3 +168,86 @@ export async function sendClientUpdatedEmail(input: {
   if (res.error) return { ok: false, error: res.error.message };
   return { ok: true, to };
 }
+
+export type CoachActivityKind = "workout" | "voice" | "profile";
+
+const ACTIVITY_TITLE: Record<CoachActivityKind, string> = {
+  workout: "registró su sesión",
+  voice: "envió una nota de voz",
+  profile: "actualizó sus datos",
+};
+
+const ACTIVITY_INTRO: Record<CoachActivityKind, string> = {
+  workout: "completó y registró series de su entrenamiento.",
+  voice: "te envió una nota de voz desde la app.",
+  profile: "editó su ficha y datos personales.",
+};
+
+/**
+ * Aviso al coach ante actividad del cliente (sesión registrada, nota de voz o
+ * actualización de datos). Se envía a la dirección maestra (DESTINATION_EMAIL).
+ */
+export async function sendCoachActivityEmail(input: {
+  kind: CoachActivityKind;
+  name: string;
+  email: string;
+  detail?: string;
+}): Promise<{ ok: boolean; to?: string; error?: string }> {
+  const to = getDestinationEmail();
+  if (!to) return { ok: false, error: "DESTINATION_EMAIL no configurado" };
+
+  const base = siteBaseUrl();
+  const link = `${base}/app/admin`;
+  const clientName = input.name || input.email;
+  const title = ACTIVITY_TITLE[input.kind];
+  const subject = `Nocito Coach: ${clientName} ${title}`;
+
+  const html = [
+    `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;">`,
+    `<div style="background:#0b0b0b;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">`,
+    `<p style="margin:0;font-size:11px;letter-spacing:2px;color:#FFC400;">NOCITO COACH</p>`,
+    `<h1 style="margin:8px 0 0;font-size:22px;">Actividad de un alumno</h1>`,
+    `</div>`,
+    `<div style="background:#fff;padding:28px;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;">`,
+    `<p style="margin:0 0 16px;color:#222;font-size:15px;"><strong>${clientName}</strong> ${ACTIVITY_INTRO[input.kind]}</p>`,
+    `<table style="width:100%;border-collapse:collapse;margin:0 0 20px;">`,
+    row("Alumno", clientName),
+    row("Email", input.email),
+    input.detail ? row("Detalle", input.detail) : "",
+    `</table>`,
+    `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Ver en el panel</a></p>`,
+    `<p style="margin:0;color:#888;font-size:12px;">Entrá al panel para revisar su historial y responder.</p>`,
+    `</div>`,
+    `</div>`,
+  ]
+    .filter(Boolean)
+    .join("");
+
+  const text = [
+    `${clientName} ${title}.`,
+    ``,
+    `Email: ${input.email}`,
+    input.detail ? `Detalle: ${input.detail}` : "",
+    ``,
+    `Ver en el panel: ${link}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  let resend;
+  try {
+    resend = getResend();
+  } catch (err: any) {
+    return { ok: false, error: err?.message || "Resend no configurado" };
+  }
+
+  const res = await resend.emails.send({
+    from: SENDER_EMAIL,
+    to,
+    subject,
+    html,
+    text,
+  });
+  if (res.error) return { ok: false, error: res.error.message };
+  return { ok: true, to };
+}

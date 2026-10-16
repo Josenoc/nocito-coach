@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
+import { sendCoachActivityEmail } from "@/app/lib/notify";
+import { sendCoachPush } from "@/app/lib/push";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +90,18 @@ export async function POST(req: NextRequest) {
         ? body.log_date
         : new Date().toISOString().slice(0, 10);
 
+    const supabase = getSupabaseAdmin();
+
+    let firstOfDay = false;
+    if (session.role === "client") {
+      const { count } = await supabase
+        .from("sets_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", clientId)
+        .eq("log_date", logDate);
+      firstOfDay = !count;
+    }
+
     const row = {
       exercise_id: exerciseId,
       client_id: clientId,
@@ -100,7 +114,7 @@ export async function POST(req: NextRequest) {
       log_date: logDate,
     };
 
-    const { data, error } = await getSupabaseAdmin()
+    const { data, error } = await supabase
       .from("sets_logs")
       .upsert(row, { onConflict: "exercise_id,client_id,log_date,set_number" })
       .select()
@@ -109,6 +123,27 @@ export async function POST(req: NextRequest) {
     if (error) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
+
+    if (firstOfDay) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", clientId)
+        .maybeSingle();
+      sendCoachActivityEmail({
+        kind: "workout",
+        name: profile?.full_name || "",
+        email: profile?.email || "",
+        detail: `Fecha: ${logDate}`,
+      }).catch((err) => console.error("notify workout", err));
+
+      sendCoachPush({
+        title: "Nocito Coach",
+        body: `${profile?.full_name || profile?.email || "Tu alumno"} registró su sesión`,
+        url: "/app/admin",
+      }).catch((err) => console.error("push workout", err));
+    }
+
     return NextResponse.json({ ok: true, log: data }, { status: 201 });
   } catch {
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });

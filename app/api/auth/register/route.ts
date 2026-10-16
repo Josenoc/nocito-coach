@@ -4,6 +4,7 @@ import { hashPin, setSessionCookie, type Role } from "@/lib/auth";
 import { isDeliverableEmail } from "@/app/lib/alumnos";
 import { generateOnboardingDraft } from "@/app/lib/onboarding";
 import { sendCoachPendingReviewEmail } from "@/app/lib/notify";
+import { sendCoachPush } from "@/app/lib/push";
 import type { Anamnesis } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
@@ -149,6 +150,12 @@ export async function POST(req: NextRequest) {
       phone,
       anamnesis,
     }).catch((err) => console.error("[register] aviso al coach:", err));
+
+    sendCoachPush({
+      title: "Nocito Coach",
+      body: `${full_name || email} completó su registro y espera revisión`,
+      url: "/app/admin",
+    }).catch((err) => console.error("[register] push al coach:", err));
 
     const profile = {
       id: data.id as string,

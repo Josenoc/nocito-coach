@@ -1,0 +1,25 @@
+{
+  "name": "Nocito Coach",
+  "short_name": "Nocito Coach",
+  "description": "Panel del coach y seguimiento de alumnos.",
+  "start_url": "/app/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    {
+      "src": "/img/logo-nocitocoach.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/logo-nocitocoach.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

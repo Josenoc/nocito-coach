@@ -15,6 +15,11 @@ export default function RootLayout({
     <html lang="es">
       <head>
         <meta name="theme-color" content="#0A0A0A" />
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Nocito Coach" />
+        <link rel="apple-touch-icon" href="/img/logo-nocitocoach.jpeg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
