@@ -124,6 +124,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
+    const rirVal = toNum(body?.rir);
+    if (session.role === "client" && rirVal !== null) {
+      const rirKey = `${exerciseId}|${logDate}|${Math.round(setNumber)}`;
+      const { data: profRow } = await supabase
+        .from("profiles")
+        .select("anamnesis")
+        .eq("id", clientId)
+        .single();
+      const anam = ((profRow?.anamnesis ?? {}) as Record<string, unknown>) || {};
+      const setRir = { ...((anam.setRir as Record<string, number>) ?? {}) };
+      if (rirVal <= 0) delete setRir[rirKey];
+      else setRir[rirKey] = rirVal;
+      await supabase
+        .from("profiles")
+        .update({ anamnesis: { ...anam, setRir } })
+        .eq("id", clientId);
+    }
+
     if (firstOfDay) {
       const { data: profile } = await supabase
         .from("profiles")

@@ -29,6 +29,16 @@ export type ParsedFoodItem = Omit<FoodItem, "id" | "created_at" | "source">;
 
 export type FoodLogs = Record<string, FoodItem[]>;
 
+/** Mapa de RIR registrado por el alumno: clave `${exercise_id}|${log_date}|${set_number}`. */
+export type SetRirMap = Record<string, number>;
+
+export interface TrainingBlock {
+  /** Indicación de la semana/bloque, ej: "Mismas reps, +2,5 kg en los básicos y 2 RIR". */
+  guideline?: string;
+  /** Cantidad de semanas del bloque (por defecto 6). */
+  weeks?: number;
+}
+
 export interface Anamnesis {
   sex: string;
   age: number;
@@ -43,6 +53,8 @@ export interface Anamnesis {
   food_restrictions?: string;
   photos?: ClientPhotos;
   foodLogs?: FoodLogs;
+  setRir?: SetRirMap;
+  trainingBlock?: TrainingBlock;
   completedAt?: string;
   clientUpdatedAt?: string;
   coachSeenAt?: string;
@@ -108,6 +120,7 @@ export interface SetLog {
   target_weight?: number | null;
   actual_reps?: number | null;
   actual_weight?: number | null;
+  rir?: number | null;
   phantom_reference_10_percent?: number | null;
   log_date: string;
   created_at: string;

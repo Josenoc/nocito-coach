@@ -966,3 +966,94 @@ textarea.input { resize: vertical; }
 .split { gap: 26px; }
 .coach-layout { gap: 26px; }
 .tabs .chip { padding: 9px 16px; font-size: 0.92rem; }
+
+/* ---- Bloque multi-semana (spec 4) ---- */
+.block-guide {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(255, 196, 0, 0.08), rgba(255, 196, 0, 0.02));
+  border: 1px solid rgba(255, 196, 0, 0.3);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.block-guide-tag {
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  border: 1px solid rgba(255, 196, 0, 0.4);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.block-guide p { margin: 0; font-size: 0.95rem; line-height: 1.5; }
+
+.week-selector { margin-bottom: 18px; }
+.week-selector-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.week-track {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.week-pill {
+  flex: 0 0 auto;
+  min-width: 74px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.week-pill-top { font-weight: 700; font-size: 0.95rem; }
+.week-pill-sub {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.week-pill.done { border-color: rgba(52, 211, 153, 0.5); }
+.week-pill.done .week-pill-top { color: var(--ok); }
+.week-pill.active { border-color: rgba(255, 196, 0, 0.6); box-shadow: 0 0 0 1px rgba(255, 196, 0, 0.25); }
+.week-pill.active .week-pill-top { color: var(--gold); }
+.week-pill.upcoming { opacity: 0.72; }
+.week-pill.empty { opacity: 0.5; }
+.week-pill.current { background: rgba(255, 196, 0, 0.12); border-color: var(--gold); }
+
+.block-card { border-color: rgba(255, 196, 0, 0.55); }
+.prev-ref {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold);
+  background: rgba(255, 196, 0, 0.1);
+  border: 1px solid rgba(255, 196, 0, 0.3);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.rir-input { min-width: 52px; }
+
+.progression-card { margin-top: 6px; }
+.progression-table th,
+.progression-table td { text-align: center; white-space: nowrap; }
+.progression-table th:first-child,
+.progression-table td:first-child { text-align: left; }
+.progression-table .col-current { background: rgba(255, 196, 0, 0.08); }
+.prog-done { color: var(--gold); font-weight: 700; }
+.prog-target { color: var(--muted); }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import RegisterWizard from "@/app/components/RegisterWizard";
 import PendingReviewDashboard from "@/app/components/PendingReviewDashboard";
 import NutritionTracker from "@/app/components/NutritionTracker";
-import type { Anamnesis, Exercise, NutritionPlan, Profile, Routine, SetLog } from "@/lib/app-types";
+import type { Anamnesis, Exercise, NutritionPlan, Profile, Routine, SetLog, TrainingBlock } from "@/lib/app-types";
 import {
   exerciseAnatomySrc,
   exerciseGifSrc,
@@ -23,6 +23,7 @@ type SetRow = {
   set_number: number;
   actual_reps: string;
   actual_weight: string;
+  rir: string;
   saved?: boolean;
 };
 
@@ -122,6 +123,11 @@ export default function ClientApp() {
   const [voiceBusy, setVoiceBusy] = useState<string | null>(null);
   const [audioMsg, setAudioMsg] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState<Record<string, boolean>>({});
+  const [week, setWeek] = useState<number>(1);
+  const [today, setToday] = useState<string>("");
+  const [logs, setLogs] = useState<SetLog[]>([]);
+  const [setRir, setSetRir] = useState<Record<string, number>>({});
+  const [trainingBlock, setTrainingBlock] = useState<TrainingBlock | null>(null);
 
   const flashSet = (exId: string, setNumber: number) => {
     const key = `${exId}:${setNumber}`;
@@ -183,21 +189,35 @@ export default function ClientApp() {
       const json = await res.json();
       if (!json.ok) return;
       const rl: Routine[] = json.routines ?? [];
-      const logs: SetLog[] = json.logs ?? [];
+      const logsData: SetLog[] = json.logs ?? [];
+      const rirMap = (json.setRir as Record<string, number>) ?? {};
+      const todayStr = new Date().toISOString().slice(0, 10);
       setRoutines(rl);
       setPlanStatus(json.status ?? "active");
       setNutrition((json.nutrition as NutritionPlan | null) ?? null);
       setAnamnesis((json.anamnesis as Anamnesis | null) ?? null);
+      setLogs(logsData);
+      setSetRir(rirMap);
+      setTrainingBlock((json.trainingBlock as TrainingBlock | null) ?? null);
+      setToday(todayStr);
       setActiveDay((prev) => prev ?? rl[0]?.id ?? null);
+
+      const weekNums = Array.from(new Set(rl.map((r) => r.week_number || 1))).sort(
+        (a, b) => a - b
+      );
+      setWeek((prev) => (weekNums.includes(prev) ? prev : weekNums[0] ?? 1));
 
       const next: Record<string, SetRow[]> = {};
       for (const routine of rl) {
         for (const ex of routine.exercises ?? []) {
           const count = Math.max(1, ex.target_sets || 3);
-          const existing = logs.filter((l) => l.exercise_id === ex.id);
+          const existing = logsData.filter(
+            (l) => l.exercise_id === ex.id && l.log_date === todayStr
+          );
           next[ex.id] = Array.from({ length: count }, (_, i) => {
             const setNumber = i + 1;
             const log = existing.find((l) => l.set_number === setNumber);
+            const rir = rirMap[`${ex.id}|${todayStr}|${setNumber}`];
             return {
               set_number: setNumber,
               actual_reps:
@@ -208,6 +228,7 @@ export default function ClientApp() {
                 log?.actual_weight !== null && log?.actual_weight !== undefined
                   ? String(log.actual_weight)
                   : "",
+              rir: rir !== null && rir !== undefined ? String(rir) : "",
             };
           });
         }
@@ -273,6 +294,10 @@ export default function ClientApp() {
     setPlanStatus("active");
     setNutrition(null);
     setAnamnesis(null);
+    setWeek(1);
+    setLogs([]);
+    setSetRir({});
+    setTrainingBlock(null);
   };
 
   const updateRow = (exId: string, setNumber: number, patch: Partial<SetRow>) => {
@@ -296,6 +321,7 @@ export default function ClientApp() {
           set_number: setNumber,
           actual_reps: row.actual_reps,
           actual_weight: row.actual_weight,
+          rir: row.rir,
           target_reps: ex.target_reps,
           target_weight: ex.target_weight,
           phantom_reference_10_percent: ex.target_weight,
@@ -304,6 +330,16 @@ export default function ClientApp() {
       const json = await res.json();
       if (json.ok) {
         updateRow(ex.id, setNumber, { saved: true });
+        if (today) {
+          setSetRir((prev) => {
+            const key = `${ex.id}|${today}|${setNumber}`;
+            const next = { ...prev };
+            const val = row.rir.trim();
+            if (val === "") delete next[key];
+            else next[key] = Number(val);
+            return next;
+          });
+        }
         flashSet(ex.id, setNumber);
       }
     } catch {
@@ -344,7 +380,7 @@ export default function ClientApp() {
     setRows((prev) => {
       const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
       while (base.length < total) {
-        base.push({ set_number: base.length + 1, actual_reps: "", actual_weight: "" });
+        base.push({ set_number: base.length + 1, actual_reps: "", actual_weight: "", rir: "" });
       }
       for (const s of sets) {
         const r = base.find((x) => x.set_number === s.set_number);
@@ -515,8 +551,52 @@ export default function ClientApp() {
     );
   }
 
-  const current = routines.find((r) => r.id === activeDay) ?? routines[0];
+  const weekPresent = Array.from(new Set(routines.map((r) => r.week_number || 1)));
+  const maxPresent = weekPresent.length ? Math.max(...weekPresent) : 1;
+  const totalWeeks = Math.max(6, trainingBlock?.weeks ?? 0, maxPresent);
+  const weekList = Array.from({ length: totalWeeks }, (_, i) => i + 1);
+
+  const weekDays = routines
+    .filter((r) => (r.week_number || 1) === week)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+  const current = weekDays.find((r) => r.id === activeDay) ?? weekDays[0];
   const exList = current?.exercises ?? [];
+
+  const dayNameOf = (r?: Routine) => (r?.day_name || r?.name || "").trim().toLowerCase();
+  const exerciseInWeek = (weekNum: number, dayName: string, ex: Exercise) => {
+    const day = routines.find(
+      (r) => (r.week_number || 1) === weekNum && dayNameOf(r) === dayName
+    );
+    return (day?.exercises ?? []).find(
+      (e) => e.name.trim().toLowerCase() === ex.name.trim().toLowerCase()
+    );
+  };
+  const latestLogFor = (exerciseId?: string) =>
+    exerciseId ? logs.find((l) => l.exercise_id === exerciseId) : undefined;
+  const fmtLog = (l?: SetLog) => {
+    if (!l) return null;
+    const reps = l.actual_reps ?? null;
+    const weight = l.actual_weight ?? null;
+    if (reps == null && weight == null) return null;
+    return `${reps ?? "-"} × ${weight ?? "-"}${weight != null ? " kg" : ""}`;
+  };
+  const weekExercises = (weekNum: number) =>
+    routines
+      .filter((r) => (r.week_number || 1) === weekNum)
+      .flatMap((r) => r.exercises ?? []);
+  const weekDone = (weekNum: number) => {
+    const exs = weekExercises(weekNum);
+    return exs.length > 0 && exs.every((e) => logs.some((l) => l.exercise_id === e.id));
+  };
+  const firstIncomplete = weekList.find(
+    (w) => weekExercises(w).length > 0 && !weekDone(w)
+  );
+  const statusOf = (weekNum: number): "done" | "active" | "upcoming" | "empty" => {
+    if (weekExercises(weekNum).length === 0) return "empty";
+    if (weekDone(weekNum)) return "done";
+    return weekNum === firstIncomplete ? "active" : "upcoming";
+  };
 
   return (
     <>
@@ -598,21 +678,82 @@ export default function ClientApp() {
 
           {routines.length > 0 && (
             <>
-              <div className="day-tabs">
-                {routines.map((r) => (
-                  <button
-                    key={r.id}
-                    className={`chip ${r.id === current?.id ? "active" : ""}`}
-                    onClick={() => setActiveDay(r.id)}
-                  >
-                    {r.day_name || r.name}
-                  </button>
-                ))}
+              {trainingBlock?.guideline && (
+                <div className="block-guide">
+                  <span className="block-guide-tag">Guía del bloque</span>
+                  <p>{trainingBlock.guideline}</p>
+                </div>
+              )}
+
+              <div className="week-selector">
+                <span className="week-selector-label">Bloque</span>
+                <div className="week-track">
+                  {weekList.map((w) => {
+                    const st = statusOf(w);
+                    return (
+                      <button
+                        key={w}
+                        className={`week-pill ${st} ${w === week ? "current" : ""}`}
+                        onClick={() => {
+                          setWeek(w);
+                          setActiveDay(null);
+                        }}
+                        title={
+                          st === "empty"
+                            ? "Semana aún sin rutina cargada"
+                            : st === "done"
+                            ? "Semana completada"
+                            : st === "active"
+                            ? "Semana en curso"
+                            : "Próxima semana"
+                        }
+                      >
+                        <span className="week-pill-top">
+                          {st === "done" ? "✓" : `Sem ${w}`}
+                        </span>
+                        <span className="week-pill-sub">
+                          {st === "done"
+                            ? `Sem ${w}`
+                            : st === "active"
+                            ? "En curso"
+                            : st === "upcoming"
+                            ? "Próxima"
+                            : "—"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="row-between" style={{ marginBottom: 14 }}>
+              {weekDays.length > 0 ? (
+                <div className="day-tabs">
+                  {weekDays.map((r) => (
+                    <button
+                      key={r.id}
+                      className={`chip ${r.id === current?.id ? "active" : ""}`}
+                      onClick={() => setActiveDay(r.id)}
+                    >
+                      {r.day_name || r.name}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="card">
+                  <span className="badge">Semana {week} en preparación</span>
+                  <p className="muted" style={{ marginBottom: 0 }}>
+                    Tu coach todavía no cargó la rutina de esta semana. Seguí con la semana en
+                    curso.
+                  </p>
+                </div>
+              )}
+
+              <div className="row-between" style={{ marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
                 <span className="badge">
-                  {exList.length} ejercicio{exList.length === 1 ? "" : "s"}
+                  Sem {week} · {exList.length} ejercicio{exList.length === 1 ? "" : "s"}
+                </span>
+                <span className="muted" style={{ fontSize: ".85rem" }}>
+                  Registrás hoy · {today}
                 </span>
               </div>
 
@@ -623,8 +764,12 @@ export default function ClientApp() {
                 const notes = (ex.technique_notes ?? "").split("\n").filter(Boolean);
                 const recording = recordingFor === ex.id;
                 const processing = voiceBusy === ex.id;
+                const prevWeek = week - 1;
+                const prevEx =
+                  prevWeek >= 1 ? exerciseInWeek(prevWeek, dayNameOf(current), ex) : undefined;
+                const prevText = fmtLog(latestLogFor(prevEx?.id));
                 return (
-                  <div className="exercise-card" key={ex.id}>
+                  <div className="exercise-card block-card" key={ex.id}>
                     <div className="workout-grid">
                       <div>
                         <div className="exercise-head">
@@ -670,10 +815,13 @@ export default function ClientApp() {
                       <div>
                         <div className="track-head">
                           <h4>Mis series</h4>
-                          <span className="legend">
-                            <span className="legend-dot">{ex.target_reps ?? "-"}</span>
-                            reps objetivo
-                          </span>
+                          {prevWeek >= 1 && (
+                            <span className="prev-ref">
+                              {prevText
+                                ? `Sem ${prevWeek}: ${prevText}`
+                                : `Sem ${prevWeek}: sin registro`}
+                            </span>
+                          )}
                         </div>
                         <table className="track-table">
                           <thead>
@@ -681,6 +829,7 @@ export default function ClientApp() {
                               <th>Series</th>
                               <th>Reps</th>
                               <th>Peso ({ex.unit})</th>
+                              <th>RIR</th>
                               <th />
                             </tr>
                           </thead>
@@ -727,6 +876,23 @@ export default function ClientApp() {
                                   </div>
                                 </td>
                                 <td>
+                                  <div className="cell-wrap">
+                                    <input
+                                      className="num-input rir-input"
+                                      inputMode="numeric"
+                                      pattern="[0-9]*"
+                                      value={r.rir}
+                                      placeholder="—"
+                                      onChange={(e) =>
+                                        updateRow(ex.id, r.set_number, {
+                                          rir: e.target.value.replace(/[^\d]/g, "").slice(0, 1),
+                                        })
+                                      }
+                                      onBlur={() => saveSet(ex, r.set_number)}
+                                    />
+                                  </div>
+                                </td>
+                                <td>
                                   <div className="save-flag">{r.saved ? "✓" : ""}</div>
                                 </td>
                               </tr>
@@ -756,6 +922,71 @@ export default function ClientApp() {
                   </div>
                 );
               })}
+
+              {current && exList.length > 0 && (
+                <div className="card progression-card">
+                  <div
+                    className="row-between"
+                    style={{ marginBottom: 12, flexWrap: "wrap", gap: 8 }}
+                  >
+                    <h3 style={{ margin: 0 }}>Progresión del Bloque</h3>
+                    <span className="muted" style={{ fontSize: ".85rem" }}>
+                      {current.day_name || current.name}
+                    </span>
+                  </div>
+                  <div className="scroll-x">
+                    <table className="data-table progression-table" style={{ minWidth: 560 }}>
+                      <thead>
+                        <tr>
+                          <th>Ejercicio</th>
+                          {weekList.map((w) => (
+                            <th key={w} className={w === week ? "col-current" : undefined}>
+                              Sem {w}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {exList.map((ex) => (
+                          <tr key={ex.id}>
+                            <td>
+                              <b>{ex.name}</b>
+                            </td>
+                            {weekList.map((w) => {
+                              const wkEx = exerciseInWeek(w, dayNameOf(current), ex);
+                              const logged = fmtLog(latestLogFor(wkEx?.id));
+                              const target =
+                                wkEx && (wkEx.target_reps != null || wkEx.target_weight != null)
+                                  ? `${wkEx.target_reps ?? "-"} × ${wkEx.target_weight ?? "-"}${
+                                      wkEx.target_weight != null ? " kg" : ""
+                                    }`
+                                  : null;
+                              return (
+                                <td
+                                  key={w}
+                                  className={w === week ? "col-current" : undefined}
+                                >
+                                  {logged ? (
+                                    <span className="prog-done">{logged}</span>
+                                  ) : target ? (
+                                    <span className="prog-target">{target}</span>
+                                  ) : (
+                                    <span className="muted">—</span>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="muted" style={{ margin: "10px 0 0", fontSize: ".82rem" }}>
+                    <span className="prog-done">Registrado</span> ·{" "}
+                    <span className="prog-target">objetivo del coach</span>
+                  </p>
+                </div>
+              )}
             </>
           )}
 

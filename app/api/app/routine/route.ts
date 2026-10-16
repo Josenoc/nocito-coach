@@ -49,8 +49,10 @@ export async function GET(req: NextRequest) {
         .from("sets_logs")
         .select("*")
         .eq("client_id", clientId)
-        .eq("log_date", date)
-        .in("exercise_id", exerciseIds);
+        .in("exercise_id", exerciseIds)
+        .order("log_date", { ascending: false })
+        .order("set_number", { ascending: true })
+        .limit(2000);
       logs = logData ?? [];
     }
 
@@ -62,6 +64,10 @@ export async function GET(req: NextRequest) {
 
     const status = prof?.routine_status ?? "active";
     const pending = session.role === "client" && status !== "active";
+    const anamnesis = (prof?.anamnesis ?? null) as {
+      setRir?: Record<string, number>;
+      trainingBlock?: { guideline?: string; weeks?: number } | null;
+    } | null;
 
     return NextResponse.json({
       ok: true,
@@ -71,6 +77,8 @@ export async function GET(req: NextRequest) {
       status,
       nutrition: pending ? null : prof?.nutrition_plan ?? null,
       anamnesis: prof?.anamnesis ?? null,
+      setRir: pending ? {} : anamnesis?.setRir ?? {},
+      trainingBlock: pending ? null : anamnesis?.trainingBlock ?? null,
       client: prof
         ? {
             full_name: prof.full_name ?? "",

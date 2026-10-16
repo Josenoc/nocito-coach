@@ -169,6 +169,8 @@ export default function CoachDashboard() {
   const [filter, setFilter] = useState<"pending" | "active" | "all">("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
+  const [blockGuideline, setBlockGuideline] = useState("");
+  const [blockSaving, setBlockSaving] = useState(false);
   const [tab, setTab] = useState<"historial" | "rutinas" | "importar" | "nutricion" | "acceso">(
     "historial"
   );
@@ -357,6 +359,33 @@ export default function CoachDashboard() {
     );
   };
 
+  const syncBlock = (json: any) => {
+    const tb = json?.profile?.anamnesis?.trainingBlock as
+      | { guideline?: string; weeks?: number }
+      | undefined;
+    setBlockGuideline(tb?.guideline ?? "");
+  };
+
+  const saveBlock = async () => {
+    if (!selectedId) return;
+    setBlockSaving(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/coach/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ client_id: selectedId, guideline: blockGuideline, weeks: 6 }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "No se pudo guardar");
+      setMsg({ type: "ok", text: "Guía del bloque guardada." });
+    } catch (err: any) {
+      setMsg({ type: "err", text: err?.message || "Error al guardar" });
+    } finally {
+      setBlockSaving(false);
+    }
+  };
+
   const selectClient = async (id: string) => {
     setSelectedId(id);
     setTab("historial");
@@ -370,6 +399,7 @@ export default function CoachDashboard() {
     if (json.ok) {
       setDetail(json);
       syncNutrition(json);
+      syncBlock(json);
     }
   };
 
@@ -380,6 +410,7 @@ export default function CoachDashboard() {
     if (json.ok) {
       setDetail(json);
       syncNutrition(json);
+      syncBlock(json);
     }
   };
 
@@ -1174,6 +1205,29 @@ export default function CoachDashboard() {
 
                 {tab === "rutinas" && detail && (
                   <div style={{ marginTop: 12 }}>
+                    <div className="card" style={{ marginBottom: 16 }}>
+                      <h3 style={{ marginTop: 0 }}>Guía del bloque (Sem 1–6)</h3>
+                      <p className="muted" style={{ marginTop: 0, fontSize: ".88rem" }}>
+                        Texto que ve el alumno arriba de sus semanas. Ej: «Mismas reps, +2,5 kg en
+                        los básicos y dejá 2 reps en reserva».
+                      </p>
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        <input
+                          className="input"
+                          style={{ flex: "1 1 340px" }}
+                          value={blockGuideline}
+                          onChange={(e) => setBlockGuideline(e.target.value)}
+                          placeholder="Indicación de la semana / bloque"
+                        />
+                        <button
+                          className="btn btn-primary"
+                          onClick={saveBlock}
+                          disabled={blockSaving}
+                        >
+                          {blockSaving ? "Guardando…" : "Guardar guía"}
+                        </button>
+                      </div>
+                    </div>
                     <div className="card" style={{ marginBottom: 16 }}>
                       <div className="row-between" style={{ marginBottom: 6 }}>
                         <h3 style={{ margin: 0 }}>
