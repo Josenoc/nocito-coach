@@ -7,10 +7,14 @@ export type PushPayload = {
   url?: string;
 };
 
+function clean(value: string | undefined): string {
+  return (value ?? "").replace(/\s+/g, "");
+}
+
 function configure(): boolean {
-  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT || "mailto:nocito.coach@gmail.com";
+  const publicKey = clean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+  const privateKey = clean(process.env.VAPID_PRIVATE_KEY);
+  const subject = (process.env.VAPID_SUBJECT || "mailto:nocito.coach@gmail.com").trim();
   if (!publicKey || !privateKey) return false;
   try {
     webpush.setVapidDetails(subject, publicKey, privateKey);
@@ -84,5 +88,5 @@ export async function sendCoachPush(
 }
 
 export function getVapidPublicKey(): string {
-  return process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+  return clean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
 }
