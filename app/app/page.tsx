@@ -151,12 +151,25 @@ export default function ClientApp() {
   const mediaRef = useRef<MediaRecorder | null>(null);
   const [voiceBusy, setVoiceBusy] = useState<string | null>(null);
   const [audioMsg, setAudioMsg] = useState<string | null>(null);
+  const [savedFlash, setSavedFlash] = useState<Record<string, boolean>>({});
+
+  const flashSet = (exId: string, setNumber: number) => {
+    const key = `${exId}:${setNumber}`;
+    setSavedFlash((prev) => ({ ...prev, [key]: true }));
+    setTimeout(() => {
+      setSavedFlash((prev) => {
+        if (!prev[key]) return prev;
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }, 900);
+  };
 
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).has("registro")
-    ) {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("registro") || params.get("onboarding") === "1") {
       setMode("register");
     }
   }, []);
@@ -331,7 +344,10 @@ export default function ClientApp() {
         }),
       });
       const json = await res.json();
-      if (json.ok) updateRow(ex.id, setNumber, { saved: true });
+      if (json.ok) {
+        updateRow(ex.id, setNumber, { saved: true });
+        flashSet(ex.id, setNumber);
+      }
     } catch {
       /* ignore */
     }
@@ -407,6 +423,7 @@ export default function ClientApp() {
         sets.some((s) => s.set_number === r.set_number) ? { ...r, saved: true } : r
       ),
     }));
+    sets.forEach((s) => flashSet(ex.id, s.set_number));
   };
 
   const processVoice = async (blob: Blob, ex: Exercise) => {
@@ -810,24 +827,27 @@ export default function ClientApp() {
           {loadingData && <p className="muted">Cargando tu rutina…</p>}
 
           {!loadingData && routines.length === 0 && (
-            <div className="card">
-              {planStatus === "pending_review" ? (
-                <>
-                  <span className="badge">Rutina en revisión</span>
-                  <p className="muted" style={{ marginBottom: 0 }}>
-                    Tu coach está revisando tu rutina. En cuanto la apruebe vas a poder verla
-                    acá. Si en unos minutos no aparece, volvé a entrar con tu email y PIN.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <span className="badge">Sin rutina asignada</span>
-                  <p className="muted" style={{ marginBottom: 0 }}>
-                    Tu coach todavía no cargó una rutina. Volvé a intentar más tarde.
-                  </p>
-                </>
-              )}
-            </div>
+            planStatus === "pending_review" ? (
+              <div className="card notice-review">
+                <span className="notice-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg>
+                </span>
+                <span className="badge">Supervisión profesional</span>
+                <h3>Tus datos ya están en la mesa de trabajo de José Nocito</h3>
+                <p className="muted">En breve tu programa personalizado estará activo.</p>
+              </div>
+            ) : (
+              <div className="card">
+                <span className="badge">Sin rutina asignada</span>
+                <p className="muted" style={{ marginBottom: 0 }}>
+                  Tu coach todavía no cargó una rutina. Volvé a intentar más tarde.
+                </p>
+              </div>
+            )
           )}
 
           {routines.length > 0 && (
@@ -920,7 +940,12 @@ export default function ClientApp() {
                           </thead>
                           <tbody>
                             {(rows[ex.id] ?? []).map((r) => (
-                              <tr key={r.set_number}>
+                              <tr
+                                key={r.set_number}
+                                className={
+                                  savedFlash[`${ex.id}:${r.set_number}`] ? "row-flash" : undefined
+                                }
+                              >
                                 <td className="set-index">{r.set_number}</td>
                                 <td>
                                   <div className="cell-wrap">

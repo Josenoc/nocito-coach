@@ -414,7 +414,7 @@ h1, h2, h3, h4 {
 .track-table tbody tr + tr td { border-top: 1px solid var(--border); }
 .set-index { color: var(--gold); font-weight: 700; width: 30px; font-size: 1rem; }
 
-.cell-wrap { position: relative; background: var(--surface-2); border-radius: 8px; }
+.cell-wrap { position: relative; background: #1f1f22; border-radius: 8px; }
 .cell-wrap .phantom {
   position: absolute;
   inset: 0;
@@ -423,7 +423,7 @@ h1, h2, h3, h4 {
   justify-content: center;
   font-size: 1rem;
   color: var(--gold);
-  opacity: 0.45;
+  opacity: 0.6;
   pointer-events: none;
   font-weight: 700;
 }
@@ -433,8 +433,8 @@ h1, h2, h3, h4 {
   min-width: 68px;
   padding: 11px 12px;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  border: 1px solid #3a3a3a;
+  background: #27272a;
   color: var(--text);
   text-align: center;
   font: inherit;
@@ -452,6 +452,50 @@ h1, h2, h3, h4 {
   color: var(--ok);
   font-weight: 700;
 }
+
+.track-table tr.row-flash { animation: rowFlash 0.9s ease; }
+@keyframes rowFlash {
+  0% { background: rgba(52, 211, 153, 0.22); }
+  100% { background: transparent; }
+}
+.track-table tr.row-flash .num-input { animation: inputFlash 0.9s ease; }
+@keyframes inputFlash {
+  0% { border-color: var(--ok); box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.28); }
+  100% { border-color: #3a3a3a; box-shadow: none; }
+}
+.track-table tr.row-flash .save-flag { animation: flagPop 0.9s ease; }
+@keyframes flagPop {
+  0% { transform: scale(0.4); opacity: 0; }
+  45% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Aviso de revisión ---------- */
+.notice-review {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 34px 26px;
+  border: 1px solid rgba(255, 196, 0, 0.4);
+  background: linear-gradient(180deg, rgba(255, 196, 0, 0.07), rgba(255, 196, 0, 0.02)), var(--surface);
+}
+.notice-review .notice-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(255, 196, 0, 0.12);
+  border: 1px solid rgba(255, 196, 0, 0.45);
+  color: var(--gold);
+  box-shadow: 0 0 24px rgba(255, 196, 0, 0.25);
+}
+.notice-review .notice-mark svg { width: 26px; height: 26px; }
+.notice-review h3 { margin: 4px 0 0; font-size: 1.15rem; }
+.notice-review p { margin: 0; max-width: 470px; line-height: 1.6; }
 
 /* ---------- Nota de voz ---------- */
 .mic-btn {
