@@ -12,6 +12,12 @@ const SEXOS = ["Masculino", "Femenino", "Otro"];
 const OBJETIVOS = ["hipertrofia", "perdida-grasa", "fuerza", "rendimiento-deportivo"];
 const DIAS_VALIDOS = [3, 4, 5];
 const NUTRICION = ["omnivoro", "vegetariano", "carnivoro", "vegano"];
+const LUGARES = ["gimnasio", "casa", "aire-libre"];
+const EXPERIENCIAS = ["principiante", "intermedio", "avanzado"];
+
+function cleanNote(value: unknown): string {
+  return typeof value === "string" ? value.trim().slice(0, 1200) : "";
+}
 
 function bad(error: string, status = 400) {
   return NextResponse.json({ ok: false, error }, { status });
@@ -38,6 +44,10 @@ export async function POST(req: NextRequest) {
     const goal = String(body?.goal ?? "");
     const training_days = clampInt(body?.training_days, 3, 5);
     const nutrition = String(body?.nutrition ?? "");
+    const training_place = String(body?.training_place ?? "");
+    const experience = String(body?.experience ?? "");
+    const injuries = cleanNote(body?.injuries);
+    const food_restrictions = cleanNote(body?.food_restrictions);
     const pin = String(body?.pin ?? "").trim();
     const pin_confirm = String(body?.pin_confirm ?? "").trim();
 
@@ -55,6 +65,10 @@ export async function POST(req: NextRequest) {
     if (training_days === null || !DIAS_VALIDOS.includes(training_days))
       return bad("Elegí 3, 4 o 5 días de entrenamiento.");
     if (!NUTRICION.includes(nutrition)) return bad("Elegí tu preferencia alimentaria.");
+    if (!LUGARES.includes(training_place))
+      return bad("Elegí dónde vas a entrenar.");
+    if (!EXPERIENCIAS.includes(experience))
+      return bad("Elegí tu nivel de experiencia.");
     if (!/^\d{4}$/.test(pin)) return bad("El PIN debe tener 4 dígitos.");
     if (pin !== pin_confirm) return bad("Los PIN no coinciden.");
 
@@ -95,6 +109,11 @@ export async function POST(req: NextRequest) {
       goal,
       training_days: training_days as number,
       nutrition,
+      training_place,
+      experience,
+      injuries,
+      food_restrictions,
+      photos: {},
       completedAt: new Date().toISOString(),
     };
 

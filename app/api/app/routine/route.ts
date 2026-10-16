@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
 
     const { data: prof } = await supabase
       .from("profiles")
-      .select("routine_status, nutrition_plan")
+      .select("routine_status, nutrition_plan, anamnesis, full_name, phone, email")
       .eq("id", clientId)
       .single();
 
@@ -70,6 +70,14 @@ export async function GET(req: NextRequest) {
       logs: pending ? [] : logs,
       status,
       nutrition: pending ? null : prof?.nutrition_plan ?? null,
+      anamnesis: prof?.anamnesis ?? null,
+      client: prof
+        ? {
+            full_name: prof.full_name ?? "",
+            email: prof.email ?? "",
+            phone: prof.phone ?? "",
+          }
+        : null,
     });
   } catch {
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });

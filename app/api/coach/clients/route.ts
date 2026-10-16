@@ -11,21 +11,27 @@ export async function GET() {
   }
   const { data, error } = await getSupabaseAdmin()
     .from("profiles")
-    .select("id, email, full_name, activo, created_at, pin_hash, routine_status")
+    .select("id, email, full_name, activo, created_at, pin_hash, routine_status, anamnesis")
     .eq("role", "client")
     .order("full_name", { ascending: true });
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
-  const clients = (data ?? []).map((c: any) => ({
-    id: c.id,
-    email: c.email,
-    full_name: c.full_name,
-    activo: c.activo,
-    created_at: c.created_at,
-    has_pin: Boolean(c.pin_hash),
-    routine_status: c.routine_status ?? "active",
-  }));
+  const clients = (data ?? []).map((c: any) => {
+    const a = c.anamnesis ?? {};
+    const updatedAt = a.clientUpdatedAt ? new Date(a.clientUpdatedAt).getTime() : 0;
+    const seenAt = a.coachSeenAt ? new Date(a.coachSeenAt).getTime() : 0;
+    return {
+      id: c.id,
+      email: c.email,
+      full_name: c.full_name,
+      activo: c.activo,
+      created_at: c.created_at,
+      has_pin: Boolean(c.pin_hash),
+      routine_status: c.routine_status,
+      has_client_update: updatedAt > 0 && updatedAt > seenAt,
+    };
+  });
   return NextResponse.json({ ok: true, clients });
 }
 

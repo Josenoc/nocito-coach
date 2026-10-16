@@ -11,6 +11,7 @@ interface ClientRow {
   activo: boolean;
   has_pin: boolean;
   routine_status: "pending_review" | "active";
+  has_client_update?: boolean;
 }
 
 interface ExRow {
@@ -73,6 +74,18 @@ const NUTRITION_LABELS: Record<string, string> = {
   vegetariano: "Vegetariano",
   carnivoro: "Carnívoro",
   vegano: "Vegano",
+};
+
+const PLACE_LABELS: Record<string, string> = {
+  gimnasio: "Gimnasio",
+  casa: "Casa",
+  "aire-libre": "Aire libre",
+};
+
+const EXPERIENCE_LABELS: Record<string, string> = {
+  principiante: "Principiante",
+  intermedio: "Intermedio",
+  avanzado: "Avanzado",
 };
 
 function Dato({ label, value }: { label: string; value: string }) {
@@ -248,6 +261,24 @@ export default function CoachDashboard() {
       setMsg({ type: "ok", text: "Rutina aprobada y publicada." });
       await loadClients();
       await reloadDetail();
+    } else {
+      setMsg({ type: "err", text: json.error || "Error" });
+    }
+  };
+
+  const markSeen = async () => {
+    if (!selectedId) return;
+    const res = await fetch("/api/coach/client-seen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: selectedId }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setMsg({ type: "ok", text: "Marcado como visto." });
+      await loadClients();
+      await reloadDetail();
+      setSelectedId(selectedId);
     } else {
       setMsg({ type: "err", text: json.error || "Error" });
     }
@@ -504,6 +535,9 @@ export default function CoachDashboard() {
                   <small>
                     {c.email} · {c.has_pin ? "PIN ok" : "sin PIN"}
                   </small>
+                  {c.has_client_update && (
+                    <span className="update-flag">● Actualizó datos</span>
+                  )}
                 </button>
               );
             })}
@@ -565,7 +599,20 @@ export default function CoachDashboard() {
                     {detail && (
                       <div className="card" style={{ marginTop: 0 }}>
                         <h3 style={{ marginTop: 0 }}>Ficha y anamnesis</h3>
+                        {selected.has_client_update && (
+                          <div className="notice-update">
+                            <span>● El cliente actualizó sus datos.</span>
+                            <button
+                              className="btn btn-outline"
+                              onClick={markSeen}
+                              style={{ padding: "6px 12px" }}
+                            >
+                              Marcar como visto
+                            </button>
+                          </div>
+                        )}
                     {detail.profile?.anamnesis ? (
+                      <>
                       <div
                         style={{
                           display: "grid",
@@ -585,18 +632,72 @@ export default function CoachDashboard() {
                           }
                         />
                         <Dato
-                          label="Días/semana"
-                          value={`${detail.profile.anamnesis.training_days}`}
-                        />
-                        <Dato
                           label="Alimentación"
                           value={
                             NUTRITION_LABELS[detail.profile.anamnesis.nutrition] ??
                             detail.profile.anamnesis.nutrition
                           }
                         />
+                        <Dato
+                          label="Lugar de entrenamiento"
+                          value={
+                            PLACE_LABELS[detail.profile.anamnesis.training_place] ??
+                            detail.profile.anamnesis.training_place ??
+                            "-"
+                          }
+                        />
+                        <Dato
+                          label="Experiencia"
+                          value={
+                            EXPERIENCE_LABELS[detail.profile.anamnesis.experience] ??
+                            detail.profile.anamnesis.experience ??
+                            "-"
+                          }
+                        />
+                        <Dato
+                          label="Lesiones"
+                          value={detail.profile.anamnesis.injuries || "-"}
+                        />
+                        <Dato
+                          label="Restricciones alimentarias"
+                          value={detail.profile.anamnesis.food_restrictions || "-"}
+                        />
                         <Dato label="Teléfono" value={detail.profile.phone || "-"} />
                       </div>
+                      {detail.profile.anamnesis.photos &&
+                        Object.values(detail.profile.anamnesis.photos).some(Boolean) && (
+                          <div className="coach-photos">
+                            {(["front", "side", "back"] as const).map((k) =>
+                              detail.profile.anamnesis.photos[k] ? (
+                                <a
+                                  key={k}
+                                  href={detail.profile.anamnesis.photos[k]}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title={
+                                    k === "front"
+                                      ? "Frente"
+                                      : k === "side"
+                                      ? "Perfil"
+                                      : "Espalda"
+                                  }
+                                >
+                                  <img
+                                    src={detail.profile.anamnesis.photos[k]}
+                                    alt={
+                                      k === "front"
+                                        ? "Frente"
+                                        : k === "side"
+                                        ? "Perfil"
+                                        : "Espalda"
+                                    }
+                                  />
+                                </a>
+                              ) : null
+                            )}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <p className="muted" style={{ margin: 0 }}>
                         El cliente todavía no completó su anamnesis.

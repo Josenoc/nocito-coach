@@ -104,3 +104,67 @@ export async function sendCoachPendingReviewEmail(input: {
   if (res.error) return { ok: false, error: res.error.message };
   return { ok: true, to };
 }
+
+/**
+ * Aviso al coach cuando un cliente actualiza sus datos desde el panel de espera.
+ * Se envía a la dirección maestra (DESTINATION_EMAIL). No bloquea al cliente.
+ */
+export async function sendClientUpdatedEmail(input: {
+  name: string;
+  email: string;
+  changes: string[];
+}): Promise<{ ok: boolean; to?: string; error?: string }> {
+  const to = getDestinationEmail();
+  if (!to) return { ok: false, error: "DESTINATION_EMAIL no configurado" };
+
+  const base = siteBaseUrl();
+  const link = `${base}/app/admin`;
+  const clientName = input.name || input.email;
+  const list = input.changes.filter(Boolean);
+  const comma = list.join(", ") || "Sus datos";
+  const subject = `Actualización de datos — ${clientName}`;
+
+  const html = [
+    `<div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;">`,
+    `<div style="background:#0b0b0b;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">`,
+    `<p style="margin:0;font-size:11px;letter-spacing:2px;color:#FFC400;">NOCITO COACH</p>`,
+    `<h1 style="margin:8px 0 0;font-size:22px;">El cliente actualizó sus datos</h1>`,
+    `</div>`,
+    `<div style="background:#fff;padding:28px;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;">`,
+    `<p style="margin:0 0 16px;color:#222;font-size:15px;"><strong>${clientName}</strong> editó su ficha mientras esperaba la revisión.</p>`,
+    `<table style="width:100%;border-collapse:collapse;margin:0 0 20px;">`,
+    row("Email", input.email),
+    row("Cambios", comma),
+    `</table>`,
+    `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Ver en el panel</a></p>`,
+    `<p style="margin:0;color:#888;font-size:12px;">Revisá los datos actualizados antes de cerrar el plan.</p>`,
+    `</div>`,
+    `</div>`,
+  ].join("");
+
+  const text = [
+    `${clientName} actualizó sus datos.`,
+    ``,
+    `Email: ${input.email}`,
+    `Cambios: ${comma}`,
+    ``,
+    `Ver en el panel: ${link}`,
+  ].join("\n");
+
+  let resend;
+  try {
+    resend = getResend();
+  } catch (err: any) {
+    return { ok: false, error: err?.message || "Resend no configurado" };
+  }
+
+  const res = await resend.emails.send({
+    from: SENDER_EMAIL,
+    to,
+    subject,
+    html,
+    text,
+  });
+  if (res.error) return { ok: false, error: res.error.message };
+  return { ok: true, to };
+}

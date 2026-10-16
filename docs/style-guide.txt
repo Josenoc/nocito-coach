@@ -1,0 +1,206 @@
+========================================================
+GUIA DE ESTILO - nocito.coach
+========================================================
+Tokens, tipografias y componentes unificados de la
+landing (public/index.html) y la Web App (/app, app/globals.css).
+
+
+--------------------------------------------------------
+1. IDENTIDAD DE MARCA
+--------------------------------------------------------
+- Nombre: nocito.coach
+- Estetica: dark mode, alto contraste, acento dorado/ambar,
+  titulos en mayusculas, bordes rectos.
+- Valores: Fuerza - Nutricion - Constancia.
+
+
+--------------------------------------------------------
+2. FUENTES
+--------------------------------------------------------
+- Titulos (H1-H4): Montserrat (600, 700, 800)
+  text-transform: uppercase, letter-spacing: -0.02em, line-height: 1.15
+- Cuerpo / UI: Inter (400, 500, 600, 700)
+- Fallback: system-ui, -apple-system, "Segoe UI", Roboto,
+  Helvetica, Arial, sans-serif
+
+Carga (Google Fonts):
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+
+
+--------------------------------------------------------
+3. COLORES
+--------------------------------------------------------
+
+3.1 Acento de marca (dorado)
+  --gold .......... #FFC400  (acento principal / CTA)
+  --gold-bright ... #FFD94A  (hover / brillo)
+  --sand .......... #FFE07A  (degradados / logo)
+
+3.2 Superficies y texto
+  --bg ............ #0A0A0A  (fondo base)
+  --bg-2 .......... #121212  (fondo secundario, app)
+  --surface ....... #121212 (app) / #101010 (landing)  (tarjetas/paneles)
+  --surface-2 ..... #1A1A1A (app) / #161616 (landing)  (superficies elevadas)
+  --border ........ #242424  (bordes por defecto)
+  --border-strong . #3A3A3A  (bordes de inputs)
+  --text .......... #EDEDED  (texto principal)
+  --muted ......... #A6A6A6 (app) / #8F8F8F (landing)  (texto secundario)
+
+3.3 Estados
+  --ok ............ #34D399  (exito / guardado)
+  --danger ........ #FF5252  (error / eliminar)
+  Aviso (pendiente)  #FFC400 sobre rgba(255,196,0,.07)
+
+3.4 Alias de compatibilidad (legacy)
+  --orange: var(--gold);        (historico: #FF5722)
+  --orange-soft: var(--gold-bright);
+  --blue: var(--gold-bright);   (historico: #00E5FF)
+
+
+--------------------------------------------------------
+4. ESCALA TIPOGRAFICA
+--------------------------------------------------------
+  Rol                 Landing                        App /app
+  ------------------  -----------------------------  --------------------
+  H1 hero             clamp(2.6rem, 6.8vw, 5.4rem)   1.6rem
+  Titulo de seccion   clamp(2.3rem, 5vw, 4rem)       -
+  Precio              clamp(2rem, 4.6vw, 2.7rem)     -
+  Nombre ejercicio    -                              1.22rem
+  Logotipo (texto)    1.5rem                         1.28rem
+  Cuerpo              1rem / line-height 1.6         1rem / line-height 1.55
+  Subtitulo           1.05rem                        .95rem
+  Label/etiqueta      .72rem - uppercase ls .28em    .85rem - uppercase ls .09em
+  Badge               .68rem - uppercase ls .18em    .8rem - uppercase ls .08em
+  Input numerico      .98rem                         1.05rem
+  Nota/micro-texto    .86rem                         .82-.9rem
+
+Regla de titulos: Montserrat + uppercase + letter-spacing -0.02em + line-height 1.15.
+
+
+--------------------------------------------------------
+5. ESPACIADO, RADIOS Y LAYOUT
+--------------------------------------------------------
+- Radios: app --radius 8px; landing 8px (nav/btn 6px,
+  cards 10-18px); pildoras 999px.
+- Padding seccion: landing .section 120px 0;
+  app .section 28px 16px 72px.
+- Contenedor: landing min(1200px, 92%); app max-width 1120px.
+- Grid ejercicios: minmax(0,360px) minmax(0,1fr)
+  (imagen izq. / series der.).
+- Gaps: grillas 12px; cards 18-22px.
+
+
+--------------------------------------------------------
+6. SOMBRAS Y GLOWS (dominante dorado)
+--------------------------------------------------------
+  Glow dorado suave ..... 0 8px 24px rgba(255,196,0,.28)
+  Glow medio ............ 0 0 34px 3px rgba(255,196,0,.45)
+  Ring de foco dorado ... 0 0 0 3px rgba(255,196,0,.14)
+  Exito (input) ......... 0 0 0 3px rgba(52,211,153,.28)
+  Profundidad neutra .... 0 30px 70px rgba(0,0,0,.5)
+
+- Tarjeta destacada (Plan Pro): borde 2px solid #FFC400 +
+  glow pulsante (@keyframes proGlow, 2.8s).
+- Tarjeta de ejercicio: borde 3px solid rgba(255,196,0,.4) +
+  sombra sutil.
+
+
+--------------------------------------------------------
+6.1 DEGRADADOS Y EFECTOS
+--------------------------------------------------------
+  Texto degradado .. linear-gradient(90deg,#fff,#FFC400 40%,#fff)
+  Marca dorada ..... linear-gradient(90deg,#FFC400,#FFE07A)
+  Boton primario ... linear-gradient(180deg,#FFD94A,#FFC400)
+  Card ............. linear-gradient(180deg,var(--surface),var(--bg-2))
+  Fondo body (app) . radial-gradient(900px 520px at 86% -12%,rgba(255,196,0,.10),transparent 60%),
+                     radial-gradient(760px 520px at 8% -4%,rgba(255,217,74,.06),transparent 55%),
+                     #0A0A0A
+
+
+--------------------------------------------------------
+7. COMPONENTES
+--------------------------------------------------------
+
+BOTONES
+  App .btn ....... padding 11px 18px; radius 8px; weight 600; .95rem
+    .btn-primary .. gradiente dorado, texto #0A0A0A
+    .btn-outline .. borde #242424, fondo #121212, hover dorado
+    .btn-danger ... borde/texto #FF5252
+  Landing .btn ... radius 6px; .8rem; uppercase; ls .16em; 700; padding 17px 30px
+    .btn-primary .. fondo #FFC400, texto #0A0A0A
+
+INPUTS
+  .input / .field . fondo #121212, borde #242424, radius 8px;
+                    focus borde dorado + ring
+  .num-input ...... fondo #27272A, borde #3A3A3A, centrado, 1.05rem, 600
+  Ghost/objetivo .. dorado con opacity .6
+
+CARDS
+  .card ........... gradiente de superficie, borde #242424, radius 8px, padding 20px
+  .exercise-card .. borde dorado 3px al 40% + glow
+  .price-card.featured .. fondo #1A1508->#120F05, borde dorado 2px,
+                           glow pulsante, badge "Mas Elegido"
+
+BADGES Y PILDORAS
+  .badge .......... uppercase .8rem, borde dorado 40%, texto dorado, radius 999px
+  .chip ........... pildora; activo = gradiente dorado, texto #0A0A0A
+  .pill.pending ... dorado
+  .pill.active .... gris
+
+ESTADOS / AVISOS
+  .toast.ok ....... fondo rgba(52,211,153,.12), borde #34D399
+  .toast.err ...... fondo rgba(255,82,82,.12), borde #FF5252
+  .notice-review .. borde dorado 40%, marca circular con glow ("en revision")
+
+MICRO-INTERACCIONES
+  rowFlash ....... fila guardada: fondo rgba(52,211,153,.22)->transparente (0.9s)
+  inputFlash ..... borde/sombra verde de exito (0.9s)
+  flagPop ........ check verde con rebote (0.9s)
+
+
+--------------------------------------------------------
+8. BREAKPOINTS
+--------------------------------------------------------
+  560px ... 1 columna precios
+  640px ... movil app
+  900px ... grillas a 1 columna
+  960px ... hero-rail
+  1080px .. precios a 2 columnas
+
+
+--------------------------------------------------------
+9. TOKENS LISTOS PARA PEGAR (CSS)
+--------------------------------------------------------
+:root {
+  color-scheme: dark;
+
+  /* Marca */
+  --gold: #FFC400;
+  --gold-bright: #FFD94A;
+  --sand: #FFE07A;
+
+  /* Superficies */
+  --bg: #0A0A0A;
+  --bg-2: #121212;
+  --surface: #121212;
+  --surface-2: #1A1A1A;
+  --border: #242424;
+
+  /* Texto */
+  --text: #EDEDED;
+  --muted: #A6A6A6;
+
+  /* Estados */
+  --ok: #34D399;
+  --danger: #FF5252;
+
+  /* Radios */
+  --radius: 8px;
+
+  /* Alias de compatibilidad */
+  --orange: var(--gold);
+  --orange-soft: var(--gold-bright);
+  --blue: var(--gold-bright);
+}

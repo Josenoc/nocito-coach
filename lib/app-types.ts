@@ -1,5 +1,15 @@
 export type Role = "client" | "coach";
 
+export type TrainingPlace = "gimnasio" | "casa" | "aire-libre";
+export type Experience = "principiante" | "intermedio" | "avanzado";
+export type PhotoSlot = "front" | "side" | "back";
+
+export interface ClientPhotos {
+  front?: string | null;
+  side?: string | null;
+  back?: string | null;
+}
+
 export interface Anamnesis {
   sex: string;
   age: number;
@@ -8,7 +18,14 @@ export interface Anamnesis {
   goal: string;
   training_days: number;
   nutrition: string;
+  training_place?: TrainingPlace | string;
+  experience?: Experience | string;
+  injuries?: string;
+  food_restrictions?: string;
+  photos?: ClientPhotos;
   completedAt?: string;
+  clientUpdatedAt?: string;
+  coachSeenAt?: string;
 }
 
 export type RoutineStatus = "pending_review" | "active";

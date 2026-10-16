@@ -30,6 +30,7 @@ export function buildOnboardingPlan(anamnesis: Anamnesis): {
 } {
   const objectiveKey = GOAL_TO_OBJECTIVE[anamnesis.goal] ?? "ganar-masa";
   const days = Number(anamnesis.training_days) || 3;
+  const experience = anamnesis.experience || DEFAULT_EXPERIENCE;
   const prefLabel = NUTRITION_TO_PREFS[anamnesis.nutrition] ?? "Omnívoro";
 
   const tdee = computeTdee(
@@ -40,7 +41,7 @@ export function buildOnboardingPlan(anamnesis: Anamnesis): {
     days
   );
 
-  const routine = buildRoutine(objectiveKey, DEFAULT_EXPERIENCE, days, "");
+  const routine = buildRoutine(objectiveKey, experience, days, "");
   const nutrition = buildNutrition(
     objectiveKey,
     anamnesis.weight_kg,
