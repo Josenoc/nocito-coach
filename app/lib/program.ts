@@ -101,7 +101,8 @@ Reglas adicionales:
 - La cantidad de "dias" DEBE coincidir con el volumen semanal indicado por el perfil (respetando el tope por edad/experiencia).
 - Las "cal" y macros DEBEN ser coherentes con peso, altura, edad, sexo y objetivo (calculalos, no inventes).
 - "meals" son pares [nombre de la comida, sugerencia concreta con alimentos locales].
-- Nunca devuelvas un esquema genérico: todo debe estar justificado por el perfil recibido.`;
+- Nunca devuelvas un esquema genérico: todo debe estar justificado por el perfil recibido.
+- Sé conciso: como MAXIMO 5 ejercicios por dia, "perfil" y "justificacion" de hasta ~120 palabras cada uno. No agregues texto fuera del JSON, ni comentarios.`;
 
 type GroqMessage = { role: "system" | "user"; content: string };
 
@@ -199,42 +200,115 @@ export async function generateProgram(input: ProgramInput): Promise<GeneratedPro
     { role: "user", content: buildProgramUserMessage(input) },
   ];
 
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${groqKey}`,
-    },
-    body: JSON.stringify({
-      model: "openai/gpt-oss-20b",
-      messages,
-      temperature: 0,
-      max_tokens: 4096,
-      response_format: { type: "json_object" },
-    }),
-  });
+  const MAX_ATTEMPTS = 3;
+  let lastError = "No se pudo generar el plan.";
 
-  const json = await res.json();
-  if (!res.ok) {
-    throw new Error(json?.error?.message || "Error del modelo");
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let payload: any;
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${groqKey}`,
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-20b",
+          messages,
+          temperature: 0,
+          max_tokens: 4096,
+          response_format: { type: "json_object" },
+        }),
+      });
+      payload = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const message: string = payload?.error?.message || "Error del modelo";
+        lastError = message;
+        const code: string = payload?.error?.code || "";
+        const retryable =
+          res.status === 429 ||
+          res.status >= 500 ||
+          code === "rate_limit_exceeded" ||
+          code === "json_validate_failed" ||
+          /rate limit|tokens per minute|json/i.test(message);
+        if (retryable && attempt < MAX_ATTEMPTS) {
+          await sleep(retryDelayMs(message, attempt));
+          continue;
+        }
+        break;
+      }
+    } catch (err: any) {
+      lastError = err?.message || "Error de red";
+      if (attempt < MAX_ATTEMPTS) {
+        await sleep(retryDelayMs("", attempt));
+        continue;
+      }
+      break;
+    }
+
+    const content: string = payload?.choices?.[0]?.message?.content || "";
+    const parsed = extractJson(content);
+    if (parsed) {
+      const days = normalizeDays(parsed?.dias ?? parsed?.days);
+      if (days.length) {
+        return {
+          perfil: str(parsed?.perfil),
+          justificacion: str(parsed?.justificacion),
+          esquema: str(parsed?.esquema),
+          days,
+          nutrition: normalizeNutrition(parsed?.nutricion ?? parsed?.nutrition),
+        };
+      }
+    }
+    lastError = "La respuesta del modelo no fue válida.";
+    if (attempt < MAX_ATTEMPTS) {
+      await sleep(600 * attempt);
+      continue;
+    }
   }
 
-  const content = json.choices?.[0]?.message?.content || "{}";
-  let parsed: any;
+  throw new Error(friendlyProgramError(lastError));
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function retryDelayMs(message: string, attempt: number): number {
+  const match = message.match(/try again in ([\d.]+)\s*s/i);
+  if (match) return Math.min(Math.ceil(Number(match[1]) * 1000) + 600, 20000);
+  return Math.min(800 * attempt, 8000);
+}
+
+function extractJson(content: string): any | null {
+  if (!content) return null;
+  let text = content.trim();
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) text = fence[1].trim();
   try {
-    parsed = JSON.parse(content);
+    return JSON.parse(text);
   } catch {
-    throw new Error("La respuesta del modelo no es JSON válido");
+    /* sigue con la extracción por llaves */
   }
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start >= 0 && end > start) {
+    try {
+      return JSON.parse(text.slice(start, end + 1));
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
-  const days = normalizeDays(parsed?.dias ?? parsed?.days);
-  const nutrition = normalizeNutrition(parsed?.nutricion ?? parsed?.nutrition);
-
-  return {
-    perfil: str(parsed?.perfil),
-    justificacion: str(parsed?.justificacion),
-    esquema: str(parsed?.esquema),
-    days,
-    nutrition,
-  };
+function friendlyProgramError(message: string): string {
+  if (/rate limit|tokens per minute|TPM|429/i.test(message)) {
+    return "El servicio de IA está saturado (límite por minuto de Groq). Esperá unos segundos y volvé a intentar.";
+  }
+  if (/json/i.test(message)) {
+    return "La IA devolvió una respuesta inválida. Volvé a intentar (normalmente se resuelve al reintentar).";
+  }
+  return message;
 }
