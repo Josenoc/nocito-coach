@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FoodItem, FoodLogs, MealSlot, NutritionPlan, Profile } from "@/lib/app-types";
 import { waLink } from "@/app/lib/coach";
+import { safeBase64ToUint8Array } from "@/app/lib/base64";
 
 interface ClientRow {
   id: string;
@@ -145,15 +146,6 @@ function Dato({ label, value }: { label: string; value: string }) {
 }
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
-
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(base64);
-  const output = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i);
-  return output;
-}
 
 export default function CoachDashboard() {
   const router = useRouter();
@@ -311,6 +303,15 @@ export default function CoachDashboard() {
         setMsg({ type: "err", text: "Falta configurar las claves VAPID." });
         return;
       }
+      const applicationServerKey = safeBase64ToUint8Array(VAPID_PUBLIC_KEY);
+      if (!applicationServerKey) {
+        setPushStatus("idle");
+        setMsg({
+          type: "err",
+          text: "La clave pública VAPID no es válida. Revisá NEXT_PUBLIC_VAPID_PUBLIC_KEY.",
+        });
+        return;
+      }
       setPushStatus("busy");
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
@@ -324,7 +325,7 @@ export default function CoachDashboard() {
       if (!sub) {
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
+          applicationServerKey: applicationServerKey as BufferSource,
         });
       }
       const res = await fetch("/api/coach/push/subscribe", {

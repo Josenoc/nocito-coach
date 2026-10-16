@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
 import { normalizeFoodItems } from "@/app/lib/food";
+import { sendCoachPush } from "@/app/lib/push";
 import type { Anamnesis, FoodItem, FoodLogs } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
@@ -77,13 +78,14 @@ export async function POST(req: NextRequest) {
   const supabase = getSupabaseAdmin();
   const { data } = await supabase
     .from("profiles")
-    .select("anamnesis")
+    .select("full_name, email, anamnesis")
     .eq("id", clientId)
     .maybeSingle();
   const anamnesis = (data?.anamnesis as Anamnesis) ?? ({} as Anamnesis);
   const foodLogs: FoodLogs = anamnesis.foodLogs ?? {};
 
   const existing = foodLogs[date] ?? [];
+  const isFirstToday = existing.length === 0;
   const now = new Date().toISOString();
   const created: FoodItem[] = parsed.map((p) => ({
     ...p,
@@ -102,6 +104,16 @@ export async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
+
+  if (session.role !== "coach" && isFirstToday) {
+    const clientName = (data?.full_name as string) || (data?.email as string) || "Un alumno";
+    sendCoachPush({
+      title: "Nocito Coach",
+      body: `${clientName} registró comidas hoy`,
+      url: "/app/admin",
+    }).catch((err) => console.error("[food] push al coach:", err));
+  }
+
   return NextResponse.json({ ok: true, date, items: merged, totals: totals(merged) });
 }
 
