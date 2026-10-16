@@ -201,7 +201,12 @@ export default function PendingReviewDashboard({
             )}
           </div>
         </div>
-        <a className="btn btn-primary" href={contact("Quiero escribirle a José")}>
+        <a
+          className="btn btn-primary"
+          href={coachWhatsApp("Hola José, soy alumno de Nocito Coach.")}
+          target="_blank"
+          rel="noreferrer"
+        >
           Escribirle a José
         </a>
       </div>
