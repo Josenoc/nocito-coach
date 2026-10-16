@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { FoodItem, FoodLogs, MealSlot, NutritionPlan, Profile } from "@/lib/app-types";
 import { waLink } from "@/app/lib/coach";
 import { safeBase64ToUint8Array } from "@/app/lib/base64";
+import type { GeneratedProgram } from "@/app/lib/program";
 
 interface ClientRow {
   id: string;
@@ -163,9 +164,9 @@ export default function CoachDashboard() {
   const [detail, setDetail] = useState<any>(null);
   const [blockGuideline, setBlockGuideline] = useState("");
   const [blockSaving, setBlockSaving] = useState(false);
-  const [tab, setTab] = useState<"historial" | "rutinas" | "importar" | "nutricion" | "acceso">(
-    "historial"
-  );
+  const [tab, setTab] = useState<
+    "historial" | "rutinas" | "importar" | "generar" | "nutricion" | "acceso"
+  >("historial");
   const [focus, setFocus] = useState<null | "rutinas" | "nutricion">(null);
 
   const [draft, setDraft] = useState<Draft>(emptyDraft());
@@ -178,6 +179,9 @@ export default function CoachDashboard() {
   const [importDays, setImportDays] = useState<ParsedDay[] | null>(null);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [program, setProgram] = useState<GeneratedProgram | null>(null);
+  const [applyingProgram, setApplyingProgram] = useState<null | "routine" | "nutrition">(null);
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
@@ -395,6 +399,7 @@ export default function CoachDashboard() {
     setBaseline(null);
     setImportText("");
     setImportDays(null);
+    setProgram(null);
     const res = await fetch(`/api/coach/client?id=${id}`);
     const json = await res.json();
     if (json.ok) {
@@ -528,6 +533,78 @@ export default function CoachDashboard() {
       setImporting(false);
     }
   };
+
+  const generatePlan = async () => {
+    if (!selectedId) return;
+    setMsg(null);
+    setGenerating(true);
+    setProgram(null);
+    try {
+      const res = await fetch("/api/coach/generate-program", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: selectedId }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      setProgram(json.program);
+      setMsg({ type: "ok", text: "Plan generado. Revisalo antes de aplicarlo." });
+    } catch (err: any) {
+      setMsg({ type: "err", text: err.message || "No se pudo generar el plan." });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const applyProgramRoutine = async () => {
+    if (!selectedId || !program?.days?.length) return;
+    setMsg(null);
+    setApplyingProgram("routine");
+    try {
+      const res = await fetch("/api/coach/import-routine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: selectedId, days: program.days }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      setMsg({ type: "ok", text: "Rutina aplicada y publicada para el cliente." });
+      await loadClients();
+      await reloadDetail();
+    } catch (err: any) {
+      setMsg({ type: "err", text: err.message || "No se pudo aplicar la rutina." });
+    } finally {
+      setApplyingProgram(null);
+    }
+  };
+
+  const applyProgramNutrition = async () => {
+    if (!selectedId || !program) return;
+    setMsg(null);
+    setApplyingProgram("nutrition");
+    try {
+      const res = await fetch("/api/coach/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId: selectedId, nutrition: program.nutrition }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+      setNutrition(program.nutrition);
+      setMsg({ type: "ok", text: "Plan nutricional aplicado." });
+      await reloadDetail();
+    } catch (err: any) {
+      setMsg({ type: "err", text: err.message || "No se pudo aplicar la nutrición." });
+    } finally {
+      setApplyingProgram(null);
+    }
+  };
+
+  const applyProgramAll = async () => {
+    await applyProgramRoutine();
+    await applyProgramNutrition();
+  };
+
 
   const setEx = (idx: number, patch: Partial<ExRow>) => {
     setDraft((d) => ({
@@ -873,25 +950,27 @@ export default function CoachDashboard() {
                       </button>
                     )}
                     <div className="tabs" style={{ margin: 0 }}>
-                      {(["historial", "rutinas", "importar", "nutricion", "acceso"] as const).map(
-                        (t) => (
-                          <button
-                            key={t}
-                            className={`chip ${tab === t ? "active" : ""}`}
-                            onClick={() => setTab(t)}
-                          >
-                            {t === "historial"
-                              ? "Historial"
-                              : t === "rutinas"
-                              ? "Rutinas"
-                              : t === "importar"
-                              ? "Importar"
-                              : t === "nutricion"
-                              ? "Nutrición"
-                              : "Acceso"}
-                          </button>
-                        )
-                      )}
+                      {(
+                        ["historial", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
+                      ).map((t) => (
+                        <button
+                          key={t}
+                          className={`chip ${tab === t ? "active" : ""}`}
+                          onClick={() => setTab(t)}
+                        >
+                          {t === "historial"
+                            ? "Historial"
+                            : t === "rutinas"
+                            ? "Rutinas"
+                            : t === "importar"
+                            ? "Importar"
+                            : t === "generar"
+                            ? "Generar IA"
+                            : t === "nutricion"
+                            ? "Nutrición"
+                            : "Acceso"}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -1200,6 +1279,175 @@ export default function CoachDashboard() {
                           {importing ? "Publicando…" : "Aprobar y enviar al cliente"}
                         </button>
                       </div>
+                    )}
+                  </div>
+                )}
+
+                {tab === "generar" && (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="card">
+                      <h3 style={{ marginTop: 0 }}>Generar plan con IA</h3>
+                      <p className="muted" style={{ marginTop: 0, fontSize: ".88rem" }}>
+                        Analiza la anamnesis del alumno (edad, sexo, peso, altura, nivel y objetivo) y
+                        propone una rutina y una nutrición 100% personalizadas, con justificación
+                        técnica. Revisá el resultado antes de aplicarlo.
+                      </p>
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        <button
+                          className="btn btn-primary"
+                          onClick={generatePlan}
+                          disabled={generating}
+                        >
+                          {generating
+                            ? "Generando plan…"
+                            : program
+                            ? "Volver a generar"
+                            : "Generar plan con IA"}
+                        </button>
+                        {program && (
+                          <button className="btn btn-outline" onClick={() => setProgram(null)}>
+                            Limpiar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {program && (
+                      <>
+                        {(program.perfil || program.justificacion) && (
+                          <div className="card">
+                            <h3 style={{ marginTop: 0 }}>Análisis del perfil</h3>
+                            {program.esquema && (
+                              <p className="muted" style={{ marginTop: 0 }}>
+                                Esquema: <strong>{program.esquema}</strong>
+                              </p>
+                            )}
+                            {program.perfil && (
+                              <>
+                                <h4 style={{ margin: "8px 0 4px" }}>Perfil analizado</h4>
+                                <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{program.perfil}</p>
+                              </>
+                            )}
+                            {program.justificacion && (
+                              <>
+                                <h4 style={{ margin: "14px 0 4px" }}>
+                                  Justificación técnica y nutricional
+                                </h4>
+                                <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>
+                                  {program.justificacion}
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="card">
+                          <h3 style={{ marginTop: 0 }}>Rutina propuesta</h3>
+                          <p className="muted" style={{ marginTop: 0, fontSize: ".85rem" }}>
+                            Al aplicar, se <strong>reemplazan</strong> las rutinas actuales del cliente.
+                          </p>
+                          {program.days.map((d, di) => (
+                            <div className="day-section" key={di}>
+                              <h4>
+                                {d.nombre}
+                                {d.nombre !== d.dia ? (
+                                  <span className="muted"> · {d.dia}</span>
+                                ) : null}
+                              </h4>
+                              <div className="scroll-x">
+                                <table className="data-table" style={{ minWidth: 620 }}>
+                                  <thead>
+                                    <tr>
+                                      <th>Ejercicio</th>
+                                      <th>Series</th>
+                                      <th>Reps</th>
+                                      <th>Descanso</th>
+                                      <th>Notas</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {d.ejercicios.map((ex, ei) => (
+                                      <tr key={ei}>
+                                        <td>
+                                          <b>{ex.ejercicio}</b>
+                                        </td>
+                                        <td>{ex.series ?? "—"}</td>
+                                        <td>{ex.reps ?? "—"}</td>
+                                        <td>{ex.descanso ?? "—"}</td>
+                                        <td>{ex.notas ?? "—"}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="card">
+                          <h3 style={{ marginTop: 0 }}>Nutrición propuesta</h3>
+                          <div className="grid-4" style={{ marginBottom: 10 }}>
+                            <Dato label="Calorías" value={`${program.nutrition.cal} kcal`} />
+                            <Dato label="Proteínas" value={`${program.nutrition.prot} g`} />
+                            <Dato label="Carbohidratos" value={`${program.nutrition.carbs} g`} />
+                            <Dato label="Grasas" value={`${program.nutrition.fat} g`} />
+                          </div>
+                          {program.nutrition.proteinSources && (
+                            <p style={{ margin: "0 0 10px" }}>
+                              <span className="muted">Fuentes de proteína: </span>
+                              {program.nutrition.proteinSources}
+                            </p>
+                          )}
+                          <div className="scroll-x">
+                            <table className="data-table" style={{ minWidth: 560 }}>
+                              <thead>
+                                <tr>
+                                  <th>Comida</th>
+                                  <th>Sugerencia</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {program.nutrition.meals.map((m, mi) => (
+                                  <tr key={mi}>
+                                    <td>
+                                      <b>{m[0]}</b>
+                                    </td>
+                                    <td>{m[1]}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div className="card">
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            <button
+                              className="btn btn-success"
+                              onClick={applyProgramAll}
+                              disabled={applyingProgram !== null}
+                            >
+                              {applyingProgram ? "Aplicando…" : "Aplicar todo (rutina + nutrición)"}
+                            </button>
+                            <button
+                              className="btn btn-primary"
+                              onClick={applyProgramRoutine}
+                              disabled={applyingProgram !== null}
+                            >
+                              {applyingProgram === "routine" ? "Aplicando…" : "Aplicar solo rutina"}
+                            </button>
+                            <button
+                              className="btn btn-outline"
+                              onClick={applyProgramNutrition}
+                              disabled={applyingProgram !== null}
+                            >
+                              {applyingProgram === "nutrition"
+                                ? "Aplicando…"
+                                : "Aplicar solo nutrición"}
+                            </button>
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
