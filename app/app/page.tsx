@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import RegisterWizard from "@/app/components/RegisterWizard";
 import PendingReviewDashboard from "@/app/components/PendingReviewDashboard";
@@ -19,6 +19,11 @@ const TEST_LOGIN_ENABLED =
   process.env.NODE_ENV !== "production" ||
   process.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
 
+// Tiempo que permanece la confirmación de voz (con opción "Deshacer") antes de
+// confirmar el guardado y auto-ocultarse. Durante esta ventana el alumno puede
+// deshacer y no se persiste nada en el servidor.
+const VOICE_CONFIRM_MS = 4000;
+
 type SetRow = {
   set_number: number;
   actual_reps: string;
@@ -28,6 +33,16 @@ type SetRow = {
 };
 
 type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
+
+// Confirmación de voz que vive dentro de la tarjeta del ejercicio.
+type CardToast = {
+  exId: string;
+  kind: "ok" | "err" | "info";
+  title: string;
+  detail?: string;
+  canUndo?: boolean;
+  ms?: number;
+};
 
 function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src: string } {
   if (!url) return { kind: "none", src: "" };
@@ -96,6 +111,18 @@ function MicIcon() {
   );
 }
 
+function Wave() {
+  return (
+    <span className="wave" aria-hidden="true">
+      <i />
+      <i />
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+}
+
 export default function ClientApp() {
   const router = useRouter();
 
@@ -121,13 +148,104 @@ export default function ClientApp() {
   const [recordingFor, setRecordingFor] = useState<string | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
   const [voiceBusy, setVoiceBusy] = useState<string | null>(null);
-  const [audioMsg, setAudioMsg] = useState<string | null>(null);
+  const [cardToast, setCardToast] = useState<CardToast | null>(null);
+  const [toastClosing, setToastClosing] = useState(false);
+  const [fillOrder, setFillOrder] = useState<Record<string, number>>({});
+  const [liveText, setLiveText] = useState("");
+  const [speechSupported, setSpeechSupported] = useState(false);
   const [savedFlash, setSavedFlash] = useState<Record<string, boolean>>({});
   const [week, setWeek] = useState<number>(1);
   const [today, setToday] = useState<string>("");
   const [logs, setLogs] = useState<SetLog[]>([]);
   const [setRir, setSetRir] = useState<Record<string, number>>({});
   const [trainingBlock, setTrainingBlock] = useState<TrainingBlock | null>(null);
+
+  // Toast dentro de la tarjeta del ejercicio: temporizadores del auto-ocultado
+  // y del guardado diferido (que se puede deshacer mientras está visible).
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const pendingVoice = useRef<{
+    ex: Exercise;
+    sets: VoiceSet[];
+    snapshot: SetRow[];
+  } | null>(null);
+
+  const clearToastTimers = () => {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+      toastTimer.current = null;
+    }
+    if (toastCloseTimer.current) {
+      clearTimeout(toastCloseTimer.current);
+      toastCloseTimer.current = null;
+    }
+  };
+
+  const dismissToast = () => {
+    clearToastTimers();
+    setToastClosing(true);
+    toastCloseTimer.current = setTimeout(() => {
+      setCardToast(null);
+      setToastClosing(false);
+      toastCloseTimer.current = null;
+    }, 240);
+  };
+
+  const showToast = (toast: CardToast, autoHideMs = 0, onExpire?: () => void) => {
+    clearToastTimers();
+    setToastClosing(false);
+    setCardToast(toast);
+    if (autoHideMs > 0) {
+      toastTimer.current = setTimeout(() => {
+        toastTimer.current = null;
+        if (onExpire) onExpire();
+        else dismissToast();
+      }, autoHideMs);
+    }
+  };
+
+  // Detecta soporte de reconocimiento de voz del navegador (para la vista previa
+  // de transcripción en vivo durante la grabación).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const SR =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    setSpeechSupported(!!SR);
+  }, []);
+
+  // Cancela temporizadores, frena el reconocimiento y confirma cualquier voz
+  // pendiente al desmontar el componente.
+  useEffect(() => {
+    return () => {
+      clearToastTimers();
+      try {
+        recognitionRef.current?.stop();
+      } catch {
+        /* ignore */
+      }
+      const p = pendingVoice.current;
+      if (p) {
+        pendingVoice.current = null;
+        for (const s of p.sets) {
+          fetch("/api/app/sets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              exercise_id: p.ex.id,
+              set_number: s.set_number,
+              actual_reps: s.reps,
+              actual_weight: s.weight,
+              target_reps: p.ex.target_reps,
+              target_weight: p.ex.target_weight,
+              phantom_reference_10_percent: p.ex.target_weight,
+            }),
+          }).catch(() => {});
+        }
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const flashSet = (exId: string, setNumber: number) => {
     const key = `${exId}:${setNumber}`;
@@ -347,8 +465,85 @@ export default function ClientApp() {
     }
   };
 
+  const startSpeech = () => {
+    const SR =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    try {
+      const rec = new SR();
+      rec.lang = "es-AR";
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.onresult = (e: any) => {
+        let text = "";
+        for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+        setLiveText(text.trim());
+      };
+      rec.onerror = () => {};
+      rec.start();
+      recognitionRef.current = rec;
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const stopSpeech = () => {
+    try {
+      recognitionRef.current?.stop();
+    } catch {
+      /* ignore */
+    }
+    recognitionRef.current = null;
+  };
+
+  // Confirma el guardado de la voz pendiente (al expirar el toast o al grabar
+  // de nuevo): persiste las series y anima los checkmarks.
+  async function finalizeVoice() {
+    const p = pendingVoice.current;
+    pendingVoice.current = null;
+    dismissToast();
+    if (!p) return;
+    for (const s of p.sets) {
+      try {
+        await fetch("/api/app/sets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            exercise_id: p.ex.id,
+            set_number: s.set_number,
+            actual_reps: s.reps,
+            actual_weight: s.weight,
+            target_reps: p.ex.target_reps,
+            target_weight: p.ex.target_weight,
+            phantom_reference_10_percent: p.ex.target_weight,
+          }),
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+    setRows((prev) => ({
+      ...prev,
+      [p.ex.id]: (prev[p.ex.id] ?? []).map((r) =>
+        p.sets.some((s) => s.set_number === r.set_number) ? { ...r, saved: true } : r
+      ),
+    }));
+    p.sets.forEach((s) => flashSet(p.ex.id, s.set_number));
+  }
+
+  // Revierte el relleno por voz si el alumno toca "Deshacer".
+  function undoVoice() {
+    const p = pendingVoice.current;
+    pendingVoice.current = null;
+    dismissToast();
+    if (!p) return;
+    setRows((prev) => ({ ...prev, [p.ex.id]: p.snapshot }));
+  }
+
   const startRec = async (ex: Exercise) => {
-    setAudioMsg(null);
+    // Si hay una confirmación de voz pendiente, se fija antes de empezar otra.
+    if (pendingVoice.current) finalizeVoice();
+    dismissToast();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mr = new MediaRecorder(stream);
@@ -362,21 +557,52 @@ export default function ClientApp() {
       mediaRef.current = mr;
       mr.start();
       setRecordingFor(ex.id);
+      setLiveText("");
+      startSpeech();
     } catch {
-      setAudioMsg("No se pudo acceder al micrófono.");
+      showToast(
+        { exId: ex.id, kind: "err", title: "No se pudo acceder al micrófono." },
+        6000
+      );
     }
   };
 
   const stopRec = () => {
+    stopSpeech();
     if (mediaRef.current && mediaRef.current.state !== "inactive") {
       mediaRef.current.stop();
     }
     setRecordingFor(null);
   };
 
-  const applyVoiceSets = async (ex: Exercise, sets: VoiceSet[]) => {
+  // Resumen corto de las series detectadas (p. ej. "10 × 14 kg").
+  const summarizeSets = (sets: VoiceSet[]): string => {
+    const reps = sets.map((s) => s.reps).filter((n): n is number => n !== null);
+    const weights = sets.map((s) => s.weight).filter((n): n is number => n !== null);
+    const sameReps = reps.length > 0 && new Set(reps).size === 1;
+    const sameWeight = weights.length > 0 && new Set(weights).size === 1;
+    if (sameReps && sameWeight) return `${reps[0]} × ${weights[0]} kg`;
+    if (sameReps) return `${reps[0]} reps`;
+    if (sameWeight) return `${weights[0]} kg`;
+    return "Series registradas";
+  };
+
+  // Rellena la tarjeta localmente (sin guardar) y deja el guardado en espera de
+  // confirmación, de forma que "Deshacer" revierta por completo.
+  const applyVoiceDraft = (ex: Exercise, sets: VoiceSet[]) => {
+    const snapshot = (rows[ex.id] ?? []).map((r) => ({ ...r }));
+    pendingVoice.current = { ex, sets, snapshot };
+
     const lastSet = sets.reduce((m, s) => Math.max(m, s.set_number), 0);
-    const total = Math.min(12, Math.max(lastSet, rows[ex.id]?.length ?? 0, ex.target_sets ?? 0));
+    const total = Math.min(
+      12,
+      Math.max(lastSet, rows[ex.id]?.length ?? 0, ex.target_sets ?? 0)
+    );
+    const order: Record<string, number> = {};
+    sets.forEach((s, i) => {
+      order[`${ex.id}:${s.set_number}`] = i;
+    });
+
     setRows((prev) => {
       const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
       while (base.length < total) {
@@ -391,38 +617,18 @@ export default function ClientApp() {
       return { ...prev, [ex.id]: base };
     });
 
-    for (const s of sets) {
-      try {
-        await fetch("/api/app/sets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            exercise_id: ex.id,
-            set_number: s.set_number,
-            actual_reps: s.reps,
-            actual_weight: s.weight,
-            target_reps: ex.target_reps,
-            target_weight: ex.target_weight,
-            phantom_reference_10_percent: ex.target_weight,
-          }),
-        });
-      } catch {
-        /* ignore */
-      }
-    }
-
-    setRows((prev) => ({
-      ...prev,
-      [ex.id]: (prev[ex.id] ?? []).map((r) =>
-        sets.some((s) => s.set_number === r.set_number) ? { ...r, saved: true } : r
-      ),
-    }));
-    sets.forEach((s) => flashSet(ex.id, s.set_number));
+    setFillOrder(order);
+    window.setTimeout(() => setFillOrder({}), 1700);
   };
 
   const processVoice = async (blob: Blob, ex: Exercise) => {
     setVoiceBusy(ex.id);
-    setAudioMsg("Procesando audio…");
+    showToast({
+      exId: ex.id,
+      kind: "info",
+      title: "Procesando audio…",
+      detail: "Interpretando las series que dictaste.",
+    });
     try {
       const fd = new FormData();
       fd.append("audio", blob, "nota.webm");
@@ -432,17 +638,36 @@ export default function ClientApp() {
       if (!json.ok) throw new Error(json.error || "No se pudo procesar el audio");
       const sets: VoiceSet[] = Array.isArray(json.sets) ? json.sets : [];
       if (sets.length === 0) {
-        setAudioMsg("No se detectaron series. Probá de nuevo.");
+        showToast(
+          {
+            exId: ex.id,
+            kind: "err",
+            title: "No se detectaron series",
+            detail: "Probá de nuevo, más cerca del micrófono.",
+          },
+          4500
+        );
         return;
       }
-      await applyVoiceSets(ex, sets);
-      setAudioMsg(
-        `Listo: ${sets.length} serie${sets.length === 1 ? "" : "s"} cargada${
-          sets.length === 1 ? "" : "s"
-        } por voz.`
+      applyVoiceDraft(ex, sets);
+      const n = sets.length;
+      showToast(
+        {
+          exId: ex.id,
+          kind: "ok",
+          title: `Listo: ${n} serie${n === 1 ? "" : "s"} cargada${n === 1 ? "" : "s"}`,
+          detail: summarizeSets(sets),
+          canUndo: true,
+          ms: VOICE_CONFIRM_MS,
+        },
+        VOICE_CONFIRM_MS,
+        finalizeVoice
       );
     } catch (err: any) {
-      setAudioMsg(err?.message || "No se pudo procesar el audio.");
+      showToast(
+        { exId: ex.id, kind: "err", title: err?.message || "No se pudo procesar el audio." },
+        6000
+      );
     } finally {
       setVoiceBusy(null);
     }
@@ -757,8 +982,6 @@ export default function ClientApp() {
                 </span>
               </div>
 
-              {audioMsg && <div className="toast ok">{audioMsg}</div>}
-
               {exList.map((ex, idx) => {
                 const media = embedUrl(ex.video_url);
                 const notes = (ex.technique_notes ?? "").split("\n").filter(Boolean);
@@ -834,11 +1057,22 @@ export default function ClientApp() {
                             </tr>
                           </thead>
                           <tbody>
-                            {(rows[ex.id] ?? []).map((r) => (
+                            {(rows[ex.id] ?? []).map((r) => {
+                              const fillKey = `${ex.id}:${r.set_number}`;
+                              const stagger = fillOrder[fillKey];
+                              return (
                               <tr
                                 key={r.set_number}
-                                className={
-                                  savedFlash[`${ex.id}:${r.set_number}`] ? "row-flash" : undefined
+                                className={[
+                                  savedFlash[fillKey] ? "row-flash" : "",
+                                  stagger !== undefined ? "row-fill" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ") || undefined}
+                                style={
+                                  stagger !== undefined
+                                    ? ({ "--stagger": `${stagger * 70}ms` } as CSSProperties)
+                                    : undefined
                                 }
                               >
                                 <td className="set-index">{r.set_number}</td>
@@ -896,7 +1130,8 @@ export default function ClientApp() {
                                   <div className="save-flag">{r.saved ? "✓" : ""}</div>
                                 </td>
                               </tr>
-                            ))}
+                              );
+                            })}
                           </tbody>
                         </table>
 
@@ -906,19 +1141,70 @@ export default function ClientApp() {
                             disabled={processing || (voiceBusy !== null && !processing)}
                             onClick={() => (recording ? stopRec() : startRec(ex))}
                           >
-                            <MicIcon />
-                            {processing
-                              ? "Procesando…"
-                              : recording
-                              ? "Detener y cargar"
-                              : "Dictar series por voz"}
+                            {processing ? (
+                              "Procesando…"
+                            ) : recording ? (
+                              <>
+                                <Wave />
+                                Escuchando…
+                              </>
+                            ) : (
+                              <>
+                                <MicIcon />
+                                Dictar series por voz
+                              </>
+                            )}
                           </button>
                           <p className="muted" style={{ fontSize: ".9rem", marginTop: 8 }}>
-                            Dictá tus series por voz, por ejemplo «3 series de 10 con 50 kilos».
+                            {recording
+                              ? "Tocá para detener y cargar las series."
+                              : "Dictá tus series por voz, por ejemplo «3 series de 10 con 50 kilos»."}
                           </p>
+                          {recording && (
+                            <div className="voice-live">
+                              <Wave />
+                              <span className="voice-live-label">Escuchando…</span>
+                              {liveText ? (
+                                <p className="voice-live-text">“{liveText}”</p>
+                              ) : (
+                                <p className="voice-live-text placeholder">
+                                  {speechSupported
+                                    ? "Decí tus series…"
+                                    : "Grabando… al detener se interpretan tus series."}
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
+                    {cardToast?.exId === ex.id && (
+                      <div
+                        className={`card-toast ${cardToast.kind} ${
+                          toastClosing ? "closing" : ""
+                        }`}
+                        role="status"
+                      >
+                        <span className="card-toast-ic" aria-hidden="true">
+                          {cardToast.kind === "ok" ? "✓" : cardToast.kind === "err" ? "!" : "…"}
+                        </span>
+                        <div className="card-toast-body">
+                          <strong>{cardToast.title}</strong>
+                          {cardToast.detail && <span>{cardToast.detail}</span>}
+                        </div>
+                        {cardToast.canUndo && (
+                          <button className="card-toast-undo" onClick={undoVoice}>
+                            Deshacer
+                          </button>
+                        )}
+                        {cardToast.ms ? (
+                          <span
+                            className="card-toast-timer"
+                            style={{ animationDuration: `${cardToast.ms}ms` }}
+                          />
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 );
               })}

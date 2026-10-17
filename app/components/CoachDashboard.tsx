@@ -1256,7 +1256,7 @@ export default function CoachDashboard() {
                   </div>
                 )}
                   </aside>
-                  <div>
+                  <div key={tab} className="tab-panel">
 
                 {tab === "historial" && detail && (
                   <div className="card" style={{ marginTop: 12 }}>

@@ -903,8 +903,16 @@
       .footer-app { font-size: .39rem; padding: 2px 11px; gap: 4px; }
       .footer-app svg { width: 7.5px; height: 7.5px; }
     }
+    /* ---------- Micro-interacción: pulso dorado en CTAs primarios ---------- */
+    @keyframes ctaPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,196,0,0), 0 8px 22px rgba(255,196,0,.18); }
+      50% { box-shadow: 0 0 0 4px rgba(255,196,0,.16), 0 14px 38px rgba(255,196,0,.42); }
+    }
+    .btn-primary, .nav-cta, .featured .btn-plan { animation: ctaPulse 2.7s ease-in-out infinite; }
+
     @media (prefers-reduced-motion: reduce) {
       .marquee-track { animation: none; }
+      .btn-primary, .nav-cta, .featured .btn-plan { animation: none; }
     }
 
     .hero-particles.paused .particle { animation-play-state: paused; }
