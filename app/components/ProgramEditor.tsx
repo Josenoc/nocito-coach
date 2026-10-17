@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import type { GeneratedProgram, ProgramDay, ProgramExercise } from "@/app/lib/program";
+import { useMemo, useState } from "react";
+import type {
+  GeneratedProgram,
+  ProgramBlock,
+  ProgramDay,
+  ProgramExercise,
+  WeekTarget,
+} from "@/app/lib/program";
+import { buildProgression, expandProgramBlock } from "@/app/lib/block";
 
 function clone(program: GeneratedProgram): GeneratedProgram {
   return JSON.parse(JSON.stringify(program)) as GeneratedProgram;
@@ -14,6 +21,13 @@ const emptyExercise = (): ProgramExercise => ({
   descanso: "90 seg",
   notas: "",
 });
+
+function numOrNull(value: string): number | null {
+  const raw = value.replace(",", ".").replace(/[^0-9.]/g, "");
+  if (!raw.trim()) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
 
 export default function ProgramEditor({
   program,
@@ -28,7 +42,25 @@ export default function ProgramEditor({
   onPublish: (edited: GeneratedProgram) => void;
   publishing: boolean;
 }) {
-  const [p, setP] = useState<GeneratedProgram>(() => clone(program));
+  const [p, setP] = useState<GeneratedProgram>(() => expandProgramBlock(clone(program)));
+
+  const weeks = Math.max(1, p.block?.weeks ?? 6);
+  const weekNums = useMemo(() => Array.from({ length: weeks }, (_, i) => i + 1), [weeks]);
+
+  const blockParams = (block?: ProgramBlock) => ({
+    incrementoKg: block?.incrementoKg ?? 2.5,
+    repWave: block?.repWave ?? 3,
+    rirInicio: block?.rirInicio ?? 2,
+    rirFin: block?.rirFin ?? 1,
+  });
+
+  const patchBlock = (patch: Partial<ProgramBlock>) =>
+    setP((prev) => ({ ...prev, block: { ...prev.block, ...patch } }));
+
+  const setWeeks = (n: number) =>
+    setP((prev) => expandProgramBlock({ ...prev, block: { ...prev.block, weeks: n } }));
+
+  const recalc = () => setP((prev) => expandProgramBlock(prev));
 
   const patchDay = (di: number, patch: Partial<ProgramDay>) =>
     setP((prev) => ({
@@ -42,6 +74,49 @@ export default function ProgramEditor({
       days: prev.days.map((d, i) =>
         i === di
           ? { ...d, ejercicios: d.ejercicios.map((e, j) => (j === ei ? { ...e, ...patch } : e)) }
+          : d
+      ),
+    }));
+
+  const setBaseWeight = (di: number, ei: number, base: number | null) =>
+    setP((prev) => ({
+      ...prev,
+      days: prev.days.map((d, i) =>
+        i === di
+          ? {
+              ...d,
+              ejercicios: d.ejercicios.map((e, j) => {
+                if (j !== ei) return e;
+                const next: ProgramExercise = { ...e, base_weight: base };
+                return {
+                  ...next,
+                  progresion: buildProgression(next, prev.block?.weeks ?? 6, blockParams(prev.block)),
+                };
+              }),
+            }
+          : d
+      ),
+    }));
+
+  const patchWeek = (di: number, ei: number, sem: number, patch: Partial<WeekTarget>) =>
+    setP((prev) => ({
+      ...prev,
+      days: prev.days.map((d, i) =>
+        i === di
+          ? {
+              ...d,
+              ejercicios: d.ejercicios.map((e, j) => {
+                if (j !== ei) return e;
+                const list = e.progresion ?? [];
+                const has = list.some((t) => t.sem === sem);
+                const progresion = has
+                  ? list.map((t) => (t.sem === sem ? { ...t, ...patch } : t))
+                  : [...list, { sem, reps: null, peso: null, rir: null, ...patch }].sort(
+                      (a, b) => a.sem - b.sem
+                    );
+                return { ...e, progresion };
+              }),
+            }
           : d
       ),
     }));
@@ -133,6 +208,43 @@ export default function ProgramEditor({
           </div>
         )}
 
+        <div className="card block-config" style={{ marginBottom: 16 }}>
+          <div className="row-between" style={{ marginBottom: 10, gap: 10, flexWrap: "wrap" }}>
+            <h3 style={{ margin: 0 }}>Bloque de progresión</h3>
+            <span className="badge">{p.block?.scheme ?? `Doble progresión · ${weeks} semanas`}</span>
+          </div>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
+            <div style={{ flex: "0 0 160px" }}>
+              <label className="lbl">Semanas del bloque</label>
+              <select
+                className="input"
+                value={weeks}
+                onChange={(e) => setWeeks(Number(e.target.value))}
+              >
+                <option value={4}>4 semanas</option>
+                <option value={5}>5 semanas</option>
+                <option value={6}>6 semanas</option>
+              </select>
+            </div>
+            <button className="btn btn-outline" onClick={recalc} title="Recalcular la curva desde Sem 1">
+              Recalcular progresión
+            </button>
+          </div>
+          <div style={{ marginTop: 12 }}>
+            <label className="lbl">Guía del bloque (la ve el alumno)</label>
+            <textarea
+              className="input"
+              rows={2}
+              value={p.block?.guideline ?? ""}
+              onChange={(e) => patchBlock({ guideline: e.target.value })}
+            />
+          </div>
+          <p className="muted" style={{ margin: "8px 0 0", fontSize: ".82rem" }}>
+            La curva (reps / peso / RIR) se calcula automáticamente según el perfil. Cargá el
+            “Peso Sem 1” de cada ejercicio para obtener los kilos exactos por semana.
+          </p>
+        </div>
+
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="row-between" style={{ marginBottom: 10, gap: 10, flexWrap: "wrap" }}>
             <h3 style={{ margin: 0 }}>Rutina ({p.days.length} días)</h3>
@@ -171,13 +283,14 @@ export default function ProgramEditor({
               </div>
 
               <div className="scroll-x" style={{ marginTop: 10 }}>
-                <table className="data-table" style={{ minWidth: 720 }}>
+                <table className="data-table" style={{ minWidth: 800 }}>
                   <thead>
                     <tr>
                       <th>Ejercicio</th>
-                      <th style={{ width: 70 }}>Series</th>
-                      <th style={{ width: 90 }}>Reps</th>
-                      <th style={{ width: 110 }}>Descanso</th>
+                      <th style={{ width: 66 }}>Series</th>
+                      <th style={{ width: 84 }}>Reps</th>
+                      <th style={{ width: 92 }}>Peso S1</th>
+                      <th style={{ width: 104 }}>Descanso</th>
                       <th>Notas</th>
                       <th style={{ width: 44 }} />
                     </tr>
@@ -209,6 +322,15 @@ export default function ProgramEditor({
                             className="input"
                             value={ex.reps ?? ""}
                             onChange={(e) => patchEx(di, ei, { reps: e.target.value })}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            className="input"
+                            inputMode="decimal"
+                            placeholder="kg"
+                            value={ex.base_weight ?? ""}
+                            onChange={(e) => setBaseWeight(di, ei, numOrNull(e.target.value))}
                           />
                         </td>
                         <td>
@@ -247,6 +369,62 @@ export default function ProgramEditor({
               >
                 + Ejercicio
               </button>
+
+              {d.ejercicios.length > 0 && (
+                <div className="scroll-x" style={{ marginTop: 14 }}>
+                  <h4 style={{ margin: "0 0 8px", fontSize: ".9rem" }}>
+                    Progresión del bloque (Sem 1–{weeks})
+                  </h4>
+                  <table className="data-table progression-edit" style={{ minWidth: 140 + weeks * 118 }}>
+                    <thead>
+                      <tr>
+                        <th>Ejercicio</th>
+                        {weekNums.map((w) => (
+                          <th key={w}>Sem {w}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d.ejercicios.map((ex, ei) => (
+                        <tr key={ei}>
+                          <td>
+                            <b className="ex-name-text">{ex.ejercicio || "—"}</b>
+                          </td>
+                          {weekNums.map((w) => {
+                            const t =
+                              (ex.progresion ?? []).find((x) => x.sem === w) ??
+                              ({ sem: w, reps: null, peso: null, rir: null } as WeekTarget);
+                            return (
+                              <td key={w}>
+                                <div className="prog-cell">
+                                  <input
+                                    className="input prog-input"
+                                    placeholder="reps"
+                                    value={t.reps ?? ""}
+                                    onChange={(e) =>
+                                      patchWeek(di, ei, w, { reps: e.target.value || null })
+                                    }
+                                  />
+                                  <input
+                                    className="input prog-input"
+                                    placeholder="kg"
+                                    inputMode="decimal"
+                                    value={t.peso ?? ""}
+                                    onChange={(e) =>
+                                      patchWeek(di, ei, w, { peso: numOrNull(e.target.value) })
+                                    }
+                                  />
+                                  <span className="prog-rir">RIR {t.rir ?? "—"}</span>
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           ))}
         </div>

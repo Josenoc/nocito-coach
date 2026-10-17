@@ -568,13 +568,49 @@ export default function CoachDashboard() {
     setMsg(null);
     setPublishingProgram(true);
     try {
+      const weeksCount = Math.max(1, edited.block?.weeks ?? 6);
+      const weeks = Array.from({ length: weeksCount }, (_, i) => {
+        const weekNumber = i + 1;
+        return {
+          week_number: weekNumber,
+          days: edited.days.map((d) => ({
+            dia: d.dia,
+            nombre: d.nombre,
+            ejercicios: d.ejercicios.map((ex) => {
+              const t = ex.progresion?.find((p) => p.sem === weekNumber);
+              return {
+                ejercicio: ex.ejercicio,
+                series: ex.series,
+                reps: t?.reps ?? ex.reps,
+                peso: t?.peso ?? ex.base_weight ?? null,
+                rir: t?.rir ?? null,
+                descanso: ex.descanso,
+                notas: ex.notas,
+              };
+            }),
+          })),
+        };
+      });
+
       const routineRes = await fetch("/api/coach/import-routine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId: selectedId, days: edited.days }),
+        body: JSON.stringify({ clientId: selectedId, weeks }),
       });
       const routineJson = await routineRes.json();
       if (!routineJson.ok) throw new Error(routineJson.error);
+
+      if (edited.block) {
+        await fetch("/api/coach/block", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            client_id: selectedId,
+            guideline: edited.block.guideline ?? "",
+            weeks: weeksCount,
+          }),
+        });
+      }
 
       const nutritionRes = await fetch("/api/coach/nutrition", {
         method: "POST",
@@ -585,10 +621,11 @@ export default function CoachDashboard() {
       if (!nutritionJson.ok) throw new Error(nutritionJson.error);
 
       setNutrition(edited.nutrition);
+      setBlockGuideline(edited.block?.guideline ?? "");
       setEditingProgram(false);
       setProgram(null);
       setTab("rutinas");
-      setMsg({ type: "ok", text: "Plan publicado para el cliente." });
+      setMsg({ type: "ok", text: `Plan publicado (bloque de ${weeksCount} semanas).` });
       await loadClients();
       await reloadDetail();
     } catch (err: any) {

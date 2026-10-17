@@ -5,12 +5,24 @@ import type { NutritionPlan } from "@/lib/app-types";
  * Genera rutina + nutrición 100% personalizadas a partir de la anamnesis.
  */
 
+/** Objetivo semanal de un ejercicio dentro de un bloque de progresión. */
+export type WeekTarget = {
+  sem: number;
+  reps: string | null;
+  peso: number | null;
+  rir: number | null;
+};
+
 export type ProgramExercise = {
   ejercicio: string;
   series: number | null;
   reps: string | null;
   descanso: string | null;
   notas: string | null;
+  /** Peso de trabajo de referencia (Sem 1) cargado por el coach; opcional. */
+  base_weight?: number | null;
+  /** Curva de sobrecarga progresiva calculada para el bloque (Sem 1..N). */
+  progresion?: WeekTarget[];
 };
 
 export type ProgramDay = {
@@ -19,12 +31,28 @@ export type ProgramDay = {
   ejercicios: ProgramExercise[];
 };
 
+/**
+ * Parámetros del bloque de progresión. Se derivan del perfil (edad, experiencia,
+ * objetivo) para construir la curva de sobrecarga progresiva de forma segura y
+ * robusta (sin depender de más tokens del modelo).
+ */
+export type ProgramBlock = {
+  weeks: number;
+  guideline: string;
+  scheme: string;
+  incrementoKg: number;
+  repWave: number;
+  rirInicio: number;
+  rirFin: number;
+};
+
 export type GeneratedProgram = {
   perfil: string;
   justificacion: string;
   esquema: string;
   days: ProgramDay[];
   nutrition: NutritionPlan;
+  block: ProgramBlock;
 };
 
 export type ProgramInput = {
@@ -81,6 +109,7 @@ Devolvés SOLO un objeto JSON válido (sin texto extra, sin markdown) con este e
           "ejercicio": "string (nombre en argentino)",
           "series": number,
           "reps": "string (ej. '10-12' o '8')",
+          "peso": number,
           "descanso": "string (ej. '90 seg', '2-3 min')",
           "notas": "string (tempo, RIR, técnica avanzada o '—')"
         }
@@ -100,6 +129,7 @@ Devolvés SOLO un objeto JSON válido (sin texto extra, sin markdown) con este e
 Reglas adicionales:
 - La cantidad de "dias" DEBE coincidir con el volumen semanal indicado por el perfil (respetando el tope por edad/experiencia).
 - Las "cal" y macros DEBEN ser coherentes con peso, altura, edad, sexo y objetivo (calculalos, no inventes).
+- "peso" = carga externa de trabajo de Semana 1 en KILOGRAMOS (solo números, sin "kg"). Calculala a partir del peso corporal, experiencia y equipamiento disponible (barra, mancuernas, máquina). En ejercicios sin carga externa (calistenia, cardio, core con peso corporal) devolvé 0.
 - "meals" son pares [nombre de la comida, sugerencia concreta con alimentos locales].
 - Nunca devuelvas un esquema genérico: todo debe estar justificado por el perfil recibido.
 - Sé conciso: como MAXIMO 5 ejercicios por dia, "perfil" y "justificacion" de hasta ~120 palabras cada uno. No agregues texto fuera del JSON, ni comentarios.`;
@@ -126,10 +156,13 @@ function normalizeDays(raw: unknown): ProgramDay[] {
           const ejercicio = str(e?.ejercicio);
           if (!ejercicio) return null;
           const seriesNum = Number(e?.series);
+          const pesoNum = Number(String(e?.peso ?? "").replace(",", "."));
           return {
             ejercicio,
             series: Number.isFinite(seriesNum) ? seriesNum : null,
             reps: str(e?.reps) || null,
+            // Carga externa de Sem 1. 0 / no numérico = sin peso (calistenia, cardio).
+            base_weight: Number.isFinite(pesoNum) && pesoNum > 0 ? pesoNum : null,
             descanso: str(e?.descanso) || null,
             notas: str(e?.notas) || null,
           };
@@ -189,6 +222,36 @@ export function buildProgramUserMessage(input: ProgramInput): string {
     "Generá el plan JSON completo respetando todas las reglas (edad, experiencia, nomenclatura argentina, nutrición específica).",
   ];
   return lines.join("\n");
+}
+
+export function buildBlockParams(input: ProgramInput): ProgramBlock {
+  const exp = (input.experience ?? "").toLowerCase();
+  const goal = (input.goal ?? "").toLowerCase();
+  const age = Number(input.age) || 0;
+
+  const young = age > 0 && age <= 15;
+  const beginner = /principiante|nunca|inicial|basa/.test(exp);
+  const advanced = /avanzad|elite|compet/.test(exp);
+  const fatLoss = /grasa|perder|defin|descenso/.test(goal);
+
+  // Bloque de 4 a 6 semanas según perfil.
+  const weeks = young || beginner ? 4 : advanced ? 6 : 6;
+  // Incremento base (kilos por mesociclo) en básicos.
+  const incrementoKg = young ? 1 : beginner ? 1.25 : advanced ? 2.5 : 2.5;
+  // Cada cuántas semanas se sube el peso (wave de reps).
+  const repWave = young || beginner ? 3 : 2;
+  const rirInicio = beginner || fatLoss ? 3 : 2;
+  const rirFin = 1;
+
+  const scheme = `Doble progresión · ${weeks} semanas`;
+  const guideline =
+    `Bloque de ${weeks} semanas (doble progresión). Empezá cerca de RIR ${rirInicio} y ` +
+    `subí la exigencia hasta RIR ${rirFin} sobre el final del bloque. Sumá repeticiones dentro ` +
+    `del rango indicado y cada ${repWave} semanas subí ${incrementoKg} kg en los básicos ` +
+    `(la mitad en los accesorios). Si llegás al tope del rango con buena técnica, priorizá el ` +
+    `aumento de peso.`;
+
+  return { weeks, guideline, scheme, incrementoKg, repWave, rirInicio, rirFin };
 }
 
 export async function generateProgram(input: ProgramInput): Promise<GeneratedProgram> {
@@ -258,6 +321,7 @@ export async function generateProgram(input: ProgramInput): Promise<GeneratedPro
           esquema: str(parsed?.esquema),
           days,
           nutrition: normalizeNutrition(parsed?.nutricion ?? parsed?.nutrition),
+          block: buildBlockParams(input),
         };
       }
     }

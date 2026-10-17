@@ -933,6 +933,14 @@ textarea.input { resize: vertical; }
   letter-spacing: 0.01em;
 }
 .ex-name-input::placeholder { color: rgba(255, 217, 74, 0.5); font-weight: 600; }
+.ex-name-text { color: var(--gold-bright); }
+
+/* ---- Editor: tabla de progresión del bloque ---- */
+.block-config .badge { background: rgba(245, 158, 11, 0.12); border: 1px solid var(--border-gold-soft); color: var(--gold-bright); }
+.progression-edit td { vertical-align: top; }
+.prog-cell { display: flex; flex-direction: column; gap: 4px; min-width: 96px; }
+.prog-input { width: 100%; padding: 7px 9px; font-size: 0.86rem; }
+.prog-rir { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 
 @media (max-width: 900px) {
   .coach-layout { grid-template-columns: 1fr; }

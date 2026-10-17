@@ -553,7 +553,7 @@ export default function ClientApp() {
 
   const weekPresent = Array.from(new Set(routines.map((r) => r.week_number || 1)));
   const maxPresent = weekPresent.length ? Math.max(...weekPresent) : 1;
-  const totalWeeks = Math.max(6, trainingBlock?.weeks ?? 0, maxPresent);
+  const totalWeeks = Math.max(trainingBlock?.weeks ?? 6, maxPresent);
   const weekList = Array.from({ length: totalWeeks }, (_, i) => i + 1);
 
   const weekDays = routines
@@ -955,12 +955,18 @@ export default function ClientApp() {
                             {weekList.map((w) => {
                               const wkEx = exerciseInWeek(w, dayNameOf(current), ex);
                               const logged = fmtLog(latestLogFor(wkEx?.id));
-                              const target =
-                                wkEx && (wkEx.target_reps != null || wkEx.target_weight != null)
-                                  ? `${wkEx.target_reps ?? "-"} × ${wkEx.target_weight ?? "-"}${
-                                      wkEx.target_weight != null ? " kg" : ""
-                                    }`
-                                  : null;
+                              let target: string | null = null;
+                              if (
+                                wkEx &&
+                                (wkEx.target_reps != null || wkEx.target_weight != null)
+                              ) {
+                                target =
+                                  wkEx.target_weight != null
+                                    ? `${wkEx.target_reps ?? "-"} × ${wkEx.target_weight} kg`
+                                    : wkEx.target_reps != null
+                                    ? `${wkEx.target_reps} reps`
+                                    : null;
+                              }
                               return (
                                 <td
                                   key={w}
