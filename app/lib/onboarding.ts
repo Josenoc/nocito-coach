@@ -7,6 +7,7 @@ const GOAL_TO_OBJECTIVE: Record<string, string> = {
   hipertrofia: "ganar-masa",
   "perdida-grasa": "perder-grasa",
   fuerza: "ganar-masa",
+  recomposicion: "recomposicion",
   "rendimiento-deportivo": "recomposicion",
 };
 

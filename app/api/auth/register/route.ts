@@ -10,11 +10,13 @@ import type { Anamnesis } from "@/lib/app-types";
 export const dynamic = "force-dynamic";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
-const OBJETIVOS = ["hipertrofia", "perdida-grasa", "fuerza", "rendimiento-deportivo"];
+const OBJETIVOS = ["hipertrofia", "perdida-grasa", "fuerza", "recomposicion", "rendimiento-deportivo"];
 const DIAS_VALIDOS = [3, 4, 5];
 const NUTRICION = ["omnivoro", "vegetariano", "carnivoro", "vegano"];
 const LUGARES = ["gimnasio", "casa", "aire-libre"];
 const EXPERIENCIAS = ["principiante", "intermedio", "avanzado"];
+const ACTIVIDADES = ["sedentario", "ligero", "moderado", "alto", "muy-alto"];
+const SUENO = ["mala", "regular", "buena", "excelente"];
 
 function cleanNote(value: unknown): string {
   return typeof value === "string" ? value.trim().slice(0, 1200) : "";
@@ -30,6 +32,24 @@ function clampInt(value: unknown, min: number, max: number): number | null {
   return n;
 }
 
+function isBlank(value: unknown): boolean {
+  return value === undefined || value === null || String(value).trim() === "";
+}
+
+/** Devuelve undefined si el campo viene vacío, "invalid" si está fuera de rango. */
+function optionalInt(value: unknown, min: number, max: number): number | undefined | "invalid" {
+  if (isBlank(value)) return undefined;
+  const n = clampInt(value, min, max);
+  return n === null ? "invalid" : n;
+}
+
+function optionalDecimal(value: unknown, min: number, max: number): number | undefined | "invalid" {
+  if (isBlank(value)) return undefined;
+  const n = Number(String(value).replace(",", "."));
+  if (!Number.isFinite(n) || n < min || n > max) return "invalid";
+  return Math.round(n * 10) / 10;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -42,11 +62,15 @@ export async function POST(req: NextRequest) {
     const age = clampInt(body?.age, 10, 100);
     const height_cm = clampInt(body?.height_cm, 100, 250);
     const weight_kg = Number(body?.weight_kg);
+    const body_fat_pct = optionalDecimal(body?.body_fat_pct, 3, 60);
     const goal = String(body?.goal ?? "");
     const training_days = clampInt(body?.training_days, 3, 5);
     const nutrition = String(body?.nutrition ?? "");
     const training_place = String(body?.training_place ?? "");
     const experience = String(body?.experience ?? "");
+    const training_years = optionalInt(body?.training_years, 0, 60);
+    const activity_level = String(body?.activity_level ?? "");
+    const sleep_quality = String(body?.sleep_quality ?? "");
     const injuries = cleanNote(body?.injuries);
     const food_restrictions = cleanNote(body?.food_restrictions);
     const pin = String(body?.pin ?? "").trim();
@@ -70,6 +94,14 @@ export async function POST(req: NextRequest) {
       return bad("Elegí dónde vas a entrenar.");
     if (!EXPERIENCIAS.includes(experience))
       return bad("Elegí tu nivel de experiencia.");
+    if (body_fat_pct === "invalid")
+      return bad("El % de grasa corporal debe estar entre 3 y 60.");
+    if (training_years === "invalid")
+      return bad("Los años de entrenamiento deben estar entre 0 y 60.");
+    if (activity_level && !ACTIVIDADES.includes(activity_level))
+      return bad("Elegí tu nivel de actividad diaria.");
+    if (sleep_quality && !SUENO.includes(sleep_quality))
+      return bad("Elegí tu calidad de sueño.");
     if (!/^\d{4}$/.test(pin)) return bad("El PIN debe tener 4 dígitos.");
     if (pin !== pin_confirm) return bad("Los PIN no coinciden.");
 
@@ -117,6 +149,14 @@ export async function POST(req: NextRequest) {
       photos: {},
       completedAt: new Date().toISOString(),
     };
+    if (body_fat_pct !== undefined) {
+      anamnesis.body_fat_pct = body_fat_pct;
+    }
+    if (training_years !== undefined) {
+      anamnesis.training_years = training_years;
+    }
+    if (activity_level) anamnesis.activity_level = activity_level;
+    if (sleep_quality) anamnesis.sleep_quality = sleep_quality;
 
     const { data, error } = await supabase
       .from("profiles")

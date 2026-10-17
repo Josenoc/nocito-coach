@@ -8,6 +8,7 @@ const GOAL_LABELS: Record<string, string> = {
   hipertrofia: "Hipertrofia",
   "perdida-grasa": "Pérdida de grasa",
   fuerza: "Fuerza",
+  recomposicion: "Recomposición corporal",
   "rendimiento-deportivo": "Rendimiento deportivo",
 };
 const NUTRITION_LABELS: Record<string, string> = {
@@ -26,6 +27,19 @@ const EXP_LABELS: Record<string, string> = {
   intermedio: "Intermedio",
   avanzado: "Avanzado",
 };
+const ACTIVITY_LABELS: Record<string, string> = {
+  sedentario: "Sedentario",
+  ligero: "Ligero",
+  moderado: "Moderado",
+  alto: "Alto",
+  "muy-alto": "Muy alto",
+};
+const SLEEP_LABELS: Record<string, string> = {
+  mala: "Mala",
+  regular: "Regular",
+  buena: "Buena",
+  excelente: "Excelente",
+};
 
 const DIAS = [3, 4, 5];
 const SEXOS = ["Masculino", "Femenino", "Otro"];
@@ -33,6 +47,8 @@ const GOALS: [string, string][] = Object.entries(GOAL_LABELS);
 const NUTRIS: [string, string][] = Object.entries(NUTRITION_LABELS);
 const PLACES: [string, string][] = Object.entries(PLACE_LABELS);
 const EXPS: [string, string][] = Object.entries(EXP_LABELS);
+const ACTIVITIES: [string, string][] = Object.entries(ACTIVITY_LABELS);
+const SLEEPS: [string, string][] = Object.entries(SLEEP_LABELS);
 
 function bmiInfo(weight?: number, height?: number) {
   if (!weight || !height) return null;
@@ -104,10 +120,14 @@ export default function PendingReviewDashboard({
       age: a.age ? String(a.age) : "",
       height_cm: a.height_cm ? String(a.height_cm) : "",
       weight_kg: a.weight_kg ? String(a.weight_kg) : "",
+      body_fat_pct: a.body_fat_pct ? String(a.body_fat_pct) : "",
       goal: a.goal ?? "hipertrofia",
       training_days: String(a.training_days ?? 4),
       training_place: (a.training_place as string) ?? "gimnasio",
       experience: (a.experience as string) ?? "intermedio",
+      training_years: a.training_years != null ? String(a.training_years) : "",
+      activity_level: (a.activity_level as string) ?? "moderado",
+      sleep_quality: (a.sleep_quality as string) ?? "buena",
       nutrition: a.nutrition ?? "omnivoro",
       injuries: a.injuries ?? "",
     });
@@ -250,6 +270,11 @@ export default function PendingReviewDashboard({
             <Metric k="Peso" v={a.weight_kg ? `${a.weight_kg} kg` : "—"} />
             <Metric k="IMC" v={bmi ? bmi.value : "—"} sub={bmi?.label} />
             <Metric k="Edad" v={a.age ? `${a.age} años` : "—"} />
+            <Metric k="% Grasa" v={a.body_fat_pct ? `${a.body_fat_pct} %` : "—"} />
+            <Metric
+              k="Años entrenando"
+              v={a.training_years != null ? `${a.training_years}` : "—"}
+            />
           </div>
           <p className="muted" style={{ margin: "12px 0 0", fontSize: ".85rem" }}>
             Si cambiás algo, José lo ve antes de cerrar tu plan.
@@ -269,6 +294,14 @@ export default function PendingReviewDashboard({
             <Row k="Días / semana" v={a.training_days ? `${a.training_days} días` : "—"} />
             <Row k="Lugar" v={PLACE_LABELS[a.training_place as string] ?? (a.training_place as string) ?? "—"} />
             <Row k="Experiencia" v={EXP_LABELS[a.experience as string] ?? (a.experience as string) ?? "—"} />
+            <Row
+              k="Actividad diaria"
+              v={ACTIVITY_LABELS[a.activity_level as string] ?? (a.activity_level as string) ?? "—"}
+            />
+            <Row
+              k="Calidad de sueño"
+              v={SLEEP_LABELS[a.sleep_quality as string] ?? (a.sleep_quality as string) ?? "—"}
+            />
           </div>
         </div>
 
@@ -417,6 +450,16 @@ export default function PendingReviewDashboard({
               </div>
               <div className="grid-2">
                 <div>
+                  <label className="lbl">% de grasa corporal</label>
+                  <input className="input" inputMode="decimal" placeholder="Ej: 18" value={form.body_fat_pct} onChange={(e) => setForm({ ...form, body_fat_pct: e.target.value.replace(/[^\d.,]/g, "").slice(0, 5) })} />
+                </div>
+                <div>
+                  <label className="lbl">Años entrenando</label>
+                  <input className="input" inputMode="numeric" placeholder="Ej: 2" value={form.training_years} onChange={(e) => setForm({ ...form, training_years: e.target.value.replace(/\D/g, "").slice(0, 2) })} />
+                </div>
+              </div>
+              <div className="grid-2">
+                <div>
                   <label className="lbl">Objetivo</label>
                   <select className="input" value={form.goal} onChange={(e) => setForm({ ...form, goal: e.target.value })}>
                     {GOALS.map(([k, l]) => (
@@ -446,6 +489,24 @@ export default function PendingReviewDashboard({
                   <label className="lbl">Experiencia</label>
                   <select className="input" value={form.experience} onChange={(e) => setForm({ ...form, experience: e.target.value })}>
                     {EXPS.map(([k, l]) => (
+                      <option key={k} value={k}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid-2">
+                <div>
+                  <label className="lbl">Actividad diaria</label>
+                  <select className="input" value={form.activity_level} onChange={(e) => setForm({ ...form, activity_level: e.target.value })}>
+                    {ACTIVITIES.map(([k, l]) => (
+                      <option key={k} value={k}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="lbl">Calidad de sueño</label>
+                  <select className="input" value={form.sleep_quality} onChange={(e) => setForm({ ...form, sleep_quality: e.target.value })}>
+                    {SLEEPS.map(([k, l]) => (
                       <option key={k} value={k}>{l}</option>
                     ))}
                   </select>

@@ -2,6 +2,8 @@ export type Role = "client" | "coach";
 
 export type TrainingPlace = "gimnasio" | "casa" | "aire-libre";
 export type Experience = "principiante" | "intermedio" | "avanzado";
+export type ActivityLevel = "sedentario" | "ligero" | "moderado" | "alto" | "muy-alto";
+export type SleepQuality = "mala" | "regular" | "buena" | "excelente";
 export type PhotoSlot = "front" | "side" | "back";
 
 export interface ClientPhotos {
@@ -44,11 +46,21 @@ export interface Anamnesis {
   age: number;
   height_cm: number;
   weight_kg: number;
+  /** % de grasa corporal estimado (composición corporal). */
+  body_fat_pct?: number;
   goal: string;
   training_days: number;
   nutrition: string;
+  /** Acceso a equipamiento: gimnasio comercial, casa/home gym o peso corporal/parques. */
   training_place?: TrainingPlace | string;
   experience?: Experience | string;
+  /** Años de entrenamiento estructurado (continuo). */
+  training_years?: number;
+  /** Nivel de actividad diaria (NEAT / energía cotidiana). */
+  activity_level?: ActivityLevel | string;
+  /** Calidad del descanso nocturno. */
+  sleep_quality?: SleepQuality | string;
+  /** Lesiones o limitaciones estructurales activas o pasadas. */
   injuries?: string;
   food_restrictions?: string;
   photos?: ClientPhotos;

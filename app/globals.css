@@ -1208,6 +1208,11 @@ textarea.input { resize: vertical; }
 .progression-table .col-current { background: rgba(255, 196, 0, 0.08); }
 .prog-done { color: var(--gold); font-weight: 700; }
 .prog-target { color: var(--muted); }
+/* Semanas futuras: sobrecarga planificada, atenuada respecto de la semana en curso. */
+.progression-table th.prog-future,
+.progression-table td.prog-future { opacity: 0.42; }
+.progression-table td.prog-future .prog-target { color: rgba(252, 211, 77, 0.6); }
+.progression-table th.prog-future { font-weight: 600; }
 
 /* ---------- Micro-interacciones (ecosistema) ---------- */
 

@@ -6,6 +6,7 @@ const GOAL_LABELS: Record<string, string> = {
   hipertrofia: "Hipertrofia",
   "perdida-grasa": "Pérdida de grasa",
   fuerza: "Fuerza",
+  recomposicion: "Recomposición corporal",
   "rendimiento-deportivo": "Rendimiento deportivo",
 };
 
@@ -57,6 +58,10 @@ export async function sendCoachPendingReviewEmail(input: {
     row("Sexo", a.sex),
     row("Altura", `${a.height_cm} cm`),
     row("Peso", `${a.weight_kg} kg`),
+    a.body_fat_pct ? row("Grasa corporal", `${a.body_fat_pct} %`) : "",
+    a.training_years != null ? row("Años entrenando", String(a.training_years)) : "",
+    a.activity_level ? row("Actividad diaria", a.activity_level) : "",
+    a.sleep_quality ? row("Sueño", a.sleep_quality) : "",
     row("Alimentación", NUTRITION_LABELS[a.nutrition] ?? a.nutrition),
     `</table>`,
     `<p style="margin:0 0 22px;"><a href="${link}" style="display:inline-block;background:#FFC400;color:#111;font-weight:700;text-decoration:none;padding:13px 28px;border-radius:999px;font-size:15px;">Entrar al panel y revisar</a></p>`,

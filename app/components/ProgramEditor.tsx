@@ -216,15 +216,13 @@ export default function ProgramEditor({
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
             <div style={{ flex: "0 0 160px" }}>
               <label className="lbl">Semanas del bloque</label>
-              <select
-                className="input"
-                value={weeks}
-                onChange={(e) => setWeeks(Number(e.target.value))}
-              >
-                <option value={4}>4 semanas</option>
-                <option value={5}>5 semanas</option>
-                <option value={6}>6 semanas</option>
-              </select>
+                <select
+                  className="input"
+                  value={weeks}
+                  onChange={(e) => setWeeks(Number(e.target.value))}
+                >
+                  <option value={6}>6 semanas</option>
+                </select>
             </div>
             <button className="btn btn-outline" onClick={recalc} title="Recalcular la curva desde Sem 1">
               Recalcular progresión

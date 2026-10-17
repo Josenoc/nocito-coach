@@ -323,14 +323,14 @@
     }
     .price-card.featured {
       background: linear-gradient(180deg, #232020, #1c1816 60%);
-      border: 1px solid var(--orange);
-      box-shadow: 0 0 0 1px rgba(255,87,34,.14), 0 24px 60px rgba(255,87,34,.16);
+      border: 2px solid var(--orange);
+      box-shadow: 0 0 0 1px rgba(255,196,0,.18), 0 28px 70px rgba(255,196,0,.22), 0 0 60px rgba(255,196,0,.12);
       transform: scale(1.045);
     }
     .price-card.featured:hover {
       transform: perspective(900px) translate3d(0,-10px,14px) scale(1.045);
       border-color: var(--orange-soft);
-      box-shadow: 0 0 0 1px rgba(255,87,34,.28), 0 34px 70px rgba(255,87,34,.3), 0 0 44px rgba(255,87,34,.24);
+      box-shadow: 0 0 0 1px rgba(255,196,0,.32), 0 38px 80px rgba(255,196,0,.34), 0 0 68px rgba(255,196,0,.24);
     }
     .featured-badge {
       position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
@@ -773,16 +773,17 @@
     @media (max-width: 620px) { .testi-wrap { grid-template-columns: 1fr; } }
     .testi-card {
       display: flex; flex-direction: column; padding: 28px;
-      background: linear-gradient(180deg, #121212, #0D0D0D);
-      border: 1px solid rgba(255,196,0,.3);
+      background: linear-gradient(180deg, #0f0f0f, #090909);
+      border: 1px solid rgba(255,196,0,.5);
       border-radius: 12px;
+      box-shadow: 0 0 0 1px rgba(255,196,0,.08), 0 18px 40px rgba(0,0,0,.5);
       transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease, border-color .3s ease;
       will-change: transform;
     }
     .testi-card:hover {
       transform: translateY(-5px);
-      border-color: rgba(255,196,0,.6);
-      box-shadow: 0 26px 54px rgba(0,0,0,.55), 0 0 30px rgba(255,196,0,.16);
+      border-color: rgba(255,196,0,.8);
+      box-shadow: 0 28px 58px rgba(0,0,0,.55), 0 0 40px rgba(255,196,0,.18);
     }
     .testi-metric {
       font-family: 'Montserrat', sans-serif; font-weight: 800;
@@ -878,7 +879,7 @@
       margin-bottom: 22px;
     }
     .pillar-num { display: block; font-size: .72rem; letter-spacing: .24em; color: var(--orange); font-weight: 700; margin-bottom: 10px; }
-    .pillar-card h3 { font-size: 1.12rem; margin-bottom: 12px; letter-spacing: .04em; }
+    .pillar-card h3 { font-size: 1.12rem; margin-bottom: 12px; letter-spacing: .04em; color: #fcd34d; }
     .pillar-card p { color: var(--muted); font-size: .95rem; line-height: 1.7; }
 
     /* ---------- Ecosistema / App ---------- */
@@ -1073,7 +1074,7 @@
           </p>
           <p class="hero-scarcity"><span class="pulse-dot" aria-hidden="true"></span>Plazas de asesoría mensual limitadas para garantizar atención 1 a 1 personalizada</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#planes">Comencemos</a>
+            <a class="btn btn-primary" href="#planes">Aplicar al plan</a>
             <a class="btn btn-outline" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">Hablar por WhatsApp</a>
           </div>
         </div>
@@ -1191,7 +1192,7 @@
     <section class="section" id="app" data-index="03" >
       <div class="container reveal">
         <span class="section-label"><span class="sec-num">03</span> Ecosistema</span>
-        <h2 class="section-title">Tu entrenamiento en una <span class="grad-text">Web App privada</span></h2>
+          <h2 class="section-title"><span style="color: #fbbf24;">Tu entrenamiento en una</span> <span class="grad-text">Web App privada</span></h2>
         <p class="section-sub">No es un archivo que se pierde en el celular: es un panel vivo donde registrás, reportás y yo ajusto tu plan en tiempo real.</p>
 
         <div class="eco-wrap">
@@ -1455,7 +1456,7 @@
             <h2 class="final-cta-title">Tu mejor versión <span class="grad-text">no se improvisa, se diseña</span></h2>
             <p class="final-cta-sub">Elegí tu plan, completá tu ficha y yo reviso y apruebo tu programación antes de que pises el gimnasio.</p>
             <div class="final-cta-actions">
-              <a class="btn btn-primary" href="#planes">Ver planes</a>
+              <a class="btn btn-primary" href="#planes">Aplicar al plan</a>
               <a class="btn btn-outline" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">Hablar por WhatsApp</a>
             </div>
           </div>

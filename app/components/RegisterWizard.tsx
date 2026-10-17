@@ -11,10 +11,14 @@ export interface RegisterPayload {
   age: string;
   height_cm: string;
   weight_kg: string;
+  body_fat_pct: string;
   goal: string;
   training_days: string;
   training_place: string;
   experience: string;
+  training_years: string;
+  activity_level: string;
+  sleep_quality: string;
   nutrition: string;
   injuries: string;
   food_restrictions: string;
@@ -27,18 +31,33 @@ const OBJETIVOS: [string, string][] = [
   ["hipertrofia", "Hipertrofia"],
   ["perdida-grasa", "Pérdida de grasa"],
   ["fuerza", "Fuerza"],
+  ["recomposicion", "Recomposición corporal"],
   ["rendimiento-deportivo", "Rendimiento deportivo"],
 ];
 const DIAS = [3, 4, 5];
+// Acceso a equipamiento (no solo "dónde"): condiciona la selección de ejercicios.
 const LUGARES: [string, string][] = [
-  ["gimnasio", "Gimnasio"],
-  ["casa", "Casa"],
-  ["aire-libre", "Aire libre"],
+  ["gimnasio", "Gimnasio comercial (equipamiento completo)"],
+  ["casa", "Casa / Home gym (mancuernas, bandas)"],
+  ["aire-libre", "Peso corporal / Parques (sin equipo)"],
 ];
 const EXPERIENCIAS: [string, string][] = [
   ["principiante", "Principiante"],
   ["intermedio", "Intermedio"],
   ["avanzado", "Avanzado"],
+];
+const ACTIVIDADES: [string, string][] = [
+  ["sedentario", "Sedentario (trabajo de escritorio)"],
+  ["ligero", "Ligero (algo de movimiento diario)"],
+  ["moderado", "Moderado (activo durante el día)"],
+  ["alto", "Alto (trabajo físico o mucho caminar)"],
+  ["muy-alto", "Muy alto (trabajo muy demandante)"],
+];
+const SUENO: [string, string][] = [
+  ["mala", "Mala (menos de 6 h o interrumpido)"],
+  ["regular", "Regular (6 a 7 h)"],
+  ["buena", "Buena (7 a 8 h)"],
+  ["excelente", "Excelente (8 h o más)"],
 ];
 const NUTRICION: [string, string][] = [
   ["omnivoro", "Omnívoro"],
@@ -56,10 +75,14 @@ const EMPTY: RegisterPayload = {
   age: "",
   height_cm: "",
   weight_kg: "",
+  body_fat_pct: "",
   goal: "hipertrofia",
   training_days: "4",
   training_place: "gimnasio",
   experience: "intermedio",
+  training_years: "1",
+  activity_level: "moderado",
+  sleep_quality: "buena",
   nutrition: "omnivoro",
   injuries: "",
   food_restrictions: "",
@@ -67,7 +90,7 @@ const EMPTY: RegisterPayload = {
   pin_confirm: "",
 };
 
-const STEPS = ["Acceso", "Tu cuerpo", "Objetivo", "Notas"];
+const STEPS = ["Acceso", "Tu cuerpo", "Objetivo", "Estilo de vida", "Notas"];
 
 export default function RegisterWizard({
   onSuccess,
@@ -99,6 +122,21 @@ export default function RegisterWizard({
       if (!h || h < 100 || h > 250) return "Ingresá una altura válida en cm.";
       const w = Number(reg.weight_kg);
       if (!w || w < 30 || w > 300) return "Ingresá un peso válido en kg.";
+      const bf = reg.body_fat_pct.trim();
+      if (bf) {
+        const n = Number(bf.replace(",", "."));
+        if (!Number.isFinite(n) || n < 3 || n > 60)
+          return "Ingresá un % de grasa válido (3 a 60) o dejàlo vacío.";
+      }
+    }
+    if (s === 4) {
+      const ty = Number(reg.training_years);
+      if (!Number.isFinite(ty) || ty < 0 || ty > 60)
+        return "Ingresá tus años de entrenamiento (0 a 60).";
+      if (!ACTIVIDADES.some(([k]) => k === reg.activity_level))
+        return "Elegí tu nivel de actividad diaria.";
+      if (!SUENO.some(([k]) => k === reg.sleep_quality))
+        return "Elegí tu calidad de sueño.";
     }
     return null;
   };
@@ -110,7 +148,7 @@ export default function RegisterWizard({
       return;
     }
     setError(null);
-    setStep((s) => Math.min(4, s + 1));
+    setStep((s) => Math.min(STEPS.length, s + 1));
   };
 
   const back = () => {
@@ -120,7 +158,7 @@ export default function RegisterWizard({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    for (let s = 1; s <= 3; s++) {
+    for (let s = 1; s < STEPS.length; s++) {
       const err = validateStep(s);
       if (err) {
         setStep(s);
@@ -155,9 +193,11 @@ export default function RegisterWizard({
         {step === 1
           ? "Empezá con tus datos de ingreso y elegí un PIN para el gym."
           : step === 2
-          ? "Estos datos nos permiten calibrar tu plan."
+          ? "Estos datos nos permiten calibrar tu plan y tus calorías."
           : step === 3
           ? "Definamos tu objetivo y cómo vas a entrenar."
+          : step === 4
+          ? "Tu actividad diaria y descanso definen tu recuperación."
           : "Últimos detalles que José va a revisar antes de cerrar tu plan."}
       </p>
 
@@ -307,6 +347,21 @@ export default function RegisterWizard({
                 />
               </div>
             </div>
+            <div>
+              <label className="lbl">% de grasa corporal estimado (opcional)</label>
+              <input
+                className="input"
+                inputMode="decimal"
+                placeholder="Ej: 18 — si no lo sabés, dejàlo vacío"
+                value={reg.body_fat_pct}
+                onChange={(e) =>
+                  set({ body_fat_pct: e.target.value.replace(/[^\d.,]/g, "").slice(0, 5) })
+                }
+              />
+              <p className="muted" style={{ margin: "6px 0 0", fontSize: ".8rem" }}>
+                Nos permite ajustar calorías y volúmenes con mayor precisión.
+              </p>
+            </div>
           </>
         )}
 
@@ -387,6 +442,54 @@ export default function RegisterWizard({
 
         {step === 4 && (
           <>
+            <div className="grid-2">
+              <div>
+                <label className="lbl">Años de entrenamiento</label>
+                <input
+                  className="input"
+                  inputMode="numeric"
+                  placeholder="Ej: 2"
+                  value={reg.training_years}
+                  onChange={(e) =>
+                    set({ training_years: e.target.value.replace(/\D/g, "").slice(0, 2) })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <label className="lbl">Actividad diaria</label>
+                <select
+                  className="input"
+                  value={reg.activity_level}
+                  onChange={(e) => set({ activity_level: e.target.value })}
+                >
+                  {ACTIVIDADES.map(([k, l]) => (
+                    <option key={k} value={k}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="lbl">Calidad de sueño</label>
+              <select
+                className="input"
+                value={reg.sleep_quality}
+                onChange={(e) => set({ sleep_quality: e.target.value })}
+              >
+                {SUENO.map(([k, l]) => (
+                  <option key={k} value={k}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
+
+        {step === 5 && (
+          <>
             <div>
               <label className="lbl">Lesiones o notas de salud</label>
               <textarea
@@ -421,7 +524,7 @@ export default function RegisterWizard({
               Atrás
             </button>
           )}
-          {step < 4 ? (
+          {step < STEPS.length ? (
             <button type="button" className="btn btn-primary" onClick={next} style={{ flex: 2 }}>
               Continuar
             </button>

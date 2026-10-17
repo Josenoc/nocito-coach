@@ -8,22 +8,28 @@ import type { Anamnesis } from "@/lib/app-types";
 export const dynamic = "force-dynamic";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
-const OBJETIVOS = ["hipertrofia", "perdida-grasa", "fuerza", "rendimiento-deportivo"];
+const OBJETIVOS = ["hipertrofia", "perdida-grasa", "fuerza", "recomposicion", "rendimiento-deportivo"];
 const DIAS_VALIDOS = [3, 4, 5];
 const NUTRICION = ["omnivoro", "vegetariano", "carnivoro", "vegano"];
 const LUGARES = ["gimnasio", "casa", "aire-libre"];
 const EXPERIENCIAS = ["principiante", "intermedio", "avanzado"];
+const ACTIVIDADES = ["sedentario", "ligero", "moderado", "alto", "muy-alto"];
+const SUENO = ["mala", "regular", "buena", "excelente"];
 
 const FIELD_LABELS: Record<string, string> = {
   age: "Edad",
   height_cm: "Altura",
   weight_kg: "Peso",
+  body_fat_pct: "% de grasa corporal",
   sex: "Sexo",
   goal: "Objetivo",
   training_days: "Días/semana",
   nutrition: "Alimentación",
   training_place: "Lugar de entrenamiento",
   experience: "Experiencia",
+  training_years: "Años de entrenamiento",
+  activity_level: "Actividad diaria",
+  sleep_quality: "Calidad de sueño",
   injuries: "Lesiones / notas",
   food_restrictions: "Restricciones alimentarias",
 };
@@ -109,6 +115,23 @@ export async function PATCH(req: NextRequest) {
       }
     };
 
+    const setDecimal = (
+      key: keyof Anamnesis,
+      raw: unknown,
+      valid: (n: number) => boolean,
+      min: number,
+      max: number
+    ) => {
+      if (raw === undefined || raw === null || String(raw).trim() === "") return;
+      const n = Number(String(raw).replace(",", "."));
+      if (!Number.isFinite(n) || !valid(n)) return;
+      const rounded = Math.round(Math.min(max, Math.max(min, n)) * 10) / 10;
+      if ((anamnesis as any)[key] !== rounded) {
+        (anamnesis as any)[key] = rounded;
+        changes.push(FIELD_LABELS[key as string] ?? String(key));
+      }
+    };
+
     const setString = (key: keyof Anamnesis, raw: unknown, allowed?: string[]) => {
       if (typeof raw !== "string") return;
       const value = raw.trim();
@@ -135,6 +158,10 @@ export async function PATCH(req: NextRequest) {
     setString("nutrition", body?.nutrition, NUTRICION);
     setString("training_place", body?.training_place, LUGARES);
     setString("experience", body?.experience, EXPERIENCIAS);
+    setDecimal("body_fat_pct", body?.body_fat_pct, (n) => n >= 3 && n <= 60, 3, 60);
+    setNumber("training_years", body?.training_years, (n) => n >= 0 && n <= 60, 0, 60);
+    setString("activity_level", body?.activity_level, ACTIVIDADES);
+    setString("sleep_quality", body?.sleep_quality, SUENO);
 
     if (typeof body?.injuries === "string") {
       const value = body.injuries.trim().slice(0, 1200);

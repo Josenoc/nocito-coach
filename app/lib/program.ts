@@ -68,6 +68,14 @@ export type ProgramInput = {
   nutrition: string;
   injuries?: string;
   food_restrictions?: string;
+  /** % de grasa corporal estimado (composición corporal). */
+  body_fat_pct?: number;
+  /** Años de entrenamiento estructurado. */
+  training_years?: number;
+  /** Nivel de actividad diaria (NEAT). */
+  activity_level?: string;
+  /** Calidad del descanso nocturno. */
+  sleep_quality?: string;
 };
 
 const ROLE_PROMPT = `# ROL Y OBJETIVO
@@ -86,6 +94,7 @@ Sos el motor de programación de entrenamientos y nutrición de "nocito.coach". 
 - FILTRADO POR EXPERIENCIA REAL Y NIVEL AVANZADO:
   - Si la experiencia es "Principiante" o "Nunca fue al gimnasio", la estructura debe ser Full Body de 2 a 3 días máximo, enfocada en la técnica y adaptaciones neuromusculares básicas. No infieras nivel avanzado por una opción genérica en el formulario.
   - Si el alumno es Avanzado (evaluando su historial real, peso, altura y composición corporal), diseña esquemas exigentes de 4 a 5 días e incorpora obligatoriamente técnicas avanzadas de intensidad según el caso (ej: superseries, drop sets, series descendentes, pausa-descanso o compuestos de alta complejidad mecánica), justificando su inclusión en el análisis previo.
+- FILTRADO POR RECUPERACIÓN Y COMPOSICIÓN: si el sueño es malo/regular o la actividad diaria es sedentaria, reducí el volumen total y las técnicas de alta intensidad (priorizá frecuencia y calidad técnica). Si el % de grasa estimado es alto (>=25), priorizá recomposición (sostener fuerza, proteger masa muscular, déficit moderado) por sobre déficits agresivos.
 
 # 3. DIRECTRICES NUTRICIONALES ESPECÍFICAS (CERO GENÉRICOS)
 - PERFILES ADOLESCENTES EN CRECIMIENTO (<= 15 años):
@@ -213,8 +222,12 @@ export function buildProgramUserMessage(input: ProgramInput): string {
     `- IMC aproximado: ${imc}`,
     `- Objetivo: ${input.goal || "—"}`,
     `- Experiencia real: ${input.experience || "no declarada"}`,
+    `- Años de entrenamiento: ${input.training_years ?? "no declarado"}`,
+    `- % de grasa corporal estimado: ${input.body_fat_pct ?? "no declarado"}`,
     `- Días por semana que puede entrenar: ${input.training_days || "—"}`,
-    `- Lugar de entrenamiento: ${input.training_place || "no declarado"}`,
+    `- Lugar / equipamiento: ${input.training_place || "no declarado"}`,
+    `- Nivel de actividad diaria: ${input.activity_level || "no declarado"}`,
+    `- Calidad de sueño: ${input.sleep_quality || "no declarada"}`,
     `- Tipo de alimentación: ${input.nutrition || "—"}`,
     `- Lesiones / limitaciones: ${input.injuries || "ninguna declarada"}`,
     `- Restricciones alimentarias: ${input.food_restrictions || "ninguna declarada"}`,
@@ -228,28 +241,46 @@ export function buildBlockParams(input: ProgramInput): ProgramBlock {
   const exp = (input.experience ?? "").toLowerCase();
   const goal = (input.goal ?? "").toLowerCase();
   const age = Number(input.age) || 0;
+  const years = Number(input.training_years) || 0;
+  const bodyFat = Number(input.body_fat_pct) || 0;
+  const activity = (input.activity_level ?? "").toLowerCase();
+  const sleep = (input.sleep_quality ?? "").toLowerCase();
 
   const young = age > 0 && age <= 15;
-  const beginner = /principiante|nunca|inicial|basa/.test(exp);
-  const advanced = /avanzad|elite|compet/.test(exp);
+  const beginnerByExp = /principiante|nunca|inicial|basa/.test(exp);
+  const beginner = beginnerByExp || years < 1;
+  const advanced = /avanzad|elite|compet/.test(exp) || years >= 5;
   const fatLoss = /grasa|perder|defin|descenso/.test(goal);
+  const recomp = /recomposi/.test(goal);
+  // Recuperación limitada: mal descanso o poca actividad diaria (NEAT bajo).
+  const lowRecovery = /mala|regular/.test(sleep) || /sedentari/.test(activity);
+  const highFat = bodyFat >= 25;
 
-  // Bloque de 4 a 6 semanas según perfil.
-  const weeks = young || beginner ? 4 : advanced ? 6 : 6;
-  // Incremento base (kilos por mesociclo) en básicos.
-  const incrementoKg = young ? 1 : beginner ? 1.25 : advanced ? 2.5 : 2.5;
-  // Cada cuántas semanas se sube el peso (wave de reps).
-  const repWave = young || beginner ? 3 : 2;
-  const rirInicio = beginner || fatLoss ? 3 : 2;
-  const rirFin = 1;
+  // Bloque estándar de 6 semanas. Visión a 3 meses = 2 bloques encadenados + deload.
+  const weeks = 6;
+  // Incremento de carga en básicos (kg por mesociclo). Protocolo: +2,5 kg cada 2 semanas.
+  const incrementoKg = young ? 1 : lowRecovery ? 1.25 : advanced ? 2.5 : 2.5;
+  // Cada cuántas semanas sube la carga (wave de reps). 2 = protocolo estándar.
+  const repWave = young || beginner || lowRecovery ? 3 : 2;
+  // RIR de arranque: más conservador para jóvenes, principiantes, déficit o baja recuperación.
+  const rirInicio =
+    young ? 4 : beginner || fatLoss || recomp || lowRecovery || highFat ? 3 : 2;
+  // RIR final: al filo del fallo técnico solo en perfiles avanzados con buena recuperación.
+  const rirFin = advanced && !lowRecovery ? 0 : 1;
 
   const scheme = `Doble progresión · ${weeks} semanas`;
   const guideline =
-    `Bloque de ${weeks} semanas (doble progresión). Empezá cerca de RIR ${rirInicio} y ` +
-    `subí la exigencia hasta RIR ${rirFin} sobre el final del bloque. Sumá repeticiones dentro ` +
-    `del rango indicado y cada ${repWave} semanas subí ${incrementoKg} kg en los básicos ` +
-    `(la mitad en los accesorios). Si llegás al tope del rango con buena técnica, priorizá el ` +
-    `aumento de peso.`;
+    `Bloque de ${weeks} semanas (doble progresión) con visión a 3 meses: se encadenan 2 bloques ` +
+    `con una descarga (deload) en el cambio. Arrancá cerca de RIR ${rirInicio} y llegá a RIR ${rirFin} ` +
+    `sobre el final. Sumá repeticiones dentro del rango indicado y cada ${repWave} semanas subí ` +
+    `${incrementoKg} kg en los básicos (la mitad en accesorios). Si tocás el tope del rango con ` +
+    `buena técnica, priorizá el aumento de peso.` +
+    (lowRecovery
+      ? " Ajustamos por recuperación: saltos más chicos y foco en sostener el descanso."
+      : "") +
+    (highFat
+      ? " Foco recomposición: sostené la carga y asegurá la proteína diaria."
+      : "");
 
   return { weeks, guideline, scheme, incrementoKg, repWave, rirInicio, rirFin };
 }

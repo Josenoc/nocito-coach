@@ -824,6 +824,9 @@ export default function ClientApp() {
     if (weekDone(weekNum)) return "done";
     return weekNum === firstIncomplete ? "active" : "upcoming";
   };
+  // Semana "en curso": la primera incompleta (o la que se está viendo). Las semanas
+  // posteriores son sobrecarga planificada y se muestran atenuadas.
+  const activeWeek = firstIncomplete ?? week;
 
   return (
     <>
@@ -1227,11 +1230,20 @@ export default function ClientApp() {
                       <thead>
                         <tr>
                           <th>Ejercicio</th>
-                          {weekList.map((w) => (
-                            <th key={w} className={w === week ? "col-current" : undefined}>
-                              Sem {w}
-                            </th>
-                          ))}
+                          {weekList.map((w) => {
+                            const cls =
+                              [
+                                w === week ? "col-current" : "",
+                                w > activeWeek ? "prog-future" : "",
+                              ]
+                                .filter(Boolean)
+                                .join(" ") || undefined;
+                            return (
+                              <th key={w} className={cls}>
+                                Sem {w}
+                              </th>
+                            );
+                          })}
                         </tr>
                       </thead>
                       <tbody>
@@ -1255,11 +1267,15 @@ export default function ClientApp() {
                                     ? `${wkEx.target_reps} reps`
                                     : null;
                               }
+                              const cellCls =
+                                [
+                                  w === week ? "col-current" : "",
+                                  w > activeWeek ? "prog-future" : "",
+                                ]
+                                  .filter(Boolean)
+                                  .join(" ") || undefined;
                               return (
-                                <td
-                                  key={w}
-                                  className={w === week ? "col-current" : undefined}
-                                >
+                                <td key={w} className={cellCls}>
                                   {logged ? (
                                     <span className="prog-done">{logged}</span>
                                   ) : target ? (
@@ -1276,8 +1292,11 @@ export default function ClientApp() {
                     </table>
                   </div>
                   <p className="muted" style={{ margin: "10px 0 0", fontSize: ".82rem" }}>
-                    <span className="prog-done">Registrado</span> ·{" "}
-                    <span className="prog-target">objetivo del coach</span>
+                    <span className="prog-done">Registrado</span> · {" "}
+                    <span className="prog-target">objetivo del coach</span> ·{" "}
+                    <span style={{ color: "rgba(252, 211, 77, 0.6)" }}>
+                      semanas futuras = sobrecarga planificada
+                    </span>
                   </p>
                 </div>
               )}

@@ -56,6 +56,11 @@ export async function POST(req: NextRequest) {
     food_restrictions: anamnesis.food_restrictions
       ? String(anamnesis.food_restrictions)
       : undefined,
+    body_fat_pct: Number(anamnesis.body_fat_pct) || undefined,
+    training_years:
+      anamnesis.training_years != null ? Number(anamnesis.training_years) : undefined,
+    activity_level: anamnesis.activity_level ? String(anamnesis.activity_level) : undefined,
+    sleep_quality: anamnesis.sleep_quality ? String(anamnesis.sleep_quality) : undefined,
   };
 
   try {

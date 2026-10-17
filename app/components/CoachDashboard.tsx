@@ -102,6 +102,7 @@ const GOAL_LABELS: Record<string, string> = {
   hipertrofia: "Hipertrofia",
   "perdida-grasa": "Pérdida de grasa",
   fuerza: "Fuerza",
+  recomposicion: "Recomposición corporal",
   "rendimiento-deportivo": "Rendimiento deportivo",
 };
 
@@ -114,14 +115,29 @@ const NUTRITION_LABELS: Record<string, string> = {
 
 const PLACE_LABELS: Record<string, string> = {
   gimnasio: "Gimnasio",
-  casa: "Casa",
-  "aire-libre": "Aire libre",
+  casa: "Casa / Home gym",
+  "aire-libre": "Peso corporal / Parques",
 };
 
 const EXPERIENCE_LABELS: Record<string, string> = {
   principiante: "Principiante",
   intermedio: "Intermedio",
   avanzado: "Avanzado",
+};
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  sedentario: "Sedentario",
+  ligero: "Ligero",
+  moderado: "Moderado",
+  alto: "Alto",
+  "muy-alto": "Muy alto",
+};
+
+const SLEEP_LABELS: Record<string, string> = {
+  mala: "Mala",
+  regular: "Regular",
+  buena: "Buena",
+  excelente: "Excelente",
 };
 
 const FOOD_SLOT_ORDER: MealSlot[] = ["desayuno", "almuerzo", "merienda", "cena", "extra"];
@@ -1165,6 +1181,14 @@ export default function CoachDashboard() {
                         <Dato label="Altura" value={`${detail.profile.anamnesis.height_cm} cm`} />
                         <Dato label="Peso" value={`${detail.profile.anamnesis.weight_kg} kg`} />
                         <Dato
+                          label="% de grasa"
+                          value={
+                            detail.profile.anamnesis.body_fat_pct
+                              ? `${detail.profile.anamnesis.body_fat_pct} %`
+                              : "Sin dato"
+                          }
+                        />
+                        <Dato
                           label="Objetivo"
                           value={
                             GOAL_LABELS[detail.profile.anamnesis.goal] ??
@@ -1200,6 +1224,28 @@ export default function CoachDashboard() {
                             detail.profile.anamnesis.training_days
                               ? `${detail.profile.anamnesis.training_days} días`
                               : "Sin definir"
+                          }
+                        />
+                        <Dato
+                          label="Años entrenando"
+                          value={
+                            detail.profile.anamnesis.training_years != null
+                              ? `${detail.profile.anamnesis.training_years} años`
+                              : "Sin dato"
+                          }
+                        />
+                        <Dato
+                          label="Actividad diaria"
+                          value={
+                            ACTIVITY_LABELS[detail.profile.anamnesis.activity_level as string] ??
+                            "Sin definir"
+                          }
+                        />
+                        <Dato
+                          label="Calidad de sueño"
+                          value={
+                            SLEEP_LABELS[detail.profile.anamnesis.sleep_quality as string] ??
+                            "Sin definir"
                           }
                         />
                         <Dato label="Teléfono" value={detail.profile.phone || "Sin dato"} />
