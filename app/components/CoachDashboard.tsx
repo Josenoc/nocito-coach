@@ -25,6 +25,7 @@ interface ExRow {
   target_sets: string;
   target_reps: string;
   target_weight: string;
+  target_rir: string;
   unit: "kg" | "lbs";
 }
 
@@ -45,8 +46,39 @@ const emptyEx = (): ExRow => ({
   target_sets: "3",
   target_reps: "10",
   target_weight: "",
+  target_rir: "",
   unit: "kg",
 });
+
+// La RIR objetivo del coach se guarda dentro de `technique_notes` (convención
+// existente: segmento "RIR n"), así no se toca el esquema de la base.
+const RIR_RE = /RIR\s*([0-9]+(?:[.,][0-9]+)?)/i;
+
+function rirFromNotes(notes: string): string {
+  const m = String(notes ?? "").match(RIR_RE);
+  return m ? m[1].replace(",", ".") : "";
+}
+
+function notesWithRir(notes: string, rir: string): string {
+  const text = String(notes ?? "");
+  const value = String(rir ?? "").trim();
+  if (/RIR\s*[0-9]+(?:[.,][0-9]+)?/i.test(text)) {
+    if (value) {
+      return text.replace(/RIR\s*[0-9]+(?:[.,][0-9]+)?/i, `RIR ${value.replace(",", ".")}`);
+    }
+    return text
+      .replace(/(?:·\s*)?RIR\s*[0-9]+(?:[.,][0-9]+)?/i, "")
+      .replace(/[ \t]*·[ \t]*(?=·)/g, "")
+      .replace(/(^|\n)[ \t]*·[ \t]*/g, "$1")
+      .replace(/[ \t]*·[ \t]*$/gm, "")
+      .replace(/[ \t]+$/gm, "")
+      .trim();
+  }
+  const trimmed = text.trim();
+  if (!value) return trimmed;
+  const line = `RIR ${value.replace(",", ".")}`;
+  return trimmed ? `${trimmed}\n${line}` : line;
+}
 
 const emptyDraft = (): Draft => ({
   name: "",
@@ -692,7 +724,7 @@ export default function CoachDashboard() {
         .map((e, i) => ({
           name: e.name.trim(),
           video_url: e.video_url.trim(),
-          technique_notes: e.technique_notes,
+          technique_notes: notesWithRir(e.technique_notes, e.target_rir),
           order_index: i,
           target_sets: e.target_sets,
           target_reps: e.target_reps,
@@ -726,6 +758,7 @@ export default function CoachDashboard() {
         target_sets: e.target_sets != null ? String(e.target_sets) : "",
         target_reps: e.target_reps != null ? String(e.target_reps) : "",
         target_weight: e.target_weight != null ? String(e.target_weight) : "",
+        target_rir: rirFromNotes(e.technique_notes ?? ""),
         unit: e.unit ?? "kg",
       }));
     setDraft({
@@ -1540,113 +1573,176 @@ export default function CoachDashboard() {
 
                       {draft.exercises.map((ex, idx) => {
                         const base = baseline?.[idx];
+                        const setCount = Math.max(
+                          1,
+                          Math.min(12, parseInt(ex.target_sets, 10) || 1)
+                        );
+                        const setSets = (n: number) =>
+                          setEx(idx, { target_sets: String(Math.max(1, Math.min(12, n))) });
                         return (
-                        <div
-                          key={idx}
-                          className="card ex-edit-block"
-                          style={{ marginBottom: 10 }}
-                        >
-                          <div className="grid-4">
-                            <input
-                              className="input ex-name-input"
-                              placeholder="Ejercicio"
-                              value={ex.name}
-                              onChange={(e) => setEx(idx, { name: e.target.value })}
-                            />
-                            <input
-                              className="input"
-                              placeholder="URL de video (YouTube)"
-                              value={ex.video_url}
-                              onChange={(e) => setEx(idx, { video_url: e.target.value })}
-                            />
-                            <div className="cell-wrap">
-                              {base?.target_sets && base.target_sets !== ex.target_sets && (
-                                <span className="phantom">{base.target_sets}</span>
-                              )}
+                          <div key={idx} className="card ex-edit-block">
+                            <div className="ex-edit-head">
+                              <span className="ex-badge">{idx + 1}</span>
                               <input
-                                className="num-input"
-                                placeholder="Series"
-                                inputMode="numeric"
-                                value={ex.target_sets}
-                                onChange={(e) => setEx(idx, { target_sets: e.target.value })}
+                                className="input ex-name-input"
+                                placeholder="Nombre del ejercicio"
+                                value={ex.name}
+                                onChange={(e) => setEx(idx, { name: e.target.value })}
                               />
+                              <button
+                                className="btn btn-danger"
+                                type="button"
+                                onClick={() => {
+                                  setDraft((d) => ({
+                                    ...d,
+                                    exercises: d.exercises.filter((_, i) => i !== idx),
+                                  }));
+                                  setBaseline((b) => (b ? b.filter((_, i) => i !== idx) : b));
+                                }}
+                              >
+                                Quitar
+                              </button>
                             </div>
-                            <div className="cell-wrap">
-                              {base?.target_reps && base.target_reps !== ex.target_reps && (
-                                <span className="phantom">{base.target_reps}</span>
-                              )}
+
+                            <div className="ex-edit-row">
                               <input
-                                className="num-input"
-                                placeholder="Reps"
-                                inputMode="numeric"
-                                value={ex.target_reps}
-                                onChange={(e) => setEx(idx, { target_reps: e.target.value })}
+                                className="input"
+                                placeholder="URL de video (YouTube o mp4)"
+                                value={ex.video_url}
+                                onChange={(e) => setEx(idx, { video_url: e.target.value })}
                               />
+                              <select
+                                className="input ex-unit-select"
+                                value={ex.unit}
+                                onChange={(e) =>
+                                  setEx(idx, { unit: e.target.value as "kg" | "lbs" })
+                                }
+                              >
+                                <option value="kg">kg</option>
+                                <option value="lbs">lbs</option>
+                              </select>
                             </div>
-                          </div>
-                          <div className="grid-4" style={{ marginTop: 10 }}>
-                            <div className="cell-wrap">
-                              {base?.target_weight && base.target_weight !== ex.target_weight && (
-                                <span className="phantom">{base.target_weight}</span>
-                              )}
-                              <input
-                                className="num-input"
-                                placeholder="Peso objetivo"
-                                inputMode="decimal"
-                                value={ex.target_weight}
-                                onChange={(e) => setEx(idx, { target_weight: e.target.value })}
-                              />
+
+                            <div className="track-head" style={{ marginTop: 12, marginBottom: 4 }}>
+                              <h4>Series del alumno</h4>
+                              <div className="set-stepper">
+                                <button
+                                  type="button"
+                                  className="step-btn"
+                                  aria-label="Quitar serie"
+                                  onClick={() => setSets(setCount - 1)}
+                                >
+                                  −
+                                </button>
+                                <span className="step-val">{setCount}</span>
+                                <button
+                                  type="button"
+                                  className="step-btn"
+                                  aria-label="Agregar serie"
+                                  onClick={() => setSets(setCount + 1)}
+                                >
+                                  +
+                                </button>
+                              </div>
                             </div>
-                            <select
-                              className="input"
-                              value={ex.unit}
-                              onChange={(e) =>
-                                setEx(idx, { unit: e.target.value as "kg" | "lbs" })
-                              }
-                            >
-                              <option value="kg">kg</option>
-                              <option value="lbs">lbs</option>
-                            </select>
-                            <input
+
+                            <table className="track-table coach-track">
+                              <thead>
+                                <tr>
+                                  <th>Series</th>
+                                  <th>Reps</th>
+                                  <th>Peso ({ex.unit})</th>
+                                  <th>RIR</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {Array.from({ length: setCount }, (_, i) => (
+                                  <tr key={i}>
+                                    <td className="set-index">{i + 1}</td>
+                                    <td>
+                                      <div className="cell-wrap">
+                                        {base?.target_reps &&
+                                          base.target_reps !== ex.target_reps && (
+                                            <span className="phantom">{base.target_reps}</span>
+                                          )}
+                                        <input
+                                          className="num-input"
+                                          inputMode="numeric"
+                                          placeholder="Reps"
+                                          value={ex.target_reps}
+                                          onChange={(e) =>
+                                            setEx(idx, {
+                                              target_reps: e.target.value.replace(/[^\d]/g, ""),
+                                            })
+                                          }
+                                        />
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div className="cell-wrap">
+                                        {base?.target_weight &&
+                                          base.target_weight !== ex.target_weight && (
+                                            <span className="phantom">{base.target_weight}</span>
+                                          )}
+                                        <input
+                                          className="num-input"
+                                          inputMode="decimal"
+                                          placeholder="kg"
+                                          value={ex.target_weight}
+                                          onChange={(e) =>
+                                            setEx(idx, {
+                                              target_weight: e.target.value.replace(
+                                                /[^\d.,]/g,
+                                                ""
+                                              ),
+                                            })
+                                          }
+                                        />
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div className="cell-wrap">
+                                        <input
+                                          className="num-input rir-input"
+                                          inputMode="numeric"
+                                          placeholder="—"
+                                          value={ex.target_rir}
+                                          onChange={(e) =>
+                                            setEx(idx, {
+                                              target_rir: e.target.value
+                                                .replace(/[^\d]/g, "")
+                                                .slice(0, 1),
+                                            })
+                                          }
+                                        />
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            <p className="muted" style={{ margin: "6px 0 0", fontSize: ".76rem" }}>
+                              Los valores se aplican a todas las series del ejercicio.
+                            </p>
+
+                            <textarea
                               className="input"
                               placeholder="Técnica (una indicación por línea)"
                               value={ex.technique_notes}
                               onChange={(e) => setEx(idx, { technique_notes: e.target.value })}
-                              style={{ gridColumn: "span 2" }}
+                              rows={2}
+                              style={{ marginTop: 10 }}
                             />
-                          </div>
-                          <div
-                            style={{
-                              marginTop: 8,
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 12,
-                              flexWrap: "wrap",
-                            }}
-                          >
-                            <button
-                              className="btn btn-danger"
-                              type="button"
-                              onClick={() => {
-                                setDraft((d) => ({
-                                  ...d,
-                                  exercises: d.exercises.filter((_, i) => i !== idx),
-                                }));
-                                setBaseline((b) => (b ? b.filter((_, i) => i !== idx) : b));
-                              }}
-                            >
-                              Quitar
-                            </button>
                             {base?.name && (
-                              <span className="muted" style={{ fontSize: ".78rem" }}>
+                              <span
+                                className="muted"
+                                style={{ fontSize: ".78rem", display: "block", marginTop: 6 }}
+                              >
                                 Base: {base.target_sets || "-"}×{base.target_reps || "-"}
-                                {base.target_weight
-                                  ? ` · ${base.target_weight} ${base.unit}`
-                                  : ""}
+                                {base.target_weight ? ` · ${base.target_weight} ${base.unit}` : ""}
                               </span>
                             )}
                           </div>
-                        </div>
                         );
                       })}
 

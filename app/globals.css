@@ -932,22 +932,63 @@ textarea.input { resize: vertical; }
 
 /* ---- Editor de rutina: ejercicios resaltados (routine-editor) ---- */
 .ex-edit-block {
-  border-width: 3px;
-  border-color: rgba(245, 158, 11, 0.5);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.12), 0 12px 28px rgba(0, 0, 0, 0.42);
+  margin-bottom: 12px;
+  border-width: 2px;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.14), 0 12px 28px rgba(0, 0, 0, 0.42);
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 .ex-edit-block:hover {
-  border-color: rgba(245, 158, 11, 0.75);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.22), 0 14px 32px rgba(0, 0, 0, 0.45);
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.24), 0 14px 32px rgba(0, 0, 0, 0.45);
 }
+.ex-edit-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ex-edit-head .ex-name-input { flex: 1 1 200px; width: auto; min-width: 0; font-size: 1.02rem; }
+.ex-edit-head .btn { flex: 0 0 auto; padding: 8px 14px; }
+.ex-edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.ex-edit-row .input { flex: 1 1 240px; }
+.ex-edit-row .ex-unit-select { flex: 0 0 auto; max-width: 110px; }
 .ex-name-input {
-  color: var(--gold-bright);
+  color: #fbbf24;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
-.ex-name-input::placeholder { color: rgba(255, 217, 74, 0.5); font-weight: 600; }
-.ex-name-text { color: var(--gold-bright); }
+.ex-name-input::placeholder { color: rgba(251, 191, 36, 0.45); font-weight: 600; }
+.ex-name-text { color: #fbbf24; }
+
+.set-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.08);
+  color: #fbbf24;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.step-btn:hover { background: rgba(245, 158, 11, 0.18); border-color: #fbbf24; }
+.step-btn:active { transform: scale(0.94); }
+.step-val { min-width: 22px; text-align: center; font-weight: 700; color: var(--text); }
+
+.coach-track { margin-top: 4px; }
+.coach-track th { color: #fbbf24; }
+.coach-track .num-input { min-width: 60px; }
 
 /* ---- Editor: tabla de progresión del bloque ---- */
 .block-config .badge { background: rgba(245, 158, 11, 0.12); border: 1px solid var(--border-gold-soft); color: var(--gold-bright); }
