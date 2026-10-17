@@ -575,16 +575,17 @@ export default function ClientApp() {
     setRecordingFor(null);
   };
 
-  // Resumen corto de las series detectadas (p. ej. "10 × 14 kg").
+  // Resumen corto de las series detectadas (p. ej. "4 × 10 con 14 kg").
   const summarizeSets = (sets: VoiceSet[]): string => {
     const reps = sets.map((s) => s.reps).filter((n): n is number => n !== null);
     const weights = sets.map((s) => s.weight).filter((n): n is number => n !== null);
+    const n = sets.length;
     const sameReps = reps.length > 0 && new Set(reps).size === 1;
     const sameWeight = weights.length > 0 && new Set(weights).size === 1;
-    if (sameReps && sameWeight) return `${reps[0]} × ${weights[0]} kg`;
-    if (sameReps) return `${reps[0]} reps`;
-    if (sameWeight) return `${weights[0]} kg`;
-    return "Series registradas";
+    if (sameReps && sameWeight) return `${n} × ${reps[0]} con ${weights[0]} kg`;
+    if (sameReps) return `${n} × ${reps[0]} reps`;
+    if (sameWeight) return `${n} series · ${weights[0]} kg`;
+    return `${n} series registradas`;
   };
 
   // Rellena la tarjeta localmente (sin guardar) y deja el guardado en espera de
@@ -613,6 +614,7 @@ export default function ClientApp() {
         if (!r) continue;
         if (s.reps !== null) r.actual_reps = String(s.reps);
         if (s.weight !== null) r.actual_weight = String(s.weight);
+        r.saved = true;
       }
       return { ...prev, [ex.id]: base };
     });
@@ -655,7 +657,7 @@ export default function ClientApp() {
         {
           exId: ex.id,
           kind: "ok",
-          title: `Listo: ${n} serie${n === 1 ? "" : "s"} cargada${n === 1 ? "" : "s"}`,
+          title: `${n} serie${n === 1 ? "" : "s"} cargada${n === 1 ? "" : "s"}`,
           detail: summarizeSets(sets),
           canUndo: true,
           ms: VOICE_CONFIRM_MS,
