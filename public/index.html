@@ -600,6 +600,30 @@
     }
     .hero-actions { margin-top: 40px; }
 
+    /* Indicador de escasez / urgencia (bajo el subheadline) */
+    .hero-scarcity {
+      display: inline-flex; align-items: center; gap: 10px;
+      margin-top: 22px; padding: 9px 16px; max-width: 100%;
+      font-size: .82rem; font-weight: 600; letter-spacing: .02em; line-height: 1.4;
+      color: var(--orange-soft);
+      background: rgba(255,196,0,.07);
+      border: 1px solid rgba(255,196,0,.35);
+      border-radius: 999px;
+    }
+    .hero-scarcity .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
+      background: var(--orange); box-shadow: 0 0 12px var(--orange);
+      animation: dotPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes dotPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.68); } }
+
+    /* CTA primario del hero: glow ámbar intenso */
+    @keyframes heroGlow {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(255,196,0,.5), 0 0 22px rgba(255,196,0,.45), 0 14px 40px rgba(255,196,0,.28); }
+      50% { box-shadow: 0 0 0 1px rgba(255,196,0,.85), 0 0 42px rgba(255,196,0,.7), 0 18px 54px rgba(255,196,0,.42); }
+    }
+    .hero-actions .btn-primary { animation: heroGlow 2.6s ease-in-out infinite; }
+
     .btn { border-radius: 6px; font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; padding: 17px 30px; }
     .btn-primary { background: var(--orange); color: #0A0A0A; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255,196,0,.28); }
@@ -747,9 +771,29 @@
     .testi-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 60px; }
     @media (max-width: 900px) { .testi-wrap { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 620px) { .testi-wrap { grid-template-columns: 1fr; } }
-    .testi-card { padding: 28px; gap: 12px; }
-    .testi-card .testi-quote { margin-bottom: 14px; }
-    .testi-card .testi-name { margin-top: 8px; }
+    .testi-card {
+      display: flex; flex-direction: column; padding: 28px;
+      background: linear-gradient(180deg, #121212, #0D0D0D);
+      border: 1px solid rgba(255,196,0,.3);
+      border-radius: 12px;
+      transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease, border-color .3s ease;
+      will-change: transform;
+    }
+    .testi-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,196,0,.6);
+      box-shadow: 0 26px 54px rgba(0,0,0,.55), 0 0 30px rgba(255,196,0,.16);
+    }
+    .testi-metric {
+      font-family: 'Montserrat', sans-serif; font-weight: 800;
+      font-size: clamp(1.3rem, 2.4vw, 1.6rem); line-height: 1.1;
+      letter-spacing: -.01em; color: var(--orange);
+      margin-bottom: 12px;
+    }
+    .testi-goal { font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .testi-quote { color: #CFCFCF; font-size: .95rem; line-height: 1.58; margin-bottom: 16px; }
+    .testi-name { margin-top: auto; font-weight: 700; color: var(--text); font-size: .92rem; }
+    .testi-name::before { content: "— "; color: var(--orange); }
 
     /* ---------- FAQ ---------- */
     .faq-list { max-width: 780px; margin: 50px auto 0; display: grid; gap: 12px; }
@@ -867,6 +911,27 @@
     .eco-item h4 { font-size: .98rem; margin-bottom: 4px; letter-spacing: .05em; }
     .eco-item p { color: var(--muted); font-size: .9rem; }
 
+    /* Preview interactivo: onda de voz + tags tecnológicos */
+    .eco-row.live { border-color: rgba(255,196,0,.4); background: rgba(255,196,0,.06); }
+    .eco-wave { display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; }
+    .eco-wave i { display: block; width: 3px; height: 6px; border-radius: 2px; background: var(--orange); transform-origin: bottom; animation: ecoWave .9s ease-in-out infinite; }
+    .eco-wave i:nth-child(2) { animation-delay: -.2s; }
+    .eco-wave i:nth-child(3) { animation-delay: -.4s; }
+    .eco-wave i:nth-child(4) { animation-delay: -.6s; }
+    @keyframes ecoWave { 0%, 100% { transform: scaleY(.5); opacity: .6; } 50% { transform: scaleY(1.6); opacity: 1; } }
+    .eco-badge {
+      display: inline-block; font-size: .56rem; font-weight: 800; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--orange); background: rgba(255,196,0,.1);
+      border: 1px solid rgba(255,196,0,.3); border-radius: 999px; padding: 2px 9px;
+      margin-left: 8px; vertical-align: middle;
+    }
+    .eco-chips { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
+    .eco-chip {
+      font-size: .62rem; font-weight: 700; letter-spacing: .06em; color: var(--orange-soft);
+      background: rgba(255,196,0,.06); border: 1px solid rgba(255,196,0,.22);
+      border-radius: 6px; padding: 3px 8px;
+    }
+
     /* ---------- CTA final ---------- */
     .final-cta {
       position: relative; overflow: hidden; text-align: center;
@@ -930,7 +995,21 @@
 
       .price-card { will-change: auto; }
       .price-card:not(.featured):hover, .price-card.featured:hover,
-      .contact-card:hover, .hero-motivation:hover { transform: none; }
+      .contact-card:hover, .hero-motivation:hover,
+      .testi-card:hover, .pillar-card:hover { transform: none; }
+    }
+
+    /* ---------- Mobile-first: espaciado táctil y sin overflow ---------- */
+    @media (max-width: 560px) {
+      .hero-scarcity { font-size: .76rem; padding: 8px 13px; line-height: 1.45; }
+      .hero-actions { gap: 12px; }
+      .hero-actions .btn { width: 100%; justify-content: center; }
+      .testi-metric { font-size: 1.3rem; }
+      .testi-card { padding: 24px 22px; }
+      .price-card { padding: 30px 22px; }
+      .panel-hero, .eco-phone { max-width: 100%; }
+      .btn-plan { padding: 17px 16px; }
+      .testi-wrap { gap: 14px; }
     }
   </style>
 </head>
@@ -992,6 +1071,7 @@
           <p class="lead">
             Soy José Nocito. No te vendo un PDF estático: te doy acceso a un sistema de alto rendimiento donde cada rutina, carga y pauta nutricional es revisada y aprobada personalmente por mí antes de pisar el gimnasio. Resultados reales que podés sostener toda la vida.
           </p>
+          <p class="hero-scarcity"><span class="pulse-dot" aria-hidden="true"></span>Plazas de asesoría mensual limitadas para garantizar atención 1 a 1 personalizada</p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="#planes">Comencemos</a>
             <a class="btn btn-outline" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">Hablar por WhatsApp</a>
@@ -1063,51 +1143,45 @@
 
         <div class="testi-wrap">
           <article class="testi-card reveal">
-            <div>
-              <p class="testi-goal">Objetivo: recomposición corporal</p>
-              <p class="testi-quote">En 5 meses mantuve mi masa muscular mientras bajaba grasa. José adaptó el plan a mi doble turno laboral y nunca me sentí obligado a seguir una rutina genérica.</p>
-              <p class="testi-name">Juan M.</p>
-            </div>
+            <p class="testi-metric">-6 kg de grasa · músculo mantenido</p>
+            <p class="testi-goal">Objetivo: recomposición corporal</p>
+            <p class="testi-quote">En 5 meses mantuve mi masa muscular mientras bajaba grasa. José adaptó el plan a mi doble turno laboral y nunca me sentí obligado a seguir una rutina genérica.</p>
+            <p class="testi-name">Juan M.</p>
           </article>
 
           <article class="testi-card reveal reveal-d1">
-            <div>
-              <p class="testi-goal">Objetivo: ganar fuerza</p>
-              <p class="testi-quote">Empecé de cero y con una lesión de rodilla. La progresión cuidada me permitió entrenar sin dolor y hoy levanto pesos que nunca imaginé.</p>
-              <p class="testi-name">Martina C.</p>
-            </div>
+            <p class="testi-metric">Fuerza optimizada sin dolor</p>
+            <p class="testi-goal">Objetivo: ganar fuerza</p>
+            <p class="testi-quote">Empecé de cero y con una lesión de rodilla. La progresión cuidada me permitió entrenar sin dolor y hoy levanto pesos que nunca imaginé.</p>
+            <p class="testi-name">Martina C.</p>
           </article>
 
           <article class="testi-card reveal reveal-d2">
-            <div>
-              <p class="testi-goal">Objetivo: perder grasa corporal</p>
-              <p class="testi-quote">Sabía lo que tenía que hacer, pero no cómo sostenerlo. Con los ajustes semanales y el acompañamiento por WhatsApp por fin lo logré.</p>
-              <p class="testi-name">Diego A.</p>
-            </div>
+            <p class="testi-metric">-9 kg de grasa en 5 meses</p>
+            <p class="testi-goal">Objetivo: perder grasa corporal</p>
+            <p class="testi-quote">Sabía lo que tenía que hacer, pero no cómo sostenerlo. Con los ajustes semanales y el acompañamiento por WhatsApp por fin lo logré.</p>
+            <p class="testi-name">Diego A.</p>
           </article>
 
           <article class="testi-card reveal reveal-d3">
-            <div>
-              <p class="testi-goal">Objetivo: recomposición corporal</p>
-              <p class="testi-quote">Pensaba que después de los 40 ya no había margen. Con la planificación de José y los ajustes semanales bajé grasa y gané tono, sin resignar las comidas que disfruto.</p>
-              <p class="testi-name">Montserrat M.</p>
-            </div>
+            <p class="testi-metric">-7 kg y +tono después de los 40</p>
+            <p class="testi-goal">Objetivo: recomposición corporal</p>
+            <p class="testi-quote">Pensaba que después de los 40 ya no había margen. Con la planificación de José y los ajustes semanales bajé grasa y gané tono, sin resignar las comidas que disfruto.</p>
+            <p class="testi-name">Montserrat M.</p>
           </article>
 
           <article class="testi-card reveal">
-            <div>
-              <p class="testi-goal">Objetivo: aumento de masa magra</p>
-              <p class="testi-quote">Entrenaba desde hacía años pero el peso no subía. Al ordenar la progresión y la alimentación sumé masa muscular real en pocos meses, sin perder definición.</p>
-              <p class="testi-name">Ivan A.</p>
-            </div>
+            <p class="testi-metric">+5 kg de masa magra</p>
+            <p class="testi-goal">Objetivo: aumento de masa magra</p>
+            <p class="testi-quote">Entrenaba desde hacía años pero el peso no subía. Al ordenar la progresión y la alimentación sumé masa muscular real en pocos meses, sin perder definición.</p>
+            <p class="testi-name">Ivan A.</p>
           </article>
 
           <article class="testi-card reveal reveal-d1">
-            <div>
-              <p class="testi-goal">Objetivo: empezar desde cero</p>
-              <p class="testi-quote">Nunca había pisado un gimnasio. Empecé con ejercicios simples y bien explicados, y en pocas semanas entrenaba con seguridad y veía los primeros cambios.</p>
-              <p class="testi-name">Felipe S.</p>
-            </div>
+            <p class="testi-metric">Primer mes entrenando con seguridad</p>
+            <p class="testi-goal">Objetivo: empezar desde cero</p>
+            <p class="testi-quote">Nunca había pisado un gimnasio. Empecé con ejercicios simples y bien explicados, y en pocas semanas entrenaba con seguridad y veía los primeros cambios.</p>
+            <p class="testi-name">Felipe S.</p>
           </article>
         </div>
       </div>
@@ -1143,8 +1217,12 @@
                 <span>165 g</span>
               </div>
               <div class="eco-row">
-                <b>Reporte de voz</b>
-                <span>Enviado</span>
+                <b>Bloque progresivo</b>
+                <span>Sem 1 → 4</span>
+              </div>
+              <div class="eco-row live">
+                <b>Dictado por voz<span class="eco-badge">IA</span></b>
+                <span class="eco-wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
               </div>
             </div>
           </div>
@@ -1173,8 +1251,9 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>
               </div>
               <div>
-                <h4>Reportes de voz</h4>
-                <p>Contame por audio tus sensaciones, molestias o energía y lo reviso para ajustar sobre la marcha.</p>
+                <h4>Dictado de series por voz <span class="eco-badge">IA · Groq</span></h4>
+                <p>Dictá «4 series de 10 con 14 kg» y la app carga tus series sola. Voz a datos con IA, sin tipear en el gym.</p>
+                <div class="eco-chips"><span class="eco-chip">Reconocimiento en vivo</span><span class="eco-chip">Español</span></div>
               </div>
             </div>
             <div class="eco-item reveal reveal-d3">
@@ -1182,8 +1261,9 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
               </div>
               <div>
-                <h4>Ajuste profesional cada 4 semanas</h4>
-                <p>Estudio tu evolución y reprogramo cargas y volumen para que nunca te estanques.</p>
+                <h4>Bloques de entrenamiento progresivos</h4>
+                <p>Cada plan es un bloque de varias semanas con progresión de carga y RIR calculada, ajustado a tu evolución.</p>
+                <div class="eco-chips"><span class="eco-chip">Sem 1 → 4</span><span class="eco-chip">Progresión automática</span></div>
               </div>
             </div>
           </div>
@@ -1217,7 +1297,7 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Sin seguimiento ni ajustes</li>
             </ul>
-            <button class="btn-plan" data-plan="3">Acceso a la App</button>
+            <button class="btn-plan" data-plan="3">Elegir Plan y Registrarme</button>
           </article>
 
           <!-- Plan 2 · ESTÁNDAR (3 días) -->
@@ -1236,7 +1316,7 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
             </ul>
-            <button class="btn-plan" data-plan="0">Portal de Alumnos</button>
+            <button class="btn-plan" data-plan="0">Elegir Plan y Registrarme</button>
           </article>
 
           <!-- Plan 3 · PRO (4 días) · DESTACADO -->
@@ -1256,7 +1336,7 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
             </ul>
-            <button class="btn-plan" data-plan="1">Portal de Alumnos</button>
+            <button class="btn-plan" data-plan="1">Elegir Plan y Registrarme</button>
           </article>
 
           <!-- Plan 4 · ELITE (5 días) -->
@@ -1275,7 +1355,7 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
             </ul>
-            <button class="btn-plan" data-plan="2">Portal de Alumnos</button>
+            <button class="btn-plan" data-plan="2">Elegir Plan y Registrarme</button>
           </article>
         </div>
 
