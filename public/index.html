@@ -1020,40 +1020,60 @@
     @media (max-width: 900px) { .eco-wrap { grid-template-columns: 1fr; gap: 40px; } }
     .eco-phone {
       position: relative; max-width: 330px; margin: 0 auto; padding: 14px; border-radius: 34px;
-      background: linear-gradient(180deg, #1b1b1b, #0d0d0d); border: 1px solid rgba(255,196,0,.3);
+      background: linear-gradient(180deg, #1b1b1b, #0d0d0d); border: 2px solid rgba(255,196,0,.42);
+      overflow: hidden; /* el borde dorado medio grueso contiene todo el mockup */
       box-shadow: 0 0 0 1px rgba(255,196,0,.1), 0 40px 80px rgba(0,0,0,.6), 0 0 50px rgba(255,196,0,.12);
     }
-    .eco-phone-screen { border-radius: 22px; background: #090909; border: 1px solid rgba(255,255,255,.08); padding: 20px 16px; }
+    .eco-phone-screen {
+      position: relative; border-radius: 22px; background: #090909; border: 1px solid rgba(255,255,255,.08);
+      padding: 20px 16px; overflow: hidden; /* ningún texto sale de su contenedor */
+    }
     .eco-phone-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-    .eco-phone-top b { font-family: 'Montserrat', sans-serif; font-size: .82rem; letter-spacing: .1em; }
+    .eco-phone-top b { font-family: 'Montserrat', sans-serif; font-size: .82rem; letter-spacing: .1em; color: #fbbf24; }
     .eco-phone-top span { font-size: .6rem; color: var(--orange); letter-spacing: .14em; text-transform: uppercase; }
 
-    /* Mockup con transición interna: Panel 24/7 ⇄ Dictado por voz IA */
-    .eco-slides { position: relative; min-height: 216px; }
+    /* Mockup con transición interna: Panel 24/7 ⇄ Dictado por voz IA.
+       Apilado en GRILLA (ambas slides en la misma celda) en lugar de
+       position:absolute con altura fija. Así la altura del contenedor es
+       SIEMPRE la de la slide más alta, y nunca se solapan ni desbordan. */
+    .eco-slides {
+      display: grid;
+      grid-template-columns: 100%;
+      position: relative;
+      overflow: hidden;              /* los límites respetan el marco */
+      border-radius: 14px;
+      min-height: 200px;             /* piso de seguridad, no altura fija */
+    }
     .eco-slide {
-      position: absolute; inset: 0;
-      opacity: 0; transform: translateY(14px);
+      grid-area: 1 / 1;              /* ambas slides comparten la celda */
+      position: relative;            /* en flujo, no superpuestas */
+      z-index: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;                      /* espaciado limpio entre cards */
+      opacity: 0;
+      transform: translateY(14px);
       transition: opacity .6s var(--ease-out), transform .6s var(--ease-out);
       pointer-events: none;
     }
-    .eco-slide.is-active { opacity: 1; transform: none; pointer-events: auto; }
+    .eco-slide.is-active { z-index: 2; opacity: 1; transform: none; pointer-events: auto; }
     .eco-voice-line {
-      padding: 14px; margin-bottom: 8px; border-radius: 8px;
+      padding: 14px; border-radius: 8px;
       background: rgba(255,196,0,.06); border: 1px dashed rgba(255,196,0,.35);
     }
     .eco-voice-quote { font-size: .84rem; font-style: italic; color: var(--text); font-weight: 600; }
-    .eco-row-ok { border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.07); }
-    .eco-row-ok span { color: var(--ok); }
+    .eco-row.eco-row-ok { border: 2px solid rgba(52,211,153,.42); background: rgba(52,211,153,.07); }
+    .eco-row.eco-row-ok span { color: var(--ok); }
     .eco-dots { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
     .eco-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.2); transition: background .3s, transform .3s; }
     .eco-dots i.is-on { background: var(--orange); transform: scale(1.25); }
     .eco-row {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 12px 14px; border-radius: 8px; background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.06); margin-bottom: 8px; font-size: .76rem; color: var(--muted);
+      border: 1px solid rgba(255,255,255,.06); font-size: .76rem; color: var(--muted);
     }
-    .eco-row b { color: var(--text); font-weight: 600; }
-    .eco-row span { color: var(--orange); font-weight: 700; }
+    .eco-row b { color: #fbbf24; font-weight: 700; }
+    .eco-row span { color: var(--orange-soft); font-weight: 700; }
     .eco-bar { height: 6px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 7px; }
     .eco-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--orange), #fff3c4); }
     .eco-list { display: grid; gap: 18px; }
@@ -1066,7 +1086,7 @@
     .eco-item p { color: var(--muted); font-size: .9rem; }
 
     /* Preview interactivo: onda de voz + tags tecnológicos */
-    .eco-row.live { border-color: rgba(255,196,0,.4); background: rgba(255,196,0,.06); }
+    .eco-row.live { border: 2px solid rgba(255,196,0,.45); background: rgba(255,196,0,.06); }
     .eco-wave { display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; }
     .eco-wave i { display: block; width: 3px; height: 6px; border-radius: 2px; background: var(--orange); transform-origin: bottom; animation: ecoWave .9s ease-in-out infinite; }
     .eco-wave i:nth-child(2) { animation-delay: -.2s; }
@@ -1084,6 +1104,12 @@
       font-size: .62rem; font-weight: 700; letter-spacing: .06em; color: var(--orange-soft);
       background: rgba(255,196,0,.06); border: 1px solid rgba(255,196,0,.22);
       border-radius: 6px; padding: 3px 8px;
+    }
+    /* Mobile: si el ancho no alcanza, las filas envuelven en vez de pisarse */
+    @media (max-width: 380px) {
+      .eco-slide { gap: 6px; }
+      .eco-row { flex-wrap: wrap; gap: 4px 10px; }
+      .eco-row b, .eco-row span { min-width: 0; }
     }
 
     /* ---------- CTA final ---------- */
