@@ -5,7 +5,20 @@ import { useRouter } from "next/navigation";
 import RegisterWizard from "@/app/components/RegisterWizard";
 import PendingReviewDashboard from "@/app/components/PendingReviewDashboard";
 import NutritionTracker from "@/app/components/NutritionTracker";
+import PostSessionSummary from "@/app/components/PostSessionSummary";
+import WeeklySummary from "@/app/components/WeeklySummary";
+import AdherenceNudge from "@/app/components/AdherenceNudge";
+import VoiceNoteRecorder from "@/app/components/VoiceNoteRecorder";
+import DiscomfortReporter from "@/app/components/DiscomfortReporter";
 import type { Anamnesis, Exercise, NutritionPlan, Profile, Routine, SetLog, TrainingBlock } from "@/lib/app-types";
+import {
+  buildDaySummaryFromRows,
+  mostImproved,
+  resolveScenario,
+  type MissedDay,
+  type SessionScenario,
+} from "@/app/lib/workout-analytics";
+import { useWorkoutDetection } from "@/app/lib/useWorkoutDetection";
 import {
   exerciseAnatomySrc,
   exerciseGifSrc,
@@ -160,6 +173,16 @@ export default function ClientApp() {
   const [setRir, setSetRir] = useState<Record<string, number>>({});
   const [trainingBlock, setTrainingBlock] = useState<TrainingBlock | null>(null);
 
+  // Resumen post-sesión / semanal / adherencia.
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [weeklyOpen, setWeeklyOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [discomfortOpen, setDiscomfortOpen] = useState(false);
+  const [nudgeVisible, setNudgeVisible] = useState(false);
+  const [retroDate, setRetroDate] = useState<string | null>(null);
+  const nudgeShownRef = useRef(false);
+  const scenarioOverride = useRef<SessionScenario | null>(null);
+
   // Toast dentro de la tarjeta del ejercicio: temporizadores del auto-ocultado
   // y del guardado diferido (que se puede deshacer mientras está visible).
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -268,6 +291,13 @@ export default function ClientApp() {
     }
     if (params.get("tab") === "nutrition") {
       setView("nutrition");
+    }
+    const sc = params.get("summary");
+    if (sc === "success" || sc === "consistency" || sc === "incomplete" || sc === "discomfort") {
+      scenarioOverride.current = sc;
+    }
+    if (params.get("demo") === "week") {
+      setWeeklyOpen(true);
     }
   }, []);
 
@@ -430,6 +460,7 @@ export default function ClientApp() {
   const saveSet = async (ex: Exercise, setNumber: number) => {
     const row = rows[ex.id]?.find((r) => r.set_number === setNumber);
     if (!row) return;
+    const logDate = retroDate ?? today;
     try {
       const res = await fetch("/api/app/sets", {
         method: "POST",
@@ -443,14 +474,16 @@ export default function ClientApp() {
           target_reps: ex.target_reps,
           target_weight: ex.target_weight,
           phantom_reference_10_percent: ex.target_weight,
+          log_date: logDate,
         }),
       });
       const json = await res.json();
       if (json.ok) {
         updateRow(ex.id, setNumber, { saved: true });
+        if (json.log) upsertLog(json.log as SetLog);
         if (today) {
           setSetRir((prev) => {
-            const key = `${ex.id}|${today}|${setNumber}`;
+            const key = `${ex.id}|${logDate}|${setNumber}`;
             const next = { ...prev };
             const val = row.rir.trim();
             if (val === "") delete next[key];
@@ -505,7 +538,7 @@ export default function ClientApp() {
     if (!p) return;
     for (const s of p.sets) {
       try {
-        await fetch("/api/app/sets", {
+        const res = await fetch("/api/app/sets", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -516,8 +549,11 @@ export default function ClientApp() {
             target_reps: p.ex.target_reps,
             target_weight: p.ex.target_weight,
             phantom_reference_10_percent: p.ex.target_weight,
+            log_date: retroDate ?? today,
           }),
         });
+        const json = await res.json().catch(() => null);
+        if (json?.ok && json.log) upsertLog(json.log as SetLog);
       } catch {
         /* ignore */
       }
@@ -675,6 +711,43 @@ export default function ClientApp() {
     }
   };
 
+  // Detección de adherencia / progreso (hooks: siempre antes de los returns).
+  const detection = useWorkoutDetection({
+    clientId: profile?.id ?? null,
+    routines,
+    logs,
+    week,
+    today,
+    trainingDays: anamnesis?.training_days ?? 4,
+    guideline: trainingBlock?.guideline,
+  });
+
+  // Actualiza el estado local de logs al guardar (para métricas instantáneas).
+  const upsertLog = (log: SetLog) => {
+    setLogs((prev) => {
+      const key = (l: SetLog) =>
+        `${l.exercise_id}|${l.log_date}|${l.set_number}`;
+      const rest = prev.filter((l) => key(l) !== key(log));
+      return [log, ...rest];
+    });
+  };
+
+  // Muestra el nudge de adherencia una sola vez por sesión de app.
+  useEffect(() => {
+    if (
+      profile &&
+      planStatus === "active" &&
+      detection.nudge.show &&
+      !nudgeShownRef.current
+    ) {
+      nudgeShownRef.current = true;
+      setNudgeVisible(true);
+      detection.markNudgeShown();
+      if (detection.nudge.missedDate) detection.dismissNudge(detection.nudge.missedDate);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, planStatus, detection.nudge.show]);
+
   if (checking) {
     return (
       <main className="auth-wrap">
@@ -682,7 +755,6 @@ export default function ClientApp() {
       </main>
     );
   }
-
   if (!profile) {
     return (
       <main className="auth-wrap">
@@ -827,6 +899,56 @@ export default function ClientApp() {
   // Semana "en curso": la primera incompleta (o la que se está viendo). Las semanas
   // posteriores son sobrecarga planificada y se muestran atenuadas.
   const activeWeek = firstIncomplete ?? week;
+
+  // --- Resumen de sesión / semanal / adherencia ---
+  const daySummary = current ? buildDaySummaryFromRows(current, rows) : null;
+  const dayRowsComplete = !!daySummary && daySummary.allCompleted;
+
+  const prevDayRoutine = weekDays.length
+    ? prevWeekRoutinesFor(week - 1).find((r) => dayNameOf(r) === dayNameOf(current))
+    : undefined;
+  const improved = current
+    ? mostImproved([current], prevDayRoutine ? [prevDayRoutine] : [], logs)
+    : null;
+  const discomfortReported = detection.discomfortZones.length > 0;
+  const resolvedScenario: SessionScenario =
+    scenarioOverride.current ??
+    (daySummary
+      ? resolveScenario({
+          day: daySummary,
+          improved: !!improved,
+          discomfort: discomfortReported,
+        })
+      : "consistency");
+
+  function prevWeekRoutinesFor(weekNum: number): Routine[] {
+    return routines
+      .filter((r) => (r.week_number || 1) === weekNum)
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  }
+
+  const goToMissedDay = (missed: MissedDay) => {
+    setRetroDate(missed.date);
+    setWeek(missed.routine.week_number || 1);
+    setActiveDay(missed.routine.id);
+    setView("train");
+    setWeeklyOpen(false);
+    setNudgeVisible(false);
+    detection.reportMissedDay(missed.date, "trained");
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const dismissNudge = () => {
+    setNudgeVisible(false);
+    if (detection.nudge.missedDate) detection.dismissNudge(detection.nudge.missedDate);
+  };
+
+  const nudgeRest = () => {
+    setNudgeVisible(false);
+    if (detection.nudge.missedDate) detection.reportMissedDay(detection.nudge.missedDate, "rest");
+  };
 
   return (
     <>
@@ -982,10 +1104,35 @@ export default function ClientApp() {
                 <span className="badge">
                   Sem {week} · {exList.length} ejercicio{exList.length === 1 ? "" : "s"}
                 </span>
+                {detection.isWeekCompleted && (
+                  <button
+                    className="btn btn-outline weekly-cta"
+                    onClick={() => setWeeklyOpen(true)}
+                  >
+                    Ver resumen de la semana
+                  </button>
+                )}
                 <span className="muted" style={{ fontSize: ".85rem" }}>
                   Registrás hoy · {today}
                 </span>
               </div>
+
+              {retroDate && (
+                <div className="retro-banner">
+                  <span className="retro-banner-ic">↺</span>
+                  <div>
+                    <strong>Cargando series del {retroDate}</strong>
+                    <span>Completá lo que entrenaste ese día. Se guarda con esa fecha.</span>
+                  </div>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => setRetroDate(null)}
+                    style={{ padding: "7px 12px" }}
+                  >
+                    Volver a hoy
+                  </button>
+                </div>
+              )}
 
               {exList.map((ex, idx) => {
                 const media = embedUrl(ex.video_url);
@@ -1215,6 +1362,42 @@ export default function ClientApp() {
               })}
 
               {current && exList.length > 0 && (
+                <div className="finish-wrap">
+                  <button
+                    className="finish-btn"
+                    disabled={!dayRowsComplete}
+                    title={
+                      dayRowsComplete
+                        ? "Ver el resumen de tu sesión"
+                        : "Completa todos los ejercicios para finalizar"
+                    }
+                    onClick={() => dayRowsComplete && setSummaryOpen(true)}
+                  >
+                    Finalizar rutina del día
+                  </button>
+                  <div className="finish-secondary">
+                    <button
+                      className="finish-ghost"
+                      onClick={() => setDiscomfortOpen(true)}
+                    >
+                      Reportar molestia
+                    </button>
+                    <button
+                      className="finish-ghost"
+                      onClick={() => setVoiceOpen(true)}
+                    >
+                      Nota de voz al coach
+                    </button>
+                  </div>
+                  {!dayRowsComplete && (
+                    <span className="finish-hint">
+                      Completa todos los ejercicios para finalizar
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {current && exList.length > 0 && (
                 <div className="card progression-card">
                   <div
                     className="row-between"
@@ -1311,6 +1494,75 @@ export default function ClientApp() {
           )}
         </div>
       </main>
+
+      {daySummary && current && (
+        <PostSessionSummary
+          open={summaryOpen}
+          onClose={() => setSummaryOpen(false)}
+          studentName={profile.full_name || profile.email.split("@")[0]}
+          day={daySummary}
+          scenario={resolvedScenario}
+          improvedExercise={improved}
+          discomfort={
+            discomfortReported
+              ? { zone: detection.discomfortZones[0], exercise: exList[0]?.name ?? "" }
+              : null
+          }
+          onSendVoiceNote={() => {
+            setSummaryOpen(false);
+            setVoiceOpen(true);
+          }}
+        />
+      )}
+
+      <WeeklySummary
+        open={weeklyOpen}
+        onClose={() => setWeeklyOpen(false)}
+        weekNumber={week}
+        studentName={profile.full_name || profile.email.split("@")[0]}
+        summary={detection.weekSummary}
+        missedDays={detection.missedDays}
+        onReport={(date, kind) => detection.reportMissedDay(date, kind)}
+        onRetroLoad={goToMissedDay}
+        onViewNextWeek={() => {
+          const next = Math.min(totalWeeks, week + 1);
+          setWeek(next);
+          setActiveDay(null);
+          setWeeklyOpen(false);
+        }}
+      />
+
+      <AdherenceNudge
+        open={nudgeVisible}
+        studentName={profile.full_name || profile.email.split("@")[0]}
+        weekday={detection.nudge.weekday}
+        onDismiss={dismissNudge}
+        onTrained={() => {
+          setNudgeVisible(false);
+          if (detection.nudge.missedDate) {
+            const missedDate = detection.nudge.missedDate;
+            const target = detection.missedDays[0];
+            if (target) {
+              goToMissedDay(target);
+            } else {
+              setRetroDate(missedDate);
+              detection.dismissNudge(missedDate);
+            }
+          }
+        }}
+        onRest={nudgeRest}
+      />
+
+      <VoiceNoteRecorder open={voiceOpen} onClose={() => setVoiceOpen(false)} />
+
+      <DiscomfortReporter
+        open={discomfortOpen}
+        onClose={() => setDiscomfortOpen(false)}
+        onSubmit={(zones) => {
+          detection.reportDiscomfort(today, zones);
+          setSummaryOpen(true);
+        }}
+      />
     </>
   );
 }
