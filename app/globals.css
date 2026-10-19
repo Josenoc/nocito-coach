@@ -2596,4 +2596,63 @@ textarea.input { resize: vertical; }
   .history-diff { grid-column: 1 / -1; }
 }
 
+/* Transición suave al cambiar de día/semana en el portal del alumno.
+   Las tarjetas se remontan (key = semana+día) y entran con un fade-up
+   escalonado para evitar saltos bruscos de layout. */
+@keyframes viewFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.view-fade-item {
+  animation: viewFadeUp .4s cubic-bezier(.16, 1, .3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .view-fade-item { animation: none; }
+}
+
+/* Sugerencia de progresión individual (portal del alumno) */
+.advice-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 196, 0, 0.05);
+  border: 1px solid rgba(255, 196, 0, 0.25);
+  overflow: hidden;
+  animation: viewFadeUp 0.35s cubic-bezier(.16, 1, .3, 1) both;
+}
+.advice-card.progress { border-color: rgba(52, 211, 153, 0.45); background: rgba(52, 211, 153, 0.06); }
+.advice-card.deload { border-color: rgba(255, 82, 82, 0.4); background: rgba(255, 82, 82, 0.05); }
+.advice-card.variation { border-color: rgba(255, 196, 0, 0.35); }
+.advice-ic {
+  flex: 0 0 30px; width: 30px; height: 30px; border-radius: 9px;
+  display: grid; place-items: center; font-weight: 800; font-size: 1rem;
+  color: var(--gold); background: rgba(255, 196, 0, 0.1);
+  border: 1px solid rgba(255, 196, 0, 0.3);
+}
+.advice-card.progress .advice-ic { color: var(--ok); background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.4); }
+.advice-card.deload .advice-ic { color: var(--danger); background: rgba(255, 82, 82, 0.1); border-color: rgba(255, 82, 82, 0.35); }
+.advice-body { flex: 1 1 auto; min-width: 0; }
+.advice-body strong { display: block; font-size: 0.92rem; font-weight: 700; color: var(--text); }
+.advice-body span { display: block; font-size: 0.82rem; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+.advice-next {
+  flex: 0 0 auto; align-self: center;
+  font-variant-numeric: tabular-nums; font-weight: 800; font-size: 0.8rem;
+  color: var(--gold); background: rgba(255, 196, 0, 0.08);
+  border: 1px solid rgba(255, 196, 0, 0.28); border-radius: 999px;
+  padding: 5px 10px; white-space: nowrap;
+}
+.advice-card.progress .advice-next { color: var(--ok); background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.35); }
+@media (max-width: 560px) {
+  .advice-card { flex-wrap: wrap; }
+  .advice-next { order: 3; margin-left: 42px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .advice-card { animation: none; }
+}
+
+
 

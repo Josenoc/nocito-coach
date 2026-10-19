@@ -22,6 +22,7 @@ import {
   type SessionScenario,
 } from "@/app/lib/workout-analytics";
 import { useWorkoutDetection } from "@/app/lib/useWorkoutDetection";
+import { proposeProgression } from "@/app/lib/progression-advice";
 import {
   exerciseAnatomySrc,
   exerciseGifSrc,
@@ -58,6 +59,7 @@ type CardToast = {
   detail?: string;
   canUndo?: boolean;
   ms?: number;
+  onUndo?: () => void;
 };
 
 function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src: string } {
@@ -523,6 +525,81 @@ export default function ClientApp() {
           });
         }
         flashSet(ex.id, setNumber);
+
+        // Feedback instantáneo al guardar manualmente, con "Deshacer" (4 s).
+        if (row.actual_reps.trim() || row.actual_weight.trim()) {
+          const prevLog = logs.find(
+            (l) =>
+              l.exercise_id === ex.id &&
+              l.log_date === logDate &&
+              l.set_number === setNumber
+          );
+          const prevReps = prevLog?.actual_reps != null ? String(prevLog.actual_reps) : "";
+          const prevWeight =
+            prevLog?.actual_weight != null ? String(prevLog.actual_weight) : "";
+          const prevRir = prevLog?.rir != null ? String(prevLog.rir) : "";
+          const persist = (reps: string, weight: string, rir: string) =>
+            fetch("/api/app/sets", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                exercise_id: ex.id,
+                set_number: setNumber,
+                actual_reps: reps,
+                actual_weight: weight,
+                rir,
+                target_reps: ex.target_reps,
+                target_weight: ex.target_weight,
+                phantom_reference_10_percent: ex.target_weight,
+                log_date: logDate,
+              }),
+            })
+              .then((r) => r.json())
+              .then((j) => {
+                if (j?.ok && j.log) upsertLog(j.log as SetLog);
+              })
+              .catch(() => {});
+
+          const changed =
+            !prevLog ||
+            String(prevLog.actual_reps ?? "") !== row.actual_reps.trim() ||
+            String(prevLog.actual_weight ?? "") !== row.actual_weight.trim() ||
+            String(prevLog.rir ?? "") !== row.rir.trim();
+
+          if (changed) {
+            showToast(
+              {
+                exId: ex.id,
+                kind: "ok",
+                title: `Serie ${setNumber} guardada`,
+                detail: `${row.actual_reps || "—"} × ${row.actual_weight || "—"}${
+                  row.actual_weight ? " kg" : ""
+                }${row.rir ? ` · RIR ${row.rir}` : ""}`,
+                canUndo: true,
+                ms: 4000,
+                onUndo: () => {
+                  updateRow(ex.id, setNumber, {
+                    actual_reps: prevReps,
+                    actual_weight: prevWeight,
+                    rir: prevRir,
+                    saved: !!prevLog,
+                  });
+                  if (today) {
+                    setSetRir((prev) => {
+                      const key = `${ex.id}|${logDate}|${setNumber}`;
+                      const next = { ...prev };
+                      if (prevRir === "") delete next[key];
+                      else next[key] = Number(prevRir);
+                      return next;
+                    });
+                  }
+                  persist(prevReps, prevWeight, prevRir);
+                },
+              },
+              4000
+            );
+          }
+        }
       }
     } catch {
       /* ignore */
@@ -1199,8 +1276,20 @@ export default function ClientApp() {
                 const prevEx =
                   prevWeek >= 1 ? exerciseInWeek(prevWeek, dayNameOf(current), ex) : undefined;
                 const prevText = fmtLog(latestLogFor(prevEx?.id));
+                const advice = proposeProgression({
+                  exercise: ex,
+                  sets: rows[ex.id] ?? [],
+                  prevBestWeight: prevEx
+                    ? latestLogFor(prevEx.id)?.actual_weight ?? null
+                    : null,
+                  unit: ex.unit,
+                });
                 return (
-                  <div className="exercise-card block-card" key={ex.id}>
+                  <div
+                    className="exercise-card block-card view-fade-item"
+                    key={`${week}-${dayNameOf(current)}-${ex.id}`}
+                    style={{ animationDelay: `${Math.min(idx, 6) * 40}ms` }}
+                  >
                     <div className="workout-grid">
                       <div>
                         <div className="exercise-head">
@@ -1386,6 +1475,32 @@ export default function ClientApp() {
                         </div>
                       </div>
                     </div>
+                    {advice && (
+                      <div className={`advice-card ${advice.kind}`}>
+                        <span className="advice-ic" aria-hidden="true">
+                          {advice.kind === "progress"
+                            ? "↑"
+                            : advice.kind === "deload"
+                            ? "↓"
+                            : advice.kind === "variation"
+                            ? "⇄"
+                            : "◎"}
+                        </span>
+                        <div className="advice-body">
+                          <strong>{advice.title}</strong>
+                          <span>{advice.detail}</span>
+                        </div>
+                        {advice.nextWeight != null && (
+                          <span className="advice-next">
+                            Próx. {advice.nextReps ?? "-"} ×{" "}
+                            {Number.isInteger(advice.nextWeight)
+                              ? advice.nextWeight
+                              : advice.nextWeight.toFixed(1).replace(".", ",")}{" "}
+                            {ex.unit ?? "kg"}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {cardToast?.exId === ex.id && (
                       <div
                         className={`card-toast ${cardToast.kind} ${
@@ -1401,7 +1516,17 @@ export default function ClientApp() {
                           {cardToast.detail && <span>{cardToast.detail}</span>}
                         </div>
                         {cardToast.canUndo && (
-                          <button className="card-toast-undo" onClick={undoVoice}>
+                          <button
+                            className="card-toast-undo"
+                            onClick={() => {
+                              if (cardToast.onUndo) {
+                                cardToast.onUndo();
+                                dismissToast();
+                              } else {
+                                undoVoice();
+                              }
+                            }}
+                          >
                             Deshacer
                           </button>
                         )}
