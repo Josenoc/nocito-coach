@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       .eq("client_id", id)
       .order("log_date", { ascending: false })
       .order("set_number", { ascending: true })
-      .limit(300),
+      .limit(2000),
     supabase
       .from("audio_reports")
       .select("*, exercises(name)")

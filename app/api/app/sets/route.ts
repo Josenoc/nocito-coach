@@ -12,15 +12,54 @@ function toNum(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-async function ownsExercise(clientId: string, exerciseId: string): Promise<boolean> {
+// Vínculo del ejercicio con su rutina (semana / día) para trazabilidad.
+type ExerciseOwner = {
+  routineId: string;
+  weekNumber: number | null;
+  dayNumber: number | null;
+};
+
+async function loadExerciseOwner(
+  clientId: string,
+  exerciseId: string
+): Promise<ExerciseOwner | null> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("exercises")
-    .select("id, routines!inner(client_id)")
+    .select("id, routines!inner(client_id, id, week_number, position)")
     .eq("id", exerciseId)
     .single();
-  if (error || !data) return false;
-  return (data as any).routines?.client_id === clientId;
+  if (error || !data) return null;
+  const routine = (data as any).routines;
+  if (!routine || routine.client_id !== clientId) return null;
+  return {
+    routineId: String(routine.id),
+    weekNumber: typeof routine.week_number === "number" ? routine.week_number : null,
+    dayNumber: typeof routine.position === "number" ? routine.position : null,
+  };
+}
+
+const MISSING_LINK_COL =
+  /(routine_id|week_number|day_number|does not exist|PGRST204|42703)/i;
+
+// Guarda la serie. Si la migración que agrega las columnas de vínculo
+// (routine_id / week_number / day_number) todavía no se aplicó, reintenta
+// sin ellas para no romper el registro del alumno.
+async function upsertSetLog(
+  row: Record<string, unknown>,
+  link: Record<string, unknown>
+) {
+  const supabase = getSupabaseAdmin();
+  const onConflict = "exercise_id,client_id,log_date,set_number";
+  let res = await supabase
+    .from("sets_logs")
+    .upsert({ ...row, ...link }, { onConflict })
+    .select()
+    .single();
+  if (res.error && MISSING_LINK_COL.test(`${res.error.message} ${res.error.code ?? ""}`)) {
+    res = await supabase.from("sets_logs").upsert(row, { onConflict }).select().single();
+  }
+  return res;
 }
 
 export async function GET(req: NextRequest) {
@@ -78,7 +117,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!(await ownsExercise(clientId, exerciseId))) {
+    const owner = await loadExerciseOwner(clientId, exerciseId);
+    if (!owner) {
       return NextResponse.json(
         { ok: false, error: "Ejercicio no pertenece al cliente" },
         { status: 403 }
@@ -114,11 +154,13 @@ export async function POST(req: NextRequest) {
       log_date: logDate,
     };
 
-    const { data, error } = await supabase
-      .from("sets_logs")
-      .upsert(row, { onConflict: "exercise_id,client_id,log_date,set_number" })
-      .select()
-      .single();
+    const link = {
+      routine_id: owner.routineId,
+      week_number: owner.weekNumber,
+      day_number: owner.dayNumber,
+    };
+
+    const { data, error } = await upsertSetLog(row, link);
 
     if (error) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

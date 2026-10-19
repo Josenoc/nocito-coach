@@ -7,6 +7,7 @@ import { waLink } from "@/app/lib/coach";
 import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
 import ProgramEditor from "@/app/components/ProgramEditor";
+import CoachProgressMirror from "@/app/components/CoachProgressMirror";
 
 interface ClientRow {
   id: string;
@@ -472,6 +473,15 @@ export default function CoachDashboard() {
       syncNutrition(json);
       syncBlock(json);
     }
+  };
+
+  // Refresco silencioso para el espejo en vivo: sólo actualiza los datos de
+  // progreso, sin tocar ediciones en curso (nutrición / guía del bloque).
+  const refreshProgress = async () => {
+    if (!selectedId) return;
+    const res = await fetch(`/api/coach/client?id=${selectedId}`);
+    const json = await res.json();
+    if (json.ok) setDetail(json);
   };
 
   const setMeal = (idx: number, col: 0 | 1, value: string) => {
@@ -1338,65 +1348,12 @@ export default function CoachDashboard() {
                   <div key={tab} className="tab-panel">
 
                 {tab === "historial" && detail && (
-                  <div className="card" style={{ marginTop: 12 }}>
-                    <h3 style={{ marginTop: 0 }}>Series registradas</h3>
-                    <div className="scroll-x">
-                      <table className="data-table" style={{ minWidth: 640 }}>
-                        <thead>
-                          <tr>
-                            <th>Fecha</th>
-                            <th>Ejercicio</th>
-                              <th>Series</th>
-                            <th>Reps</th>
-                            <th>Peso</th>
-                            <th>Objetivo</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(detail.logs ?? []).map((l: any) => (
-                            <tr key={l.id}>
-                              <td>{l.log_date}</td>
-                              <td>{l.exercises?.name ?? "-"}</td>
-                              <td>{l.set_number}</td>
-                              <td>{l.actual_reps ?? "-"}</td>
-                              <td>{l.actual_weight ?? "-"}</td>
-                              <td className="muted">
-                                {l.target_reps ?? "-"} × {l.target_weight ?? "-"}
-                              </td>
-                            </tr>
-                          ))}
-                          {(detail.logs ?? []).length === 0 && (
-                            <tr>
-                              <td colSpan={6} className="muted">
-                                Sin registros.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <h3 style={{ marginTop: 24 }}>Notas de voz</h3>
-                    {(detail.audio ?? []).length === 0 && (
-                      <p className="muted">Sin notas de voz.</p>
-                    )}
-                    {(detail.audio ?? []).map((a: any) => (
-                      <div
-                        key={a.id}
-                        className="row-between"
-                        style={{
-                          borderTop: "1px solid var(--border)",
-                          padding: "10px 0",
-                        }}
-                      >
-                        <span className="muted">
-                          {a.exercises?.name ?? "General"} ·{" "}
-                          {new Date(a.created_at).toLocaleString()}
-                        </span>
-                        <audio src={a.audio_storage_url} controls preload="none" />
-                      </div>
-                    ))}
-                  </div>
+                  <CoachProgressMirror
+                    key={selectedId ?? "none"}
+                    detail={detail}
+                    clientName={selected.full_name || selected.email}
+                    onRefresh={refreshProgress}
+                  />
                 )}
 
                 {tab === "importar" && (
