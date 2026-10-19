@@ -536,7 +536,7 @@
       backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3);
       box-shadow: 0 20px 40px rgba(0,0,0,.5);
     }
-    .nav { height: auto; min-height: 84px; }
+    .nav { height: auto; min-height: 84px; justify-content: flex-start; gap: 20px; }
     .brand-logo { height: 56px; width: auto; object-fit: contain; display: block; border-radius: 8px; }
     .brand-name {
       display: inline-flex; align-items: center; gap: 10px;
@@ -544,20 +544,32 @@
       background: none; -webkit-background-clip: initial; background-clip: initial; color: #fff;
     }
     .brand-name::after { content: ""; width: 9px; height: 9px; background: var(--orange); }
-    .nav-links { gap: 24px; }
+    .nav-links { gap: 26px; margin-inline: auto; }
     .nav-links a {
-      font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
-      color: var(--muted); position: relative; padding: 6px 2px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+      color: #a1a1aa; position: relative; padding: 6px 2px;
+      transition: color .2s ease;
     }
-    .nav-links a::after { content: ""; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; background: var(--orange); transition: width .25s ease; }
-    .nav-links a:hover { color: #fff; }
+    .nav-links a::after { content: ""; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; background: #fbbf24; transition: width .25s ease; }
+    .nav-links a:hover { color: #fbbf24; }
     .nav-links a:hover::after { width: 100%; }
+    .nav-actions { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; }
     .nav-cta {
-      background: transparent; color: var(--orange);
-      border: 1px solid rgba(255,196,0,.4); border-radius: 6px;
-      font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; padding: 12px 20px;
+      background: linear-gradient(180deg, #ffd34a, #ffc400);
+      color: #0A0A0A;
+      border: 2px solid #f59e0b; border-radius: 10px;
+      font-size: .72rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+      padding: 11px 20px; white-space: nowrap;
+      box-shadow: 0 0 0 3px rgba(245,158,11,.12), 0 10px 26px rgba(245,158,11,.32),
+                  inset 0 1px 0 rgba(255,255,255,.45);
+      transition: transform .18s ease, box-shadow .25s ease, background .2s ease;
     }
-    .nav-cta:hover { background: var(--orange); color: #0A0A0A; box-shadow: none; transform: none; }
+    .nav-cta:hover {
+      transform: translateY(-2px) scale(1.03);
+      background: linear-gradient(180deg, #ffdd6b, #ffc400);
+      box-shadow: 0 0 0 4px rgba(245,158,11,.2), 0 16px 38px rgba(245,158,11,.5),
+                  inset 0 1px 0 rgba(255,255,255,.5);
+    }
 
     /* Indicador de escasez en el header (glass) */
     .nav-scarcity {
@@ -575,16 +587,22 @@
       animation: dotPulse 1.8s ease-in-out infinite;
     }
     /* Evita apiñamiento del header en tablet (la escasez vive en desktop y en el menú móvil) */
-    @media (min-width: 761px) and (max-width: 1180px) { .nav-links .nav-scarcity { display: none; } }
-    .nav-links a.nav-app, .mobile-menu a.nav-app {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--surface-2); color: var(--orange);
-      border: 1px solid rgba(255,196,0,.55); border-radius: 8px;
-      font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
-      padding: 1px 18px; transition: background .2s, color .2s, border-color .2s;
+    @media (min-width: 761px) and (max-width: 1180px) { .nav-actions .nav-scarcity { display: none; } }
+    @media (min-width: 761px) and (max-width: 1080px) {
+      .nav-links { gap: 16px; }
+      .nav-links a { letter-spacing: .1em; }
+      .nav-actions { gap: 10px; }
     }
-    .nav-links a.nav-app::after { display: none; }
-    .nav-links a.nav-app:hover, .mobile-menu a.nav-app:hover { background: var(--orange); color: #0A0A0A; border-color: var(--orange); }
+    .nav-actions a.nav-app, .mobile-menu a.nav-app {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: transparent; color: #d4d4d8;
+      border: 1px solid rgba(255,255,255,.16); border-radius: 9px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      padding: 10px 16px; white-space: nowrap;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .nav-actions a.nav-app::after { display: none; }
+    .nav-actions a.nav-app:hover, .mobile-menu a.nav-app:hover { color: #fbbf24; border-color: rgba(245,158,11,.6); background: rgba(245,158,11,.08); }
     .nav-app svg { width: 15px; height: 15px; }
     .footer-app {
       display: inline-flex; align-items: center; gap: 8px;
@@ -702,7 +720,7 @@
 
     .btn { border-radius: 6px; font-size: .8rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; padding: 17px 30px; }
     .btn-primary { background: var(--orange); color: #0A0A0A; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255,196,0,.28); }
+    .btn-primary:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 40px rgba(255,196,0,.32); }
     .btn-outline { border-color: rgba(255,255,255,.22); color: var(--text); border-radius: 6px; }
     .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
 
@@ -847,7 +865,7 @@
       border-radius: 6px; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase;
       background: var(--surface); border-color: rgba(255,255,255,.14); color: var(--text);
     }
-    .btn-plan:hover { transform: translateY(-2px); border-color: var(--orange); }
+    .btn-plan:hover { transform: translateY(-2px) scale(1.02); border-color: var(--orange); box-shadow: 0 12px 30px rgba(255,196,0,.22); }
     .featured .btn-plan { background: transparent; border-color: rgba(255,196,0,.5); color: var(--orange); }
     .featured .btn-plan:hover { background: var(--orange); color: #0A0A0A; box-shadow: 0 12px 30px rgba(255,196,0,.3); }
     .payment-note {
@@ -1146,25 +1164,26 @@
       .section::before { font-size: 6rem; top: 4px; }
     }
     @media (max-width: 760px) {
-      .nav { height: 64px; }
+      .nav { height: 64px; justify-content: space-between; }
       .hero { padding: 58px 0 72px; }
       .brand-name { font-size: 1.2rem; }
       .brand-logo { height: 42px; }
-      .nav-links a.nav-app, .mobile-menu a.nav-app { font-size: .36rem; padding: 2px 9px; gap: 4px; }
-      .nav-app svg { width: 7.5px; height: 7.5px; }
-      .footer-app { font-size: .39rem; padding: 2px 11px; gap: 4px; }
-      .footer-app svg { width: 7.5px; height: 7.5px; }
+      .nav-actions { display: none; }
+      .mobile-menu a.nav-app { font-size: .78rem; padding: 12px 16px; gap: 8px; justify-content: center; }
+      .nav-app svg { width: 16px; height: 16px; }
+      .footer-app { font-size: .78rem; padding: 10px 16px; gap: 8px; }
+      .footer-app svg { width: 15px; height: 15px; }
     }
     /* ---------- Micro-interacción: pulso dorado en CTAs primarios ---------- */
     @keyframes ctaPulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(255,196,0,0), 0 8px 22px rgba(255,196,0,.18); }
       50% { box-shadow: 0 0 0 4px rgba(255,196,0,.16), 0 14px 38px rgba(255,196,0,.42); }
     }
-    .btn-primary, .nav-cta, .featured .btn-plan { animation: ctaPulse 2.7s ease-in-out infinite; }
+    .btn-primary, .featured .btn-plan { animation: ctaPulse 2.7s ease-in-out infinite; }
 
     @media (prefers-reduced-motion: reduce) {
       .marquee-track { animation: none; }
-      .btn-primary, .nav-cta, .featured .btn-plan { animation: none; }
+      .btn-primary, .featured .btn-plan { animation: none; }
       .hero-grid > div:first-child > *, .hero::before { animation: none !important; opacity: 1 !important; transform: none !important; }
       .reveal { opacity: 1 !important; transform: none !important; }
       .scarcity-dot, .pulse-dot { animation: none !important; }
@@ -1217,16 +1236,18 @@
         <a href="#app">La App</a>
         <a href="#planes">Planes</a>
         <a href="#contacto">Contacto</a>
-        <a class="nav-app" href="/app">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Acceso a la App
-        </a>
+      </nav>
+      <div class="nav-actions">
         <span class="nav-scarcity" aria-label="Disponibilidad limitada">
           <span class="scarcity-dot" aria-hidden="true"></span>
           <span class="scarcity-text">Quedan <b>3 plazas</b> este mes</span>
         </span>
+        <a class="nav-app" href="/app">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Acceso a la App
+        </a>
         <a class="nav-cta" href="#planes">Aplicar a la Asesoría</a>
-      </nav>
+      </div>
       <button class="hamburger" id="hamburger" aria-label="Abrir menú">
         <span></span><span></span><span></span>
       </button>
