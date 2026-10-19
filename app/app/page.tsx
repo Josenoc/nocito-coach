@@ -10,6 +10,9 @@ import WeeklySummary from "@/app/components/WeeklySummary";
 import AdherenceNudge from "@/app/components/AdherenceNudge";
 import VoiceNoteRecorder from "@/app/components/VoiceNoteRecorder";
 import DiscomfortReporter from "@/app/components/DiscomfortReporter";
+import WelcomeScreen from "@/app/components/WelcomeScreen";
+import OnboardingCelebration from "@/app/components/OnboardingCelebration";
+import { computeMetabolic } from "@/app/lib/metabolic";
 import type { Anamnesis, Exercise, NutritionPlan, Profile, Routine, SetLog, TrainingBlock } from "@/lib/app-types";
 import {
   buildDaySummaryFromRows,
@@ -182,6 +185,11 @@ export default function ClientApp() {
   const [retroDate, setRetroDate] = useState<string | null>(null);
   const nudgeShownRef = useRef(false);
   const scenarioOverride = useRef<SessionScenario | null>(null);
+
+  // Bienvenida cinematográfica + celebración del onboarding.
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [celebrateOpen, setCelebrateOpen] = useState(false);
+  const welcomedRef = useRef(false);
 
   // Toast dentro de la tarjeta del ejercicio: temporizadores del auto-ocultado
   // y del guardado diferido (que se puede deshacer mientras está visible).
@@ -387,6 +395,19 @@ export default function ClientApp() {
     }
   };
 
+  // Muestra la bienvenida cinematográfica una vez por sesión de navegador.
+  const maybeWelcome = () => {
+    if (welcomedRef.current) return;
+    welcomedRef.current = true;
+    try {
+      if (sessionStorage.getItem("nc_welcomed")) return;
+      sessionStorage.setItem("nc_welcomed", "1");
+    } catch {
+      // sessionStorage no disponible: igual mostramos una vez.
+    }
+    setWelcomeOpen(true);
+  };
+
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -405,6 +426,7 @@ export default function ClientApp() {
       }
       setProfile(json.profile);
       await loadRoutine();
+      maybeWelcome();
     } catch (err: any) {
       setAuthError(err.message || "No se pudo ingresar");
     } finally {
@@ -421,6 +443,7 @@ export default function ClientApp() {
       if (!json.ok) throw new Error(json.error);
       setProfile(json.profile);
       await loadRoutine();
+      maybeWelcome();
     } catch (err: any) {
       setAuthError(err.message || "No se pudo iniciar sesión de prueba");
     } finally {
@@ -431,6 +454,14 @@ export default function ClientApp() {
   const handleRegistered = async (p: Profile) => {
     setProfile(p);
     await loadRoutine();
+    // Tras crear la cuenta mostramos la celebración (y no la bienvenida).
+    welcomedRef.current = true;
+    try {
+      sessionStorage.setItem("nc_welcomed", "1");
+    } catch {
+      // ignore
+    }
+    setCelebrateOpen(true);
   };
 
   const logout = async () => {
@@ -950,8 +981,33 @@ export default function ClientApp() {
     if (detection.nudge.missedDate) detection.reportMissedDay(detection.nudge.missedDate, "rest");
   };
 
+  const celebrationMetabolic = anamnesis
+    ? computeMetabolic({
+        sex: anamnesis.sex,
+        weight_kg: anamnesis.weight_kg,
+        height_cm: anamnesis.height_cm,
+        age: anamnesis.age,
+        goal: anamnesis.goal,
+        activity_level: anamnesis.activity_level,
+        training_days: anamnesis.training_days,
+      })
+    : null;
+
   return (
     <>
+      <WelcomeScreen
+        open={welcomeOpen}
+        name={profile.full_name || profile.email.split("@")[0]}
+        onDone={() => setWelcomeOpen(false)}
+      />
+      {celebrationMetabolic && (
+        <OnboardingCelebration
+          open={celebrateOpen}
+          name={profile.full_name || profile.email.split("@")[0]}
+          metabolic={celebrationMetabolic}
+          onDone={() => setCelebrateOpen(false)}
+        />
+      )}
       <header className="app-header">
         <div className="app-header-inner">
           <span className="brand">

@@ -50,6 +50,8 @@ export interface Anamnesis {
   body_fat_pct?: number;
   goal: string;
   training_days: number;
+  /** Duración objetivo de cada sesión (ej: "60 min"). */
+  session_length?: string;
   nutrition: string;
   /** Acceso a equipamiento: gimnasio comercial, casa/home gym o peso corporal/parques. */
   training_place?: TrainingPlace | string;
@@ -63,6 +65,32 @@ export interface Anamnesis {
   /** Lesiones o limitaciones estructurales activas o pasadas. */
   injuries?: string;
   food_restrictions?: string;
+  /** Alergias o intolerancias declaradas. */
+  allergies?: string;
+  /** Alimentos que le encantan (para armar el plan a su gusto). */
+  foods_love?: string;
+  /** Alimentos que evita / no le gustan. */
+  foods_avoid?: string;
+  /** Comidas por día (3 a 6+). */
+  meals_per_day?: number;
+  /** Tiempo disponible para cocinar (ej: "menos de 15 min"). */
+  cook_time?: string;
+  /** Frecuencia de meal prep (ej: "domingo completo"). */
+  meal_prep?: string;
+  /** Presupuesto alimentario (ej: "ajustado", "medio", "amplio"). */
+  budget?: string;
+  /** Nivel de estrés percibido (1 a 10). */
+  stress_level?: number;
+  /** Horas de sueño promedio por noche (4 a 10). */
+  sleep_hours?: number;
+  /** Suplementación actual. */
+  supplements?: string;
+  /** Consumo de alcohol. */
+  alcohol?: string;
+  /** Objetivo / motivación principal, en palabras del alumno. */
+  motivation?: string;
+  /** Preferencia de género para los días del plan, si aplica. */
+  preferred_days?: string;
   photos?: ClientPhotos;
   foodLogs?: FoodLogs;
   setRir?: SetRirMap;

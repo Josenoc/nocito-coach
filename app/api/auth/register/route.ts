@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const OBJETIVOS = ["hipertrofia", "perdida-grasa", "fuerza", "recomposicion", "rendimiento-deportivo"];
-const DIAS_VALIDOS = [3, 4, 5];
+const DIAS_VALIDOS = [3, 4, 5, 6];
 const NUTRICION = ["omnivoro", "vegetariano", "carnivoro", "vegano"];
 const LUGARES = ["gimnasio", "casa", "aire-libre"];
 const EXPERIENCIAS = ["principiante", "intermedio", "avanzado"];
@@ -20,6 +20,10 @@ const SUENO = ["mala", "regular", "buena", "excelente"];
 
 function cleanNote(value: unknown): string {
   return typeof value === "string" ? value.trim().slice(0, 1200) : "";
+}
+
+function cleanShort(value: unknown, max = 80): string {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
 function bad(error: string, status = 400) {
@@ -73,6 +77,19 @@ export async function POST(req: NextRequest) {
     const sleep_quality = String(body?.sleep_quality ?? "");
     const injuries = cleanNote(body?.injuries);
     const food_restrictions = cleanNote(body?.food_restrictions);
+    const allergies = cleanNote(body?.allergies);
+    const foods_love = cleanNote(body?.foods_love);
+    const foods_avoid = cleanNote(body?.foods_avoid);
+    const motivation = cleanNote(body?.motivation);
+    const supplements = cleanNote(body?.supplements);
+    const session_length = cleanShort(body?.session_length);
+    const cook_time = cleanShort(body?.cook_time);
+    const meal_prep = cleanShort(body?.meal_prep);
+    const budget = cleanShort(body?.budget);
+    const alcohol = cleanShort(body?.alcohol);
+    const meals_per_day = clampInt(body?.meals_per_day, 2, 8);
+    const stress_level = clampInt(body?.stress_level, 1, 10);
+    const sleep_hours = clampInt(body?.sleep_hours, 3, 12);
     const pin = String(body?.pin ?? "").trim();
     const pin_confirm = String(body?.pin_confirm ?? "").trim();
 
@@ -157,6 +174,19 @@ export async function POST(req: NextRequest) {
     }
     if (activity_level) anamnesis.activity_level = activity_level;
     if (sleep_quality) anamnesis.sleep_quality = sleep_quality;
+    if (session_length) anamnesis.session_length = session_length;
+    if (allergies) anamnesis.allergies = allergies;
+    if (foods_love) anamnesis.foods_love = foods_love;
+    if (foods_avoid) anamnesis.foods_avoid = foods_avoid;
+    if (motivation) anamnesis.motivation = motivation;
+    if (supplements) anamnesis.supplements = supplements;
+    if (cook_time) anamnesis.cook_time = cook_time;
+    if (meal_prep) anamnesis.meal_prep = meal_prep;
+    if (budget) anamnesis.budget = budget;
+    if (alcohol) anamnesis.alcohol = alcohol;
+    if (meals_per_day !== null) anamnesis.meals_per_day = meals_per_day;
+    if (stress_level !== null) anamnesis.stress_level = stress_level;
+    if (sleep_hours !== null) anamnesis.sleep_hours = sleep_hours;
 
     const { data, error } = await supabase
       .from("profiles")

@@ -8,6 +8,7 @@ import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
 import ProgramEditor from "@/app/components/ProgramEditor";
 import CoachProgressMirror from "@/app/components/CoachProgressMirror";
+import CoachProfileEditor from "@/app/components/CoachProfileEditor";
 
 interface ClientRow {
   id: string;
@@ -215,7 +216,7 @@ export default function CoachDashboard() {
   const [blockGuideline, setBlockGuideline] = useState("");
   const [blockSaving, setBlockSaving] = useState(false);
   const [tab, setTab] = useState<
-    "historial" | "rutinas" | "importar" | "generar" | "nutricion" | "acceso"
+    "historial" | "perfil" | "rutinas" | "importar" | "generar" | "nutricion" | "acceso"
   >("historial");
   const [focus, setFocus] = useState<null | "rutinas" | "nutricion">(null);
 
@@ -1086,7 +1087,7 @@ export default function CoachDashboard() {
                     )}
                     <div className="tabs" style={{ margin: 0 }}>
                       {(
-                        ["historial", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
+                        ["historial", "perfil", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
                       ).map((t) => (
                         <button
                           key={t}
@@ -1095,6 +1096,8 @@ export default function CoachDashboard() {
                         >
                           {t === "historial"
                             ? "Historial"
+                            : t === "perfil"
+                            ? "Perfil"
                             : t === "rutinas"
                             ? "Rutinas"
                             : t === "importar"
@@ -1354,6 +1357,21 @@ export default function CoachDashboard() {
                     clientName={selected.full_name || selected.email}
                     onRefresh={refreshProgress}
                   />
+                )}
+
+                {tab === "perfil" && detail && (
+                  <div style={{ marginTop: 12 }}>
+                    <CoachProfileEditor
+                      key={`perfil-${selectedId ?? "none"}`}
+                      clientId={selectedId ?? ""}
+                      profile={detail.profile}
+                      changes={detail.changes ?? []}
+                      onSaved={async () => {
+                        await loadClients();
+                        await reloadDetail();
+                      }}
+                    />
+                  </div>
                 )}
 
                 {tab === "importar" && (
