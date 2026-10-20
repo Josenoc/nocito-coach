@@ -1221,6 +1221,160 @@
       .testi-wrap { gap: 14px; }
     }
   </style>
+
+  <!-- ============================================================
+       LIGHT THEME PREVIEW — SOLO EN LA RAMA light-theme-preview
+       Override opt-in bajo `html.light`. No afecta el tema oscuro.
+       Para ver el oscuro en esta rama: agregar ?theme=dark al final.
+       ============================================================ -->
+  <style id="light-theme">
+    html.light {
+      color-scheme: light;
+
+      --bg: #F9F9FB;
+      --bg-2: #FFFFFF;
+      --surface: #FFFFFF;
+      --surface-2: #F4F4F6;
+      --surface-3: #ECECF0;
+      --border: #E4E4E9;
+      --border-strong: #D6D6DC;
+
+      /* Dorado adaptado a fondo claro: legible en texto y bordes */
+      --orange: #C27803;
+      --orange-soft: #D97706;
+      --blue: #B45309;
+
+      --text: #0A0A0A;
+      --muted: #52525B;
+      --muted-2: #71717A;
+
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-border: rgba(10, 10, 10, 0.08);
+      --glow-gold: 0 0 0 1px rgba(194, 120, 3, 0.22), 0 18px 50px rgba(194, 120, 3, 0.1);
+      --glow-gold-strong: 0 0 0 1px rgba(194, 120, 3, 0.3), 0 26px 70px rgba(194, 120, 3, 0.16), 0 0 60px rgba(194, 120, 3, 0.1);
+    }
+
+    /* Superficies base */
+    html.light body { background: var(--bg); color: var(--text); }
+    html.light header { background: rgba(255, 255, 255, 0.72); border-bottom-color: rgba(10, 10, 10, 0.08); }
+    html.light header.glass {
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 20px 40px rgba(10, 10, 10, 0.08);
+    }
+    html.light .nav-links a { color: #52525B; }
+    html.light .nav-links a:hover { color: #B45309; }
+    html.light .nav-actions a.nav-app { color: #3F3F46; border-color: rgba(10, 10, 10, 0.14); }
+    html.light .mobile-menu { border-top-color: rgba(10, 10, 10, 0.08); }
+    html.light .mobile-menu a { color: #52525B; border-bottom-color: rgba(10, 10, 10, 0.05); }
+    html.light .brand-name { color: #0A0A0A; }
+    html.light .hamburger span { background: #0A0A0A; }
+    html.light .nav-scarcity { color: #047857; background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.28); }
+    html.light .nav-scarcity b { color: #047857; }
+
+    /* Decoración de secciones */
+    html.light .section::before { -webkit-text-stroke: 1px rgba(10, 10, 10, 0.06); }
+    html.light .section-photo { filter: grayscale(1) contrast(1.02) brightness(1.15); opacity: 0.12; }
+    html.light .hero-photo { opacity: 0.32; }
+    html.light .hero::before {
+      background:
+        radial-gradient(900px 600px at 12% 0%, rgba(194, 120, 3, 0.1), transparent 60%),
+        radial-gradient(700px 520px at 100% 18%, rgba(10, 10, 10, 0.04), transparent 55%);
+    }
+    html.light .hero::after {
+      background-image:
+        linear-gradient(rgba(10, 10, 10, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10, 10, 10, 0.05) 1px, transparent 1px);
+    }
+    html.light .grad-text {
+      background: linear-gradient(90deg, #0A0A0A, var(--orange) 45%, #0A0A0A);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    html.light .section-title span[style*="#fbbf24"] { color: #B45309 !important; }
+
+    /* Tarjetas y contenedores */
+    html.light .form-card,
+    html.light .step,
+    html.light .contact-card,
+    html.light .faq-item,
+    html.light .pillar-card,
+    html.light .final-cta,
+    html.light .eco-phone { background: #FFFFFF; }
+
+    html.light .form-card,
+    html.light .step,
+    html.light .contact-card,
+    html.light .faq-item { border-color: #E4E4E9; }
+    html.light .pillar-card { border-color: rgba(194, 120, 3, 0.28); }
+    html.light .contact-card:hover,
+    html.light .step:hover { box-shadow: 0 24px 50px rgba(10, 10, 10, 0.1), 0 0 26px rgba(194, 120, 3, 0.1); }
+    html.light .testi-card {
+      background: linear-gradient(180deg, #FFFFFF, #FAFAFB);
+      border-color: rgba(194, 120, 3, 0.4);
+      box-shadow: 0 18px 40px rgba(10, 10, 10, 0.06);
+    }
+    html.light .testi-card:hover { box-shadow: 0 28px 58px rgba(10, 10, 10, 0.1), 0 0 40px rgba(194, 120, 3, 0.12); }
+    html.light .testi-quote { color: #3F3F46; }
+    html.light .plan-features li { color: #3F3F46; }
+    html.light .price-card { border-color: #E4E4E9; }
+    html.light .price-card:not(.featured):hover { box-shadow: 0 34px 66px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(194, 120, 3, 0.2), 0 0 34px rgba(194, 120, 3, 0.1); }
+    html.light .price-card.featured {
+      background: linear-gradient(180deg, #FFF8E6, #FFFDF6);
+      border-color: var(--orange);
+      box-shadow: 0 0 0 1px rgba(194, 120, 3, 0.2), 0 22px 54px rgba(10, 10, 10, 0.1);
+    }
+    html.light .price-card.featured:hover { box-shadow: 0 0 0 1px rgba(194, 120, 3, 0.3), 0 30px 64px rgba(10, 10, 10, 0.12); }
+    html.light .final-cta { background: linear-gradient(180deg, #FFFFFF, #FFFDF6); box-shadow: 0 40px 90px rgba(10, 10, 10, 0.08); }
+    html.light .faq-item[open] { border-color: rgba(194, 120, 3, 0.5); }
+    html.light .plans-footnote { background: #FAFAFB; border-color: #E4E4E9; }
+    html.light .marquee { background: #FFFFFF; border-color: rgba(10, 10, 10, 0.08); }
+    html.light footer { border-top-color: rgba(10, 10, 10, 0.08); }
+    html.light .footer-bottom { border-top-color: rgba(10, 10, 10, 0.08); }
+    html.light .footer-cta { border-color: #D6D6DC; }
+    html.light body::after { opacity: 0.03; }
+
+    /* Formularios */
+    html.light .field input,
+    html.light .field select,
+    html.light .field textarea { background: #FFFFFF; border-color: #D6D6DC; color: #0A0A0A; }
+    html.light .pill,
+    html.light .day-pill label { background: #F4F4F6; border-color: #D6D6DC; color: #52525B; }
+    html.light .pill input:checked + .pill-label {
+      background: rgba(194, 120, 3, 0.12); border-color: var(--orange); color: #8A5A00;
+    }
+    html.light .gen-stat { background: #F4F4F6; border-color: #E4E4E9; }
+
+    /* Botones */
+    html.light .btn-outline { border-color: #D6D6DC; color: #18181B; }
+    html.light .btn-outline:hover { border-color: var(--orange); color: #B45309; }
+    html.light .btn-primary { color: #1A1203; }
+
+    /* Mockup del teléfono (claro) */
+    html.light .eco-phone {
+      background: linear-gradient(180deg, #FFFFFF, #F4F4F6);
+      border-color: rgba(194, 120, 3, 0.45);
+      box-shadow: 0 20px 50px rgba(10, 10, 10, 0.12), 0 0 0 1px rgba(194, 120, 3, 0.12);
+    }
+    html.light .eco-phone-screen { background: #FFFFFF; border-color: #E4E4E9; }
+    html.light .eco-phone-top b { color: #B45309; }
+    html.light .eco-row { background: #FAFAFB; border-color: #ECECF0; }
+    html.light .eco-row b { color: #B45309; }
+    html.light .eco-row span { color: #8A5A00; }
+    html.light .eco-row.eco-row-ok { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.4); }
+    html.light .eco-voice-line { background: rgba(194, 120, 3, 0.06); border-color: rgba(194, 120, 3, 0.35); }
+    html.light .eco-voice-quote { color: #27272A; }
+    html.light .eco-bar { background: rgba(10, 10, 10, 0.08); }
+    html.light .eco-dots i { background: rgba(10, 10, 10, 0.15); }
+    html.light .eco-badge { color: #8A5A00; background: rgba(194, 120, 3, 0.1); border-color: rgba(194, 120, 3, 0.3); }
+
+    /* Ajustes puntuales */
+    html.light .form-col { background: #FAFAFB; border-color: #ECECF0; }
+    html.light .pillar-card h3 { color: #B45309; }
+    html.light .btn-plan { border-color: #D6D6DC; }
+    html.light .send-box { border-color: #D6D6DC; }
+    html.light .hero-scarcity { color: #8A5A00; background: rgba(194, 120, 3, 0.08); border-color: rgba(194, 120, 3, 0.3); }
+    html.light .nav-actions a.nav-app:hover,
+    html.light .mobile-menu a.nav-app:hover { color: #B45309; border-color: rgba(194, 120, 3, 0.6); background: rgba(194, 120, 3, 0.08); }
+  </style>
 </head>
 <body>
 
@@ -2409,6 +2563,14 @@
           ring.classList.toggle("grow", !!hit);
         }, { passive: true });
       }
+    })();
+  </script>
+  <script>
+    /* Light theme preview: activo por defecto SOLO en esta rama.
+       Para comparar con el tema oscuro: agregar ?theme=dark a la URL. */
+    (function () {
+      var theme = new URLSearchParams(window.location.search).get("theme");
+      if (theme !== "dark") document.documentElement.classList.add("light");
     })();
   </script>
 </body>
