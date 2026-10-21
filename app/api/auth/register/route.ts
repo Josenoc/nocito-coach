@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     const weight_kg = Number(body?.weight_kg);
     const body_fat_pct = optionalDecimal(body?.body_fat_pct, 3, 60);
     const goal = String(body?.goal ?? "");
-    const training_days = clampInt(body?.training_days, 3, 5);
+    const training_days = clampInt(body?.training_days, 3, 6);
     const nutrition = String(body?.nutrition ?? "");
     const training_place = String(body?.training_place ?? "");
     const experience = String(body?.experience ?? "");
@@ -92,12 +92,20 @@ export async function POST(req: NextRequest) {
     const sleep_hours = clampInt(body?.sleep_hours, 3, 12);
     const pin = String(body?.pin ?? "").trim();
     const pin_confirm = String(body?.pin_confirm ?? "").trim();
+    const termsAccepted = body?.termsAccepted === true || body?.termsAccepted === "true";
 
     if (!isDeliverableEmail(email)) return bad("Ingresá un email válido.");
     if (!/^[a-z0-9_]{3,20}$/.test(username))
       return bad("El usuario debe tener 3 a 20 caracteres (letras, números o guión bajo).");
-    if (!full_name) return bad("Ingresá tu nombre completo.");
-    if (phone.replace(/\D/g, "").length < 6) return bad("Ingresá un teléfono/WhatsApp válido.");
+    if (!full_name || full_name.length < 2 || full_name.length > 80)
+      return bad("Ingresá tu nombre completo (2 a 80 caracteres).");
+    if (!/^[\p{L}\s'.-]+$/u.test(full_name))
+      return bad("El nombre solo puede incluir letras, espacios, apóstrofes, puntos o guiones.");
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phoneDigits.length < 8 || phoneDigits.length > 15)
+      return bad("Ingresá un teléfono/WhatsApp válido (8 a 15 dígitos).");
+    if (!termsAccepted)
+      return bad("Tenés que aceptar los términos y la política de privacidad.");
     if (!SEXOS.includes(sex)) return bad("Elegí tu sexo.");
     if (age === null) return bad("Edad inválida (10 a 100 años).");
     if (height_cm === null) return bad("Altura inválida (100 a 250 cm).");
@@ -105,7 +113,7 @@ export async function POST(req: NextRequest) {
       return bad("Peso inválido (30 a 300 kg).");
     if (!OBJETIVOS.includes(goal)) return bad("Elegí tu objetivo.");
     if (training_days === null || !DIAS_VALIDOS.includes(training_days))
-      return bad("Elegí 3, 4 o 5 días de entrenamiento.");
+      return bad("Elegí entre 3 y 6 días de entrenamiento.");
     if (!NUTRICION.includes(nutrition)) return bad("Elegí tu preferencia alimentaria.");
     if (!LUGARES.includes(training_place))
       return bad("Elegí dónde vas a entrenar.");
@@ -165,6 +173,7 @@ export async function POST(req: NextRequest) {
       food_restrictions,
       photos: {},
       completedAt: new Date().toISOString(),
+      termsAcceptedAt: new Date().toISOString(),
     };
     if (body_fat_pct !== undefined) {
       anamnesis.body_fat_pct = body_fat_pct;

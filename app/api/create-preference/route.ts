@@ -40,6 +40,16 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+  if (!Number.isFinite(plan.price) || plan.price <= 0) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Ese plan se coordina por WhatsApp. Escribinos para confirmar el precio y la forma de pago.",
+      },
+      { status: 400 }
+    );
+  }
 
   const name = asString(diagnostic.name, "Cliente");
   const contact = asString(diagnostic.contact);
@@ -132,7 +142,7 @@ export async function POST(req: Request) {
       {
         ok: false,
         error:
-          "No se pudo crear el pago en Mercado Pago. Verificá MP_ACCESS_TOKEN y los datos del plan.",
+          "No pudimos iniciar el pago. Probá por transferencia o escribinos por WhatsApp.",
       },
       { status: 500 }
     );

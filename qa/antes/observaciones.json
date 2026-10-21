@@ -1,0 +1,163 @@
+{
+  "phase": "antes",
+  "base": "http://127.0.0.1:3400",
+  "startedAt": "2026-10-21T17:57:04.421Z",
+  "journeys": {
+    "a-impaciente": [
+      {
+        "key": "primer-cta",
+        "value": {
+          "text": "Aplicar al plan",
+          "href": "#planes"
+        }
+      },
+      {
+        "key": "primer-plan",
+        "value": {
+          "text": "Elegir Plan y Registrarme",
+          "dataPlan": "3"
+        }
+      },
+      {
+        "key": "dialogos",
+        "value": [
+          "No se pudo crear el pago en Mercado Pago. Verificá MP_ACCESS_TOKEN y los datos del plan."
+        ]
+      },
+      {
+        "key": "api-pago",
+        "value": [
+          {
+            "status": 500,
+            "body": "{\"ok\":false,\"error\":\"No se pudo crear el pago en Mercado Pago. Verificá MP_ACCESS_TOKEN y los datos del plan.\"}"
+          }
+        ]
+      },
+      {
+        "key": "url-final",
+        "value": "http://127.0.0.1:3400/index.html#planes"
+      }
+    ],
+    "b-esceptico": [
+      {
+        "key": "precios",
+        "value": [
+          "$50 ARS · pago único",
+          "$45.000 ARS / mes",
+          "$60.000 ARS / mes",
+          "$75.000 ARS / mes"
+        ]
+      },
+      {
+        "key": "links-legales-en-footer",
+        "value": []
+      },
+      {
+        "key": "status-/privacidad",
+        "value": 404
+      },
+      {
+        "key": "status-/terminos",
+        "value": 404
+      },
+      {
+        "key": "checkboxes-registro",
+        "value": 0
+      },
+      {
+        "key": "texto-acepto",
+        "value": 0
+      }
+    ],
+    "c-movil": [
+      {
+        "key": "domcontentloaded-ms",
+        "value": 1517
+      },
+      {
+        "key": "metricas-hero",
+        "value": {
+          "innerWidth": 383,
+          "scrollWidth": 383,
+          "bodyScrollWidth": 383,
+          "horizontalOverflow": false,
+          "cta": {
+            "width": 345,
+            "height": 54
+          }
+        }
+      },
+      {
+        "key": "metricas-app",
+        "value": {
+          "innerWidth": 375,
+          "scrollWidth": 375,
+          "horizontalOverflow": false
+        }
+      }
+    ],
+    "d-nonativo": [
+      {
+        "key": "labels-asociados",
+        "value": 0
+      },
+      {
+        "key": "paso2-visible",
+        "value": 0
+      },
+      {
+        "key": "nombre-conservado-atras",
+        "value": "QA No Nativo"
+      },
+      {
+        "key": "url-tras-back-navegador",
+        "value": "http://127.0.0.1:3400/index.html"
+      },
+      {
+        "key": "wizard-tras-back",
+        "value": 0
+      },
+      {
+        "key": "nombre-tras-back",
+        "value": null
+      }
+    ],
+    "e-rompe": [
+      {
+        "key": "error-visible",
+        "value": [
+          "El usuario debe tener 3 a 20 caracteres."
+        ]
+      },
+      {
+        "key": "longitud-nombre",
+        "value": 499
+      },
+      {
+        "key": "paso-activo",
+        "value": [
+          "1Acceso"
+        ]
+      },
+      {
+        "key": "url-tras-back",
+        "value": "about:blank"
+      }
+    ],
+    "f-exito": [
+      {
+        "key": "url",
+        "value": "http://127.0.0.1:3400/app"
+      },
+      {
+        "key": "login-ok",
+        "value": true
+      },
+      {
+        "key": "texto-inicio",
+        "value": "BIENVENIDO, AL|\n\nVamos a construir tu mejor versión\n\nEmpezar\nAlumno Test\nSalir\nHOLA, ALUMNO TEST\nTu entrenamiento de hoy\nEntrenamiento\nNutrición\nBLOQUE\nSem 1\nEN CURSO\nSem 2\n—\nSem 3\n—\nSem 4\n—\nSem 5\n—\nSem 6\n—\nDía 1 · Upper A\nDía 2 · Lower A\nDía 3 · Upper B\nDía 4 · Lower B\nSEM 1 · 6 EJERCICIOS\nRegistrás hoy · 2026-10-21\n1\nPRESS BANCA CON BARRA\n4\n×\n8\nMIS SERIES\nSERIES\tREPS\tPESO (KG)\tRIR\t\n1\t\n8\n\t\n\t\n\t\n\n2\t\n8\n\t\n\t\n\t\n\n3\t\n8\n\t\n\t\n\t\n\n4\t\n8\n\t\n\t\n\t\nDictar series por voz\n\nDictá tus series por voz, por ejemplo «3 se"
+      }
+    ]
+  },
+  "finishedAt": "2026-10-21T17:58:17.258Z"
+}

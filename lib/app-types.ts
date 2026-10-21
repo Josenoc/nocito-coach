@@ -96,6 +96,8 @@ export interface Anamnesis {
   setRir?: SetRirMap;
   trainingBlock?: TrainingBlock;
   completedAt?: string;
+  /** Fecha/hora en que el alumno aceptó términos y privacidad al registrarse. */
+  termsAcceptedAt?: string;
   clientUpdatedAt?: string;
   coachSeenAt?: string;
 }
