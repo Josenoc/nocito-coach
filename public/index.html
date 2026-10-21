@@ -3,15 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Jose · Personal Trainer — Asesorías personalizadas de entrenamiento y nutrición. Transformá tu cuerpo con ciencia y experiencia real.">
+  <meta name="description" content="Entrenamiento y nutrición con seguimiento personal semanal para profesionales con poco tiempo. Evaluación gratuita por WhatsApp y demo de la app.">
   <meta name="theme-color" content="#0A0A0A">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="nocito.coach">
+  <meta name="apple-mobile-web-app-title" content="Nocito Coach">
   <meta name="format-detection" content="telephone=no">
-  <link rel="manifest" href="data:application/manifest+json,&#123;&quot;name&quot;:&quot;nocito.coach&quot;,&quot;short_name&quot;:&quot;nocito&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0A0A0A&quot;,&quot;theme_color&quot;:&quot;#0A0A0A&quot;,&quot;start_url&quot;:&quot;index.html&quot;&#125;">
-  <title>nocito.coach | Jose · Personal Trainer</title>
+  <link rel="manifest" href="data:application/manifest+json,&#123;&quot;name&quot;:&quot;Nocito Coach&quot;,&quot;short_name&quot;:&quot;Nocito Coach&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0A0A0A&quot;,&quot;theme_color&quot;:&quot;#0A0A0A&quot;,&quot;start_url&quot;:&quot;index.html&quot;&#125;">
+  <link rel="canonical" href="https://nocito-coach.vercel.app/">
+  <title>nocito.coach | Entrená sin abandonar</title>
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="nocito.coach">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:title" content="nocito.coach | Entrená sin abandonar">
+  <meta property="og:description" content="Entrenamiento y nutrición con seguimiento personal semanal para profesionales con poco tiempo. Evaluación gratuita + demo de la app.">
+  <meta property="og:url" content="https://nocito-coach.vercel.app/">
+  <meta property="og:image" content="https://nocito-coach.vercel.app/img/og-nocito-coach.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="nocito.coach — Entrenamiento y nutrición con seguimiento personal">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="nocito.coach | Entrená sin abandonar">
+  <meta name="twitter:description" content="Entrenamiento y nutrición con seguimiento personal semanal para profesionales con poco tiempo. Evaluación gratuita + demo de la app.">
+  <meta name="twitter:image" content="https://nocito-coach.vercel.app/img/og-nocito-coach.jpg">
+
+  <!-- TODO-JOSE: reemplazar TODO-META-PIXEL-ID por el ID numérico del píxel de Meta. -->
+  <script>
+    window.META_PIXEL_ID = "TODO-META-PIXEL-ID";
+    (function () {
+      var id = window.META_PIXEL_ID;
+      if (!/^\d+$/.test(String(id))) return;
+      !function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
+        t = b.createElement(e); t.async = true; t.src = v;
+        s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+      }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      window.fbq("init", id);
+      window.fbq("track", "PageView");
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
@@ -792,7 +829,7 @@
 
     /* Flujo simple de 4 pasos */
     .steps-wrap {
-      display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
       align-items: stretch; gap: 10px; max-width: 1120px; margin: 44px auto 0;
     }
     .step {
@@ -1287,6 +1324,71 @@
       html { scroll-behavior: auto; }
       .eco-slide { transition: none !important; }
     }
+
+    /* ---------- Funnel de anuncios: primer paso, video y autoría ---------- */
+    .trial-section { padding-top: 0; }
+    .trial-band {
+      display: flex; align-items: center; justify-content: space-between; gap: 32px;
+      padding: clamp(28px, 4vw, 46px);
+      border: 1px solid rgba(255,196,0,.38); border-radius: 14px;
+      background: linear-gradient(120deg, rgba(255,196,0,.11), rgba(255,255,255,.02) 60%);
+      box-shadow: 0 24px 60px rgba(0,0,0,.36), 0 0 0 1px rgba(255,196,0,.08);
+    }
+    .trial-band .section-label { margin-bottom: 10px; }
+    .trial-band .section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 8px; }
+    .trial-band .section-sub { max-width: 620px; }
+    .trial-actions { display: flex; flex-wrap: wrap; gap: 12px; flex: 0 0 auto; }
+    .steps-note {
+      max-width: 760px; margin: 18px auto 0; text-align: center;
+      color: var(--muted); font-size: .82rem; line-height: 1.55;
+    }
+    .price-consult .amount { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: .01em; }
+    .hero-video-placeholder {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      margin: 0 0 18px; padding: 12px 14px;
+      border: 1px dashed rgba(255,196,0,.4); border-radius: 8px;
+      background: rgba(255,196,0,.04); color: var(--text);
+    }
+    .hero-video-play {
+      display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px;
+      border-radius: 50%; background: var(--orange); color: #0A0A0A;
+    }
+    .hero-video-placeholder > span:last-child { display: flex; flex-direction: column; line-height: 1.25; text-align: left; }
+    .hero-video-placeholder b { font-size: .85rem; }
+    .hero-video-placeholder small { color: var(--muted); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
+    .testi-author { display: flex; align-items: center; gap: 10px; margin-top: auto; }
+    .testi-avatar {
+      display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px;
+      border-radius: 50%; background: rgba(255,196,0,.12); border: 1px solid rgba(255,196,0,.4);
+      color: var(--orange); font-family: 'Montserrat', sans-serif; font-size: .72rem;
+      font-weight: 800; letter-spacing: .04em;
+    }
+    .testi-author .testi-name { margin-top: 0; }
+    .testi-author .testi-name::before { content: ""; }
+    @media (max-width: 860px) {
+      .trial-band { flex-direction: column; align-items: flex-start; }
+      .trial-actions { width: 100%; }
+      .trial-actions .btn { flex: 1 1 240px; }
+    }
+    @media (max-width: 560px) {
+      .trial-actions .btn { width: 100%; }
+    }
+
+    /* El nuevo titular es más largo: prioriza que el CTA entre en el primer pantallazo. */
+    .hero { padding-top: clamp(56px, 6vw, 90px); }
+    .hero h1 { font-size: clamp(2.7rem, 6.4vw, 5.2rem); line-height: .96; }
+    .hero p.lead { font-size: .98rem; line-height: 1.55; }
+    .hero-actions { margin-top: 24px; }
+    .nav-actions a.nav-app {
+      background: transparent; border: 0; color: var(--muted);
+      padding: 8px 2px; letter-spacing: .08em;
+    }
+    .nav-actions a.nav-app:hover { background: transparent; border: 0; color: #fbbf24; }
+    .plan-price .per { white-space: nowrap; }
+    @media (max-width: 760px) {
+      .hero h1 { font-size: clamp(2.15rem, 10vw, 2.9rem); }
+      .hero p.lead { font-size: .95rem; }
+    }
   </style>
 </head>
 <body>
@@ -1306,15 +1408,11 @@
         <a href="#contacto">Contacto</a>
       </nav>
       <div class="nav-actions">
-        <span class="nav-scarcity" aria-label="Disponibilidad limitada">
-          <span class="scarcity-dot" aria-hidden="true"></span>
-          <span class="scarcity-text">Quedan <b>3 plazas</b> este mes</span>
-        </span>
         <a class="nav-app" href="/app">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Acceso a la App
+          Ya soy cliente
         </a>
-        <a class="nav-cta" href="#planes">Aplicar a la Asesoría</a>
+        <a class="nav-cta" data-meta-source="nav" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20mi%20evaluaci%C3%B3n%20gratuita%20y%20probar%20la%20app." target="_blank" rel="noopener">Evaluación gratuita</a>
       </div>
       <button class="hamburger" id="hamburger" aria-label="Abrir menú">
         <span></span><span></span><span></span>
@@ -1327,14 +1425,10 @@
         <a href="#app">App</a>
         <a href="#planes">Planes</a>
         <a href="#contacto">Contacto</a>
-        <span class="nav-scarcity" style="display:inline-flex;margin-top:14px;" aria-label="Disponibilidad limitada">
-          <span class="scarcity-dot" aria-hidden="true"></span>
-          <span class="scarcity-text">Quedan <b>3 plazas</b> este mes</span>
-        </span>
-        <a class="nav-cta" href="#planes" style="display:inline-block;margin-top:14px;">Aplicar a la Asesoría</a>
+        <a class="nav-cta" data-meta-source="nav-mobile" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20mi%20evaluaci%C3%B3n%20gratuita%20y%20probar%20la%20app." target="_blank" rel="noopener" style="display:inline-block;margin-top:14px;">Evaluación gratuita</a>
         <a class="nav-app" href="/app" style="display:inline-flex;margin-top:10px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Acceso a la App
+          Ya soy cliente
         </a>
     </div>
   </header>
@@ -1354,32 +1448,29 @@
       <div class="hero-rail" aria-hidden="true"><span>Fuerza — Nutrición — Constancia</span></div>
       <div class="container hero-grid">
         <div>
-          <span class="badge-hero">Entrenamiento + Nutrición · método supervisado en tu app</span>
-          <h1><span>Fuerza, salud y</span><span class="grad-text">longevidad</span><span>se construyen con método</span></h1>
-          <!-- Propuesta de copy para aprobar (TODO-JOSE): enfocar el hero en constancia/adherencia. -->
-          <p class="hero-sub">Si te cuesta sostener el hábito de entrenar, te armo un plan que se adapta a tu agenda y a tu vida real.</p>
+          <span class="badge-hero">Entrenamiento + Nutrición · seguimiento personal semanal</span>
+          <h1><span>Entrená sin</span><span class="grad-text">abandonar</span></h1>
+          <p class="hero-sub">Un método para ser constante, con seguimiento personal para profesionales con poco tiempo.</p>
           <p class="lead">
-            Soy José Nocito. No te vendo un PDF estático: te doy acceso a un sistema de alto rendimiento donde cada rutina, carga y pauta nutricional es revisada y aprobada personalmente por mí antes de pisar el gimnasio. Resultados reales que podés sostener toda la vida.
+            Soy José Nocito. No te vendo un PDF estático: te doy acceso a un sistema con seguimiento personal donde cada rutina, carga y pauta nutricional se revisa y ajusta a tu agenda y a tu vida real.
           </p>
-          <p class="hero-scarcity"><span class="pulse-dot" aria-hidden="true"></span>Plazas de asesoría mensual limitadas para garantizar atención 1 a 1 personalizada</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#planes">Aplicar al plan</a>
-            <a class="btn btn-outline" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">Hablar por WhatsApp</a>
+            <a class="btn btn-primary" data-meta-source="hero" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20mi%20evaluaci%C3%B3n%20gratuita%20y%20probar%20la%20app." target="_blank" rel="noopener">Quiero mi evaluación gratuita</a>
+            <a class="btn btn-outline" href="#planes">Ver planes</a>
           </div>
         </div>
 
         <div class="hero-side" id="sobre-mi">
           <div class="hero-motivation reveal">
             <img class="hero-motivation-photo" src="img/hero-nocito.webp" width="702" height="950" alt="José Nocito entrenando" decoding="async" fetchpriority="high">
-            <p class="hero-motivation-cta">Contactame hoy por WhatsApp o correo para coordinar tu plan</p>
-            <div class="hero-contact-btns">
-              <a class="btn btn-primary btn-icon" id="heroWhatsApp" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                Hablar por WhatsApp</a>
-              <a class="btn btn-outline btn-icon" id="heroMail" href="mailto:nocito.coach@gmail.com" target="_blank" rel="noopener">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-                Enviar un e-mail</a>
+            <!-- TODO-JOSE: reemplazar este espacio por un video vertical corto de presentación. -->
+            <div class="hero-video-placeholder" role="note" aria-label="Espacio reservado para video de presentación">
+              <span class="hero-video-play" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span><b>Video de presentación</b><small>Próximamente</small></span>
             </div>
+            <p class="hero-motivation-cta">Evaluación gratuita + demo de la app por WhatsApp</p>
           </div>
         </div>
       </div>
@@ -1431,47 +1522,48 @@
         <h2 class="section-title">Historias reales, <span class="grad-text">resultados sostenidos</span></h2>
         <p class="section-sub">Alumnos que confiaron en un plan adaptado a su vida y a su etapa.</p>
 
+        <!-- TODO-JOSE: reemplazar las iniciales por fotos reales de cada alumno, con su autorización. -->
         <div class="testi-wrap">
           <article class="testi-card reveal">
             <p class="testi-metric">-6 kg de grasa · músculo mantenido</p>
             <p class="testi-goal">Objetivo: recomposición corporal</p>
             <p class="testi-quote">En 5 meses mantuve mi masa muscular mientras bajaba grasa. José adaptó el plan a mi doble turno laboral y nunca me sentí obligado a seguir una rutina genérica.</p>
-            <p class="testi-name">Juan M.</p>
+            <div class="testi-author"><span class="testi-avatar" aria-hidden="true">JM</span><p class="testi-name">Juan M.</p></div>
           </article>
 
           <article class="testi-card reveal reveal-d1">
             <p class="testi-metric">Fuerza optimizada sin dolor</p>
             <p class="testi-goal">Objetivo: ganar fuerza</p>
             <p class="testi-quote">Empecé de cero y con una lesión de rodilla. La progresión cuidada me permitió entrenar sin dolor y hoy levanto pesos que nunca imaginé.</p>
-            <p class="testi-name">Martina C.</p>
+            <div class="testi-author"><span class="testi-avatar" aria-hidden="true">MC</span><p class="testi-name">Martina C.</p></div>
           </article>
 
           <article class="testi-card reveal reveal-d2">
             <p class="testi-metric">-9 kg de grasa en 5 meses</p>
             <p class="testi-goal">Objetivo: perder grasa corporal</p>
             <p class="testi-quote">Sabía lo que tenía que hacer, pero no cómo sostenerlo. Con los ajustes semanales y el acompañamiento por WhatsApp por fin lo logré.</p>
-            <p class="testi-name">Diego A.</p>
+            <div class="testi-author"><span class="testi-avatar" aria-hidden="true">DA</span><p class="testi-name">Diego A.</p></div>
           </article>
 
           <article class="testi-card reveal reveal-d3">
             <p class="testi-metric">-7 kg y +tono después de los 40</p>
             <p class="testi-goal">Objetivo: recomposición corporal</p>
             <p class="testi-quote">Pensaba que después de los 40 ya no había margen. Con la planificación de José y los ajustes semanales bajé grasa y gané tono, sin resignar las comidas que disfruto.</p>
-            <p class="testi-name">Montserrat M.</p>
+            <div class="testi-author"><span class="testi-avatar" aria-hidden="true">MM</span><p class="testi-name">Montserrat M.</p></div>
           </article>
 
           <article class="testi-card reveal">
             <p class="testi-metric">+5 kg de masa magra</p>
             <p class="testi-goal">Objetivo: aumento de masa magra</p>
             <p class="testi-quote">Entrenaba desde hacía años pero el peso no subía. Al ordenar la progresión y la alimentación sumé masa muscular real en pocos meses, sin perder definición.</p>
-            <p class="testi-name">Ivan A.</p>
+            <div class="testi-author"><span class="testi-avatar" aria-hidden="true">IA</span><p class="testi-name">Ivan A.</p></div>
           </article>
 
           <article class="testi-card reveal reveal-d1">
             <p class="testi-metric">Primer mes entrenando con seguridad</p>
             <p class="testi-goal">Objetivo: empezar desde cero</p>
             <p class="testi-quote">Nunca había pisado un gimnasio. Empecé con ejercicios simples y bien explicados, y en pocas semanas entrenaba con seguridad y veía los primeros cambios.</p>
-            <p class="testi-name">Felipe S.</p>
+            <div class="testi-author"><span class="testi-avatar" aria-hidden="true">FS</span><p class="testi-name">Felipe S.</p></div>
           </article>
         </div>
       </div>
@@ -1578,9 +1670,26 @@
               <div>
                 <h4>Bloques de entrenamiento progresivos</h4>
                 <p>Cada plan es un bloque de varias semanas con progresión de carga y RIR (repeticiones en reserva) calculada, ajustado a tu evolución.</p>
-                <div class="eco-chips"><span class="eco-chip">Sem 1 → 4</span><span class="eco-chip">Progresión automática</span></div>
+                <div class="eco-chips"><span class="eco-chip">Sem 1 → 6</span><span class="eco-chip">Progresión automática</span></div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PRIMER PASO SIN PAGO ============ -->
+    <section class="section trial-section" id="primer-paso">
+      <div class="container">
+        <div class="trial-band reveal">
+          <div>
+            <span class="section-label">Primer paso sin pago</span>
+            <h2 class="section-title">Primero hablamos. Después decidís.</h2>
+            <p class="section-sub">Evaluación gratuita por WhatsApp + demo de la app. Sin tarjeta y sin compromiso.</p>
+          </div>
+          <div class="trial-actions">
+            <a class="btn btn-primary" data-meta-source="primer-paso" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20mi%20evaluaci%C3%B3n%20gratuita%20y%20probar%20la%20app." target="_blank" rel="noopener">Quiero mi evaluación gratuita</a>
+            <a class="btn btn-outline" href="#planes">Ver planes</a>
           </div>
         </div>
       </div>
@@ -1593,59 +1702,50 @@
         <div style="text-align:center;">
           <span class="section-label" style="justify-content:center;"><span class="sec-num">04</span> Planes y asesorías</span>
           <h2 class="section-title">Elegí tu plan de <span class="grad-text">seguimiento personalizado</span></h2>
-          <p class="section-sub" style="margin-inline:auto;">No es un PDF ni una rutina estática: es acceso a mi app privada con supervisión profesional directa. Elegí tu plan, pagá por transferencia o Mercado Pago y enviá el comprobante para recibir tu acceso.</p>
+          <p class="section-sub" style="margin-inline:auto;">No es un PDF ni una rutina estática: es acceso a mi app privada con supervisión profesional directa. Primero hacemos la evaluación gratuita y la demo; después elegís el plan que mejor se adapte a tu semana.</p>
         </div>
 
-        <!-- Flujo único de pago: elegir → pagar → comprobante → acceso -->
+        <!-- Flujo: hablar → probar → elegir plan -->
         <div class="steps-wrap reveal">
-          <div class="step">
-            <div class="step-ico">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
-            </div>
-            <span class="step-num">1</span>
-            <p><b>Elegís tu plan</b></p>
-          </div>
-          <div class="step-arrow" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </div>
-          <div class="step">
-            <div class="step-ico">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>
-            </div>
-            <span class="step-num">2</span>
-            <p><b>Pagás por transferencia o Mercado Pago</b></p>
-          </div>
-          <div class="step-arrow" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </div>
           <div class="step">
             <div class="step-ico">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
             </div>
-            <span class="step-num">3</span>
-            <p><b>Enviás el comprobante</b> por WhatsApp</p>
+            <span class="step-num">1</span>
+            <p><b>Hablemos</b> por WhatsApp: evaluación gratuita</p>
           </div>
           <div class="step-arrow" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </div>
           <div class="step">
             <div class="step-ico">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
             </div>
-            <span class="step-num">4</span>
-            <p><b>Recibís acceso</b> a tu app privada</p>
+            <span class="step-num">2</span>
+            <p><b>Probás la app</b> con una demo</p>
+          </div>
+          <div class="step-arrow" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+          <div class="step">
+            <div class="step-ico">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
+            </div>
+            <span class="step-num">3</span>
+            <p><b>Elegís tu plan</b> y recibís acceso</p>
           </div>
         </div>
+        <p class="steps-note">El pago se realiza después de elegir el plan, por transferencia o Mercado Pago. Luego enviás el comprobante por WhatsApp.</p>
 
         <div class="pricing-grid">
 
           <!-- Plan 1 · RUT&NUT -->
-          <!-- TODO-JOSE: confirmar el precio real de Rut&Nut antes de publicar. -->
+          <!-- TODO-JOSE: el precio de Rut&Nut se coordina por WhatsApp. Si se define, reemplazar "A consultar". -->
           <article class="price-card reveal" style="background: linear-gradient(180deg, rgba(255,196,0,.060), rgba(255,196,0,.057)), var(--surface);">
             <div>
               <h3 class="plan-name">Rut&Nut</h3>
               <span class="plan-tag">Rutina + plan de alimentación</span>
-              <div class="plan-price"><span class="cur">$</span><span class="amount">TODO-JOSE</span> <span class="per">ARS · pago único</span></div>
+              <div class="plan-price price-consult"><span class="amount">A consultar</span> <span class="per">ARS · pago único</span></div>
               <p class="price-sub">Sin seguimiento personalizado</p>
               <p class="price-total">Para quien solo quiere la rutina y la pauta</p>
             </div>
@@ -1654,16 +1754,17 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Plan de alimentación orientativo</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Sin seguimiento ni ajustes</li>
             </ul>
-            <a class="btn-plan btn-plan-wa" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20el%20precio%20del%20plan%20Rut%26Nut." target="_blank" rel="noopener">Consultar precio por WhatsApp</a>
+            <a class="btn-plan btn-plan-wa" data-meta-source="rutnut" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20el%20precio%20del%20plan%20Rut%26Nut." target="_blank" rel="noopener">Consultar precio por WhatsApp</a>
           </article>
 
-          <!-- Plan 2 · ESTÁNDAR (3 días) -->
-          <article class="price-card reveal reveal-d1" style="background: linear-gradient(180deg, rgba(255,196,0,.059), rgba(255,196,0,.056)), var(--surface);">
+          <!-- Plan 2 · ESTÁNDAR (3 días) · PUNTO DE ENTRADA -->
+          <article class="price-card featured reveal reveal-d1" style="background: linear-gradient(180deg, rgba(255,196,0,.059), rgba(255,196,0,.056)), var(--surface);">
+            <span class="featured-badge">Plan de entrada</span>
             <div>
               <h3 class="plan-name">Plan Estándar</h3>
               <span class="plan-tag">3 días / semana</span>
               <div class="plan-price"><span class="cur">$</span><span class="amount">45.000</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">Ideal para optimizar tiempos con alta efectividad</p>
+              <p class="price-sub">Para empezar sin sobrecargar la semana</p>
               <p class="price-total">Programación de 3 días a medida</p>
             </div>
             <ul class="plan-features">
@@ -1671,19 +1772,18 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Demostraciones técnicas en video/GIF en cada ejercicio</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Registro de cargas con historial de cada serie</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Seguimiento semanal y ajustes profesionales según tu evolución</li>
             </ul>
-            <button class="btn-plan" data-plan="0">Elegir plan y pagar</button>
+            <button class="btn-plan" data-plan="0">Elegir Plan</button>
           </article>
 
-          <!-- Plan 3 · PRO (4 días) · DESTACADO -->
-          <article class="price-card featured reveal reveal-d2" style="background: linear-gradient(180deg, rgba(255,196,0,.057), rgba(255,196,0,.054)), var(--surface);">
-            <span class="featured-badge">Más Elegido</span>
+          <!-- Plan 3 · PRO (4 días) -->
+          <article class="price-card reveal reveal-d2" style="background: linear-gradient(180deg, rgba(255,196,0,.057), rgba(255,196,0,.054)), var(--surface);">
             <div>
               <h3 class="plan-name">Plan Pro</h3>
               <span class="plan-tag">4 días / semana</span>
               <div class="plan-price"><span class="cur">$</span><span class="amount">60.000</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">El equilibrio perfecto entre volumen, frecuencia y recuperación</p>
+              <p class="price-sub">Más volumen semanal para quien ya sostiene la constancia</p>
               <p class="price-total">Programación de 4 días a medida</p>
             </div>
             <ul class="plan-features">
@@ -1691,9 +1791,9 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Demostraciones técnicas en video/GIF en cada ejercicio</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Registro de cargas con historial de cada serie</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Seguimiento semanal y ajustes profesionales según tu evolución</li>
             </ul>
-            <button class="btn-plan" data-plan="1">Elegir plan y pagar</button>
+            <button class="btn-plan" data-plan="1">Elegir Plan</button>
           </article>
 
           <!-- Plan 4 · ELITE (5 días) -->
@@ -1702,7 +1802,7 @@
               <h3 class="plan-name">Plan Elite</h3>
               <span class="plan-tag">5 días / semana</span>
               <div class="plan-price"><span class="cur">$</span><span class="amount">75.000</span> <span class="per">ARS / mes</span></div>
-              <p class="price-sub">Para alta disponibilidad enfocado en rendimiento superior</p>
+              <p class="price-sub">Para quien ya entrena 5 días y quiere más volumen</p>
               <p class="price-total">Programación de 5 días a medida</p>
             </div>
             <ul class="plan-features">
@@ -1710,23 +1810,23 @@
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Demostraciones técnicas en video/GIF en cada ejercicio</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Registro de cargas con historial de cada serie</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Reportes de voz: reportá sensaciones, molestias o energía</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Revisión y ajuste profesional cada 4 semanas</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFC400" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>Seguimiento semanal y ajustes profesionales según tu evolución</li>
             </ul>
-            <button class="btn-plan" data-plan="2">Elegir plan y pagar</button>
+            <button class="btn-plan" data-plan="2">Elegir Plan</button>
           </article>
         </div>
 
         <p class="payment-note">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
           Después de pagar, enviás el comprobante por WhatsApp al
-          <a class="payment-wa" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20te%20env%C3%ADo%20el%20comprobante%20de%20mi%20pago." target="_blank" rel="noopener">+54 9 2616 22-4718</a>
+          <a class="payment-wa" data-meta-source="comprobante" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20te%20env%C3%ADo%20el%20comprobante%20de%20mi%20pago." target="_blank" rel="noopener">+54 9 2616 22-4718</a>
         </p>
         <div class="payment-methods">
           <p><b>Transferencia bancaria</b> · Alias/CBU: <span class="todo">TODO-JOSE</span></p>
           <!-- TODO-JOSE: reemplazar el alias/CBU por los datos bancarios reales y, si corresponde, el link fijo de Mercado Pago. -->
           <p><b>Mercado Pago</b> · el botón de cada plan abre el checkout seguro.</p>
         </div>
-        <p class="plans-footnote">Los planes por frecuencia se abonan mensualmente y podés pagarlos por transferencia o Mercado Pago. El pago habilita tu acceso a tu app privada nocito.coach/app.</p>
+        <p class="plans-footnote">Los planes por frecuencia se abonan mensualmente e incluyen seguimiento semanal. Podés pagarlos por transferencia o Mercado Pago. El pago habilita tu acceso a tu app privada nocito.coach/app; tu primera programación se revisa y activa normalmente en menos de 48 h.</p>
       </div>
     </section>
 
@@ -1739,7 +1839,7 @@
         <p class="section-sub">Resolvé tus dudas directamente por WhatsApp o escribime por correo. Respondo personalmente, sin intermediarios.</p>
 
         <div class="contact-wrap">
-          <a class="contact-card reveal" id="whatsappLinkMain" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
+          <a class="contact-card reveal" id="whatsappLinkMain" data-meta-source="contacto" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
             <div class="ico">
               <img src="img/logo-nocitocoach.webp" width="636" height="547" alt="nocito.coach" loading="lazy" decoding="async">
             </div>
@@ -1788,7 +1888,7 @@
             </details>
             <details class="faq-item">
               <summary>¿Cómo y cuándo se actualizan las rutinas y el plan nutricional?</summary>
-              <div class="faq-body"><p>Luego de la revisión de tu ficha inicial, el progreso se registra de manera interactiva en tu app privada y el coach realiza ajustes profesionales periódicos según tu evolución.</p></div>
+              <div class="faq-body"><p>Luego de la revisión de tu ficha inicial, el progreso se registra de manera interactiva en tu app privada y el coach realiza seguimiento semanal con ajustes profesionales según tu evolución.</p></div>
             </details>
             <details class="faq-item">
               <summary>¿Cómo se realiza el pago?</summary>
@@ -1815,10 +1915,10 @@
           <div class="final-cta">
             <span class="section-label" style="justify-content:center;">Empezá hoy</span>
             <h2 class="final-cta-title">Tu mejor versión <span class="grad-text">no se improvisa, se diseña</span></h2>
-            <p class="final-cta-sub">Elegí tu plan, completá tu ficha y yo reviso y apruebo tu programación antes de que pises el gimnasio.</p>
+            <p class="final-cta-sub">Empezá con una evaluación gratuita y una demo de la app. Después elegís el plan, completás tu ficha y yo reviso tu programación antes de que pises el gimnasio.</p>
             <div class="final-cta-actions">
-              <a class="btn btn-primary" href="#planes">Aplicar al plan</a>
-              <a class="btn btn-outline" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">Hablar por WhatsApp</a>
+              <a class="btn btn-primary" data-meta-source="cierre" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20mi%20evaluaci%C3%B3n%20gratuita%20y%20probar%20la%20app." target="_blank" rel="noopener">Quiero mi evaluación gratuita</a>
+              <a class="btn btn-outline" href="#planes">Ver planes</a>
             </div>
           </div>
         </div>
@@ -1838,7 +1938,7 @@
         <span class="footer-tagline">· Jose, Personal Trainer</span>
         <p class="footer-desc">Entrenamiento y nutrición personalizada con supervisión profesional directa.</p>
         <div class="footer-social" aria-label="Contacto directo">
-          <a class="footer-cta footer-cta-wa" id="footerWhatsApp" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
+          <a class="footer-cta footer-cta-wa" id="footerWhatsApp" data-meta-source="footer" href="https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20por%20tus%20servicios%20de%20entrenamiento" target="_blank" rel="noopener">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             WhatsApp
           </a>
@@ -1865,7 +1965,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Acceso a la App
         </a>
-        <a class="footer-cta footer-cta-plan" href="#planes">Aplicar a la Asesoría</a>
+        <a class="footer-cta footer-cta-plan" href="#planes">Ver planes</a>
       </div>
     </div>
     <div class="container footer-bottom">
@@ -1885,20 +1985,42 @@
     (function () {
       "use strict";
 
-      var WHATSAPP_NUMBER = "5492616224718";
       var EMAIL = "nocito.coach@gmail.com";
+      var WHATSAPP_MESSAGE_DEFAULT = "Hola José, quiero mi evaluación gratuita y probar la app.";
 
-      // TODO-JOSE: único lugar para actualizar las plazas reales del mes.
-      // Si vale 0, el header y el menú móvil muestran "Lista de espera".
-      var PLAZAS_DISPONIBLES = 3;
-
-      function renderScarcity() {
-        var html = PLAZAS_DISPONIBLES > 0
-          ? "Quedan <b>" + PLAZAS_DISPONIBLES + " plazas</b> este mes"
-          : "Lista de espera";
-        document.querySelectorAll(".scarcity-text").forEach(function (el) {
-          el.innerHTML = html;
+      var UTM_KEYS = [
+        ["utm_source", "Origen"],
+        ["utm_medium", "Medio"],
+        ["utm_campaign", "Campaña"],
+        ["utm_content", "Anuncio"],
+        ["utm_term", "Término"]
+      ];
+      var WHATSAPP_UTM_SUMMARY = (function () {
+        var params = new URLSearchParams(window.location.search);
+        var parts = [];
+        UTM_KEYS.forEach(function (pair) {
+          var value = params.get(pair[0]);
+          if (value) parts.push(pair[1] + ": " + value.slice(0, 120));
         });
+        return parts.join(" · ");
+      })();
+
+      function trackMeta(eventName, params) {
+        if (typeof window.fbq !== "function") return;
+        window.fbq("track", eventName, params || {});
+      }
+
+      function buildWhatsAppHref(baseHref) {
+        var url;
+        try {
+          url = new URL(baseHref, window.location.href);
+        } catch (err) {
+          return baseHref;
+        }
+        var text = url.searchParams.get("text") || WHATSAPP_MESSAGE_DEFAULT;
+        if (WHATSAPP_UTM_SUMMARY) text += "\n\n" + WHATSAPP_UTM_SUMMARY;
+        url.searchParams.set("text", text);
+        return url.toString();
       }
 
       var OBJECTIVE_LABELS = {
@@ -2328,6 +2450,19 @@
       document.querySelectorAll(".btn-plan[data-plan]").forEach(function (btn) {
         btn.addEventListener("click", function () {
           var planIndex = Number(btn.getAttribute("data-plan"));
+          var card = btn.closest(".price-card");
+          var planNameEl = card ? card.querySelector(".plan-name") : null;
+          var amountEl = card ? card.querySelector(".amount") : null;
+          var planValue = amountEl ? Number(amountEl.textContent.replace(/\D/g, "")) : NaN;
+          var checkoutParams = {
+            content_name: planNameEl ? planNameEl.textContent.trim() : "Plan",
+            content_category: "plan"
+          };
+          if (Number.isFinite(planValue)) {
+            checkoutParams.value = planValue;
+            checkoutParams.currency = "ARS";
+          }
+          trackMeta("InitiateCheckout", checkoutParams);
 
           if (isStandalonePage()) {
             alert(friendlyPayError("Estás viendo la página sin el sistema activo (archivo local). Para pagar abrí nocito.coach online."));
@@ -2359,24 +2494,25 @@
       });
 
       /* ---------- WhatsApp / email de contacto ---------- */
-      $id("whatsappLinkMain").addEventListener("click", function (ev) {
-        ev.preventDefault();
-        var msg = "Hola José, quiero consultar por tus servicios de entrenamiento.";
-        window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
-      });
-
       $id("emailLinkMain").setAttribute("href", "mailto:" + EMAIL);
 
-      var heroWhatsApp = $id("heroWhatsApp");
-      if (heroWhatsApp) {
-        heroWhatsApp.addEventListener("click", function (ev) {
-          ev.preventDefault();
-          var msg = "Hola José, quiero consultar por tus servicios de entrenamiento.";
-          window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
-        });
-      }
-      var heroMail = $id("heroMail");
-      if (heroMail) { heroMail.setAttribute("href", "mailto:" + EMAIL); }
+      document.addEventListener("click", function (ev) {
+        var target = ev.target;
+        var link = target && target.closest ? target.closest('a[href*="wa.me/"]') : null;
+        if (!link) return;
+
+        if (!link.dataset.baseHref) {
+          link.dataset.baseHref = link.getAttribute("href");
+        }
+        link.setAttribute("href", buildWhatsAppHref(link.dataset.baseHref));
+
+        var host = link.closest("section, header, footer");
+        var source =
+          link.getAttribute("data-meta-source") ||
+          (host && (host.id || host.tagName.toLowerCase())) ||
+          "whatsapp";
+        trackMeta("Lead", { content_name: source, content_category: "whatsapp" });
+      }, true);
 
       /* ---------- Mobile menu ---------- */
       var burger = $id("hamburger");
@@ -2465,7 +2601,6 @@
       onScrollGlass();
 
       $id("yearFoot").textContent = new Date().getFullYear();
-      renderScarcity();
     })();
   </script>
 
