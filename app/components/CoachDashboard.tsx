@@ -922,7 +922,14 @@ export default function CoachDashboard() {
         <div className="topbar sticky">
           <div className="topbar-title">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
+            <img
+              className="brand-logo"
+              src="/img/logo-nocitocoach.webp"
+              width={636}
+              height={547}
+              alt="Nocito Coach"
+              decoding="async"
+            />
             <div>
               <h1>Panel de {coach.full_name || "José"}</h1>
               <span className="muted" style={{ fontSize: ".9rem" }}>
@@ -1167,7 +1174,7 @@ export default function CoachDashboard() {
                   <aside>
                     {detail && (
                       <div className="card" style={{ marginTop: 0 }}>
-                        <h3 style={{ marginTop: 0 }}>Ficha y anamnesis</h3>
+                        <h3 style={{ marginTop: 0 }}>Ficha del alumno</h3>
                         {selected.has_client_update && (
                           <div className="notice-update">
                             <span>● El cliente actualizó sus datos.</span>
@@ -1342,7 +1349,7 @@ export default function CoachDashboard() {
                       </>
                     ) : (
                       <p className="muted" style={{ margin: 0 }}>
-                        El cliente todavía no completó su anamnesis.
+                        El cliente todavía no completó su ficha inicial.
                       </p>
                     )}
                   </div>

@@ -1,0 +1,204 @@
+{
+  "phase": "despues",
+  "base": "http://127.0.0.1:3400",
+  "startedAt": "2026-10-21T18:20:32.315Z",
+  "journeys": {
+    "a-impaciente": [
+      {
+        "key": "primer-cta",
+        "value": {
+          "text": "Aplicar al plan",
+          "href": "#planes"
+        }
+      },
+      {
+        "key": "plan-rutnut",
+        "value": {
+          "text": "Consultar precio por WhatsApp",
+          "href": "https://wa.me/5492616224718?text=Hola%20Jos%C3%A9%2C%20quiero%20consultar%20el%20precio%20del%20plan%20Rut%26Nut."
+        }
+      },
+      {
+        "key": "primer-plan",
+        "value": {
+          "text": "Elegir plan y pagar",
+          "dataPlan": "0"
+        }
+      },
+      {
+        "key": "dialogos",
+        "value": [
+          "No pudimos iniciar el pago. Probá de nuevo en unos segundos o pagá por transferencia y enviá el comprobante por WhatsApp."
+        ]
+      },
+      {
+        "key": "api-pago",
+        "value": [
+          {
+            "status": 500,
+            "body": "{\"ok\":false,\"error\":\"No pudimos iniciar el pago. Probá por transferencia o escribinos por WhatsApp.\"}"
+          }
+        ]
+      },
+      {
+        "key": "url-final",
+        "value": "http://127.0.0.1:3400/index.html#planes"
+      },
+      {
+        "key": "error-tecnico-visible",
+        "value": false
+      }
+    ],
+    "b-esceptico": [
+      {
+        "key": "precios",
+        "value": [
+          "$TODO-JOSE ARS · pago único",
+          "$45.000 ARS / mes",
+          "$60.000 ARS / mes",
+          "$75.000 ARS / mes"
+        ]
+      },
+      {
+        "key": "links-legales-en-footer",
+        "value": [
+          {
+            "text": "Política de privacidad",
+            "href": "/privacidad"
+          },
+          {
+            "text": "Términos y condiciones",
+            "href": "/terminos"
+          }
+        ]
+      },
+      {
+        "key": "status-/privacidad",
+        "value": 200
+      },
+      {
+        "key": "status-/terminos",
+        "value": 200
+      },
+      {
+        "key": "checkboxes-registro",
+        "value": 1
+      },
+      {
+        "key": "texto-acepto",
+        "value": 1
+      },
+      {
+        "key": "links-legales-registro",
+        "value": [
+          {
+            "text": "términos y condiciones",
+            "href": "/terminos"
+          },
+          {
+            "text": "política de privacidad",
+            "href": "/privacidad"
+          }
+        ]
+      },
+      {
+        "key": "error-sin-aceptar",
+        "value": [
+          "Tenés que aceptar los términos y la política de privacidad."
+        ]
+      },
+      {
+        "key": "checkbox-marcado",
+        "value": true
+      }
+    ],
+    "c-movil": [
+      {
+        "key": "domcontentloaded-ms",
+        "value": 1495
+      },
+      {
+        "key": "metricas-hero",
+        "value": {
+          "innerWidth": 375,
+          "scrollWidth": 375,
+          "bodyScrollWidth": 383,
+          "horizontalOverflow": false,
+          "cta": {
+            "width": 345,
+            "height": 54
+          }
+        }
+      },
+      {
+        "key": "metricas-app",
+        "value": {
+          "innerWidth": 375,
+          "scrollWidth": 375,
+          "horizontalOverflow": false
+        }
+      }
+    ],
+    "d-nonativo": [
+      {
+        "key": "labels-asociados",
+        "value": 1
+      },
+      {
+        "key": "paso2-visible",
+        "value": [
+          "2Tu cuerpo"
+        ]
+      },
+      {
+        "key": "url-tras-back-navegador",
+        "value": "http://127.0.0.1:3400/app"
+      },
+      {
+        "key": "wizard-tras-back",
+        "value": 6
+      },
+      {
+        "key": "nombre-tras-back",
+        "value": "QA No Nativo"
+      }
+    ],
+    "e-rompe": [
+      {
+        "key": "error-visible",
+        "value": [
+          "El nombre solo puede incluir letras, espacios, apóstrofes, puntos o guiones."
+        ]
+      },
+      {
+        "key": "longitud-nombre",
+        "value": 80
+      },
+      {
+        "key": "paso-activo",
+        "value": [
+          "1Acceso"
+        ]
+      },
+      {
+        "key": "url-tras-back",
+        "value": "about:blank"
+      }
+    ],
+    "f-exito": [
+      {
+        "key": "url",
+        "value": "http://127.0.0.1:3400/app"
+      },
+      {
+        "key": "login-ok",
+        "value": true
+      },
+      {
+        "key": "texto-inicio",
+        "value": "BIENVENIDO, ALUMNO\n\nVamos a construir tu mejor versión\n\nEmpezar\nAlumno Test\nSalir\nHOLA, ALUMNO TEST\nTu entrenamiento de hoy\nEntrenamiento\nNutrición\nBLOQUE\nSem 1\nEN CURSO\nSem 2\n—\nSem 3\n—\nSem 4\n—\nSem 5\n—\nSem 6\n—\nDía 1 · Upper A\nDía 2 · Lower A\nDía 3 · Upper B\nDía 4 · Lower B\nSEM 1 · 6 EJERCICIOS\nRegistrás hoy · 2026-10-21\n1\nPRESS BANCA CON BARRA\n4\n×\n8\nMIS SERIES\nSERIES\tREPS\tPESO (KG)\tRIR\t\n1\t\n8\n\t\n\t\n\t\n\n2\t\n8\n\t\n\t\n\t\n\n3\t\n8\n\t\n\t\n\t\n\n4\t\n8\n\t\n\t\n\t\n\nRIR = repeticiones en reserva: cuántas repeticiones te quedaba"
+      }
+    ]
+  },
+  "finishedAt": "2026-10-21T18:21:17.105Z"
+}

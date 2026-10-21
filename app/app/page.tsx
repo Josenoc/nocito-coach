@@ -413,15 +413,30 @@ export default function ClientApp() {
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+    const identifier = email.trim();
+    if (!identifier) {
+      setAuthError("Ingresá tu usuario o email.");
+      return;
+    }
+    if (identifier.length > 120) {
+      setAuthError("El usuario o email es demasiado largo.");
+      return;
+    }
+    if (!/^\d{4}$/.test(pin)) {
+      setAuthError("El PIN debe tener 4 dígitos.");
+      return;
+    }
     setAuthLoading(true);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, pin }),
+        body: JSON.stringify({ email: identifier, pin }),
       });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error);
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || "No se pudo ingresar. Probá de nuevo.");
+      }
       if (json.profile.role === "coach") {
         router.replace("/entrenador");
         return;
@@ -869,7 +884,14 @@ export default function ClientApp() {
         <div className="auth-card" style={{ maxWidth: mode === "register" ? 560 : 400 }}>
           <div style={{ textAlign: "center", marginBottom: 18 }}>
             <span className="brand">
-              <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
+              <img
+                className="brand-logo"
+                src="/img/logo-nocitocoach.webp"
+                width={636}
+                height={547}
+                alt="Nocito Coach"
+                decoding="async"
+              />
             </span>
           </div>
           <div className="card">
@@ -881,19 +903,22 @@ export default function ClientApp() {
                 </p>
                 <form onSubmit={login} style={{ display: "grid", gap: 14, marginTop: 16 }}>
                   <div>
-                    <label className="lbl">Usuario o email</label>
+                    <label className="lbl" htmlFor="login-identifier">Usuario o email</label>
                     <input
+                      id="login-identifier"
                       className="input"
                       type="text"
                       autoComplete="username"
+                      maxLength={120}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
                   <div>
-                    <label className="lbl">PIN (4 dígitos)</label>
+                    <label className="lbl" htmlFor="login-pin">PIN (4 dígitos)</label>
                     <input
+                      id="login-pin"
                       className="input"
                       inputMode="numeric"
                       pattern="[0-9]*"
@@ -908,7 +933,7 @@ export default function ClientApp() {
                   <button className="btn btn-primary" disabled={authLoading}>
                     {authLoading ? "Ingresando…" : "Ingresar"}
                   </button>
-                  {authError && <div className="toast err">{authError}</div>}
+                  {authError && <div className="toast err" role="alert">{authError}</div>}
                 </form>
                 {TEST_LOGIN_ENABLED && (
                   <div style={{ marginTop: 14 }}>
@@ -945,10 +970,6 @@ export default function ClientApp() {
               </>
             ) : (
               <>
-                <h1 style={{ margin: "0 0 4px", fontSize: "1.42rem" }}>Creá tu acceso</h1>
-                <p className="muted" style={{ marginTop: 0 }}>
-                  Completá tus datos y elegí tu PIN para entrar rápido desde el gym.
-                </p>
                 <RegisterWizard onSuccess={handleRegistered} onSwitchToLogin={() => setMode("login")} />
               </>
             )}
@@ -1088,7 +1109,14 @@ export default function ClientApp() {
       <header className="app-header">
         <div className="app-header-inner">
           <span className="brand">
-            <img className="brand-logo" src="/img/logo-nocitocoach.jpeg" alt="Nocito Coach" />
+            <img
+              className="brand-logo"
+              src="/img/logo-nocitocoach.webp"
+              width={636}
+              height={547}
+              alt="Nocito Coach"
+              decoding="async"
+            />
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span className="muted hide-sm" style={{ fontSize: ".9rem" }}>
@@ -1431,6 +1459,9 @@ export default function ClientApp() {
                             })}
                           </tbody>
                         </table>
+                        <p className="muted" style={{ fontSize: ".78rem", margin: "8px 0 0" }}>
+                          RIR = repeticiones en reserva: cuántas repeticiones te quedaban antes del fallo.
+                        </p>
 
                         <div style={{ marginTop: 14 }}>
                           <button

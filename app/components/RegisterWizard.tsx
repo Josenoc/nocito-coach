@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   BicepsFlexed,
@@ -160,6 +160,8 @@ const EMPTY: RegisterPayload = {
 };
 
 const STEPS = ["Acceso", "Tu cuerpo", "Objetivo", "Nutrición", "Hábitos"];
+const STORAGE_KEY = "nocito-register-draft-v1";
+const NAME_RE = /^[\p{L}\s'.-]+$/u;
 
 function ChipGroup({
   options,
@@ -225,10 +227,76 @@ export default function RegisterWizard({
   const reduce = useReducedMotion();
   const [step, setStep] = useState(1);
   const [reg, setReg] = useState<RegisterPayload>({ ...EMPTY });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const historyReady = useRef(false);
 
-  const set = (patch: Partial<RegisterPayload>) => setReg((r) => ({ ...r, ...patch }));
+  const set = (patch: Partial<RegisterPayload>) => {
+    setReg((r) => ({ ...r, ...patch }));
+    if (error) setError(null);
+  };
+
+  useEffect(() => {
+    let saved: { reg?: Partial<RegisterPayload>; step?: number } | null = null;
+    try {
+      saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "null");
+    } catch {
+      saved = null;
+    }
+    if (saved?.reg && typeof saved.reg === "object") {
+      setReg({ ...EMPTY, ...saved.reg });
+    }
+    const savedStep =
+      typeof saved?.step === "number" && saved.step >= 1 && saved.step <= STEPS.length
+        ? saved.step
+        : 1;
+    if (savedStep > 1) setStep(savedStep);
+    try {
+      history.replaceState({ ...history.state, nocitoWizard: true, step: 1 }, "");
+      if (savedStep > 1) {
+        history.pushState({ ...history.state, nocitoWizard: true, step: savedStep }, "");
+      }
+    } catch {
+      /* history no disponible */
+    }
+    historyReady.current = true;
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      const safeReg = { ...reg, pin: "", pin_confirm: "" };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ reg: safeReg, step }));
+    } catch {
+      /* almacenamiento no disponible */
+    }
+  }, [reg, step, loaded]);
+
+  useEffect(() => {
+    const onPop = (event: PopStateEvent) => {
+      const target = event.state?.nocitoWizard ? Number(event.state.step) : NaN;
+      if (Number.isInteger(target) && target >= 1 && target <= STEPS.length) {
+        setError(null);
+        setStep(target);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const goToStep = (target: number) => {
+    setStep(target);
+    if (historyReady.current) {
+      try {
+        history.pushState({ ...history.state, nocitoWizard: true, step: target }, "");
+      } catch {
+        /* history no disponible */
+      }
+    }
+  };
 
   const metabolic = useMemo(
     () =>
@@ -247,10 +315,21 @@ export default function RegisterWizard({
 
   const validateStep = (s: number): string | null => {
     if (s === 1) {
-      if (!reg.full_name.trim()) return "Contanos tu nombre completo.";
-      if (!/^[a-z0-9_]{3,20}$/.test(reg.username)) return "El usuario debe tener 3 a 20 caracteres.";
-      if (!/^\S+@\S+\.\S+$/.test(reg.email.trim())) return "Ingresá un email válido.";
-      if (reg.phone.replace(/\D/g, "").length < 6) return "Ingresá un teléfono / WhatsApp válido.";
+      const name = reg.full_name.trim().replace(/\s+/g, " ");
+      if (!name) return "Contanos tu nombre completo.";
+      if (name.length < 2 || name.length > 80)
+        return "El nombre debe tener entre 2 y 80 caracteres.";
+      if (!NAME_RE.test(name))
+        return "El nombre solo puede incluir letras, espacios, apóstrofes, puntos o guiones.";
+      if (/(.)\1{4,}/u.test(name)) return "Revisá el nombre: parece tener caracteres repetidos.";
+      if (!/^[a-z0-9_]{3,20}$/.test(reg.username))
+        return "El usuario debe tener de 3 a 20 caracteres: minúsculas, números o guion bajo.";
+      const email = reg.email.trim().toLowerCase();
+      if (email.length > 120 || !/^\S+@\S+\.\S+$/.test(email))
+        return "Ingresá un email válido.";
+      const phoneDigits = reg.phone.replace(/\D/g, "");
+      if (phoneDigits.length < 8 || phoneDigits.length > 15)
+        return "Ingresá un teléfono / WhatsApp válido (8 a 15 dígitos).";
       if (!/^\d{4}$/.test(reg.pin)) return "El PIN debe tener 4 dígitos.";
       if (reg.pin !== reg.pin_confirm) return "Los PIN no coinciden.";
     }
@@ -268,10 +347,19 @@ export default function RegisterWizard({
           return "Ingresá un % de grasa válido (3 a 60) o dejàlo vacío.";
       }
     }
+    if (s === 4) {
+      if (reg.allergies.trim().length > 200) return "Alergias: máximo 200 caracteres.";
+      if (reg.foods_love.trim().length > 200) return "Alimentos que te encantan: máximo 200 caracteres.";
+      if (reg.foods_avoid.trim().length > 200) return "Alimentos que evitas: máximo 200 caracteres.";
+    }
     if (s === 5) {
       const ty = Number(reg.training_years);
       if (!Number.isFinite(ty) || ty < 0 || ty > 60)
         return "Ingresá tus años de entrenamiento (0 a 60).";
+      if (reg.injuries.trim().length > 500) return "Lesiones o notas de salud: máximo 500 caracteres.";
+      if (reg.motivation.trim().length > 500) return "Motivación: máximo 500 caracteres.";
+      if (!acceptedTerms)
+        return "Para crear tu cuenta tenés que aceptar los términos y la política de privacidad.";
     }
     return null;
   };
@@ -283,12 +371,17 @@ export default function RegisterWizard({
       return;
     }
     setError(null);
-    setStep((s) => Math.min(STEPS.length, s + 1));
+    goToStep(Math.min(STEPS.length, step + 1));
   };
 
   const back = () => {
     setError(null);
-    setStep((s) => Math.max(1, s - 1));
+    if (step <= 1) return;
+    if (historyReady.current && history.state?.nocitoWizard) {
+      history.back();
+    } else {
+      setStep(step - 1);
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -304,13 +397,28 @@ export default function RegisterWizard({
     setError(null);
     setLoading(true);
     try {
+      const payload = {
+        ...reg,
+        full_name: reg.full_name.trim().replace(/\s+/g, " "),
+        username: reg.username.trim().toLowerCase(),
+        email: reg.email.trim().toLowerCase(),
+        phone: reg.phone.trim(),
+        termsAccepted: acceptedTerms,
+      };
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reg),
+        body: JSON.stringify(payload),
       });
-      const json = await res.json();
-      if (!json.ok) throw new Error(json.error);
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || "No pudimos crear la cuenta. Probá de nuevo.");
+      }
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* almacenamiento no disponible */
+      }
       await onSuccess(json.profile);
     } catch (err: any) {
       setError(err.message || "No se pudo crear la cuenta.");
@@ -378,20 +486,25 @@ export default function RegisterWizard({
             {step === 1 && (
               <>
                 <div>
-                  <label className="lbl">Nombre completo</label>
+                  <label className="lbl" htmlFor="reg-name">Nombre completo</label>
                   <input
+                    id="reg-name"
                     className="input"
+                    autoComplete="name"
+                    maxLength={80}
                     value={reg.full_name}
                     onChange={(e) => set({ full_name: e.target.value })}
                     required
                   />
                 </div>
                 <div>
-                  <label className="lbl">Nombre de usuario (para ingresar rápido)</label>
+                  <label className="lbl" htmlFor="reg-username">Nombre de usuario (para ingresar rápido)</label>
                   <input
+                    id="reg-username"
                     className="input"
                     autoComplete="username"
                     placeholder="ej: juanperez"
+                    maxLength={20}
                     value={reg.username}
                     onChange={(e) =>
                       set({ username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20) })
@@ -401,22 +514,26 @@ export default function RegisterWizard({
                 </div>
                 <div className="grid-2">
                   <div>
-                    <label className="lbl">Email</label>
+                    <label className="lbl" htmlFor="reg-email">Email</label>
                     <input
+                      id="reg-email"
                       className="input"
                       type="email"
                       autoComplete="email"
+                      maxLength={120}
                       value={reg.email}
                       onChange={(e) => set({ email: e.target.value })}
                       required
                     />
                   </div>
                   <div>
-                    <label className="lbl">Teléfono / WhatsApp</label>
+                    <label className="lbl" htmlFor="reg-phone">Teléfono / WhatsApp</label>
                     <input
+                      id="reg-phone"
                       className="input"
                       type="tel"
                       autoComplete="tel"
+                      maxLength={20}
                       value={reg.phone}
                       onChange={(e) => set({ phone: e.target.value })}
                       required
@@ -425,8 +542,9 @@ export default function RegisterWizard({
                 </div>
                 <div className="grid-2">
                   <div>
-                    <label className="lbl">PIN (4 dígitos)</label>
+                    <label className="lbl" htmlFor="reg-pin">PIN (4 dígitos)</label>
                     <input
+                      id="reg-pin"
                       className="input"
                       inputMode="numeric"
                       maxLength={4}
@@ -437,8 +555,9 @@ export default function RegisterWizard({
                     />
                   </div>
                   <div>
-                    <label className="lbl">Confirmar PIN</label>
+                    <label className="lbl" htmlFor="reg-pin-confirm">Confirmar PIN</label>
                     <input
+                      id="reg-pin-confirm"
                       className="input"
                       inputMode="numeric"
                       maxLength={4}
@@ -646,6 +765,7 @@ export default function RegisterWizard({
                   <input
                     className="input"
                     placeholder="Ej: lactosa, gluten, frutos secos…"
+                    maxLength={200}
                     value={reg.allergies}
                     onChange={(e) => set({ allergies: e.target.value })}
                   />
@@ -656,6 +776,7 @@ export default function RegisterWizard({
                     <input
                       className="input"
                       placeholder="Ej: pollo, arroz, banana"
+                      maxLength={200}
                       value={reg.foods_love}
                       onChange={(e) => set({ foods_love: e.target.value })}
                     />
@@ -665,6 +786,7 @@ export default function RegisterWizard({
                     <input
                       className="input"
                       placeholder="Ej: pescado, hígado"
+                      maxLength={200}
                       value={reg.foods_avoid}
                       onChange={(e) => set({ foods_avoid: e.target.value })}
                     />
@@ -807,6 +929,7 @@ export default function RegisterWizard({
                     className="input"
                     rows={2}
                     placeholder="Ej: molestia en hombro derecho, hernia lumbar…"
+                    maxLength={500}
                     value={reg.injuries}
                     onChange={(e) => set({ injuries: e.target.value })}
                   />
@@ -817,6 +940,7 @@ export default function RegisterWizard({
                     className="input"
                     rows={2}
                     placeholder="Contale a José por qué empezás este proceso."
+                    maxLength={500}
                     value={reg.motivation}
                     onChange={(e) => set({ motivation: e.target.value })}
                   />
@@ -829,7 +953,42 @@ export default function RegisterWizard({
           </motion.div>
         </AnimatePresence>
 
-        {error && <div className="toast err">{error}</div>}
+        {step === STEPS.length && (
+          <div className="terms-check">
+            <input
+              id="reg-terms"
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => {
+                setAcceptedTerms(e.target.checked);
+                if (error) setError(null);
+              }}
+            />
+            <label htmlFor="reg-terms">
+              Acepto los{" "}
+              <a
+                href="/terminos"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                términos y condiciones
+              </a>{" "}
+              y la{" "}
+              <a
+                href="/privacidad"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                política de privacidad
+              </a>
+              .
+            </label>
+          </div>
+        )}
+
+        {error && <div className="toast err" role="alert">{error}</div>}
 
         <div style={{ display: "flex", gap: 10 }}>
           {step > 1 && (
