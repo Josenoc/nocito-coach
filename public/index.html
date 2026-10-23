@@ -706,11 +706,11 @@
     .hero-motivation {
       position: relative; z-index: 2;
       background: var(--surface); border: none;
-      max-width: 500px; margin: 0 auto;
+max-width: 380px; margin: 0 auto;
       padding: 26px 28px;
       transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease, border-color .28s ease;
     }
-    .hero-motivation-photo { display: block; width: 100%; height: auto; border-radius: 2px; margin-bottom: 22px; }
+.hero-motivation-photo { display: block; width: 100%; max-width: 340px; height: auto; border-radius: 2px; margin-bottom: 22px; margin-inline: auto; }
     .hero-motivation:hover {
       transform: perspective(900px) translate3d(0,-10px,14px);
       border-color: var(--orange-soft);
