@@ -356,7 +356,7 @@
     .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 44px; align-items: stretch; min-width: 0; }
     @media (max-width: 1080px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
-    .price-card { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px 28px; transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease, border-color .28s ease; will-change: transform; }
+    .price-card { position: relative; display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px 28px; transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease, border-color .28s ease; will-change: transform; }
       position: relative; display: flex; flex-direction: column;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 18px; padding: 32px 28px;
@@ -1701,37 +1701,6 @@ max-width: 380px; margin: 0 auto;
           <p class="section-sub" style="margin-inline:auto;">No es un PDF ni una rutina estática: es acceso a mi app privada con supervisión profesional directa. Primero hacemos la evaluación gratuita y la demo; después elegís el plan que mejor se adapte a tu semana.</p>
         </div>
 
-        <!-- Flujo: hablar → probar → elegir plan -->
-        <div class="steps-wrap reveal">
-          <div class="step">
-            <div class="step-ico">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-            </div>
-            <span class="step-num">1</span>
-            <p><b>Hablemos</b> por WhatsApp: evaluación gratuita</p>
-          </div>
-          <div class="step-arrow" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </div>
-          <div class="step">
-            <div class="step-ico">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-            </div>
-            <span class="step-num">2</span>
-            <p><b>Probás la app</b> con una demo</p>
-          </div>
-          <div class="step-arrow" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </div>
-          <div class="step">
-            <div class="step-ico">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
-            </div>
-            <span class="step-num">3</span>
-            <p><b>Elegís tu plan</b> y recibís acceso</p>
-          </div>
-        </div>
-        <p class="steps-note">El pago se realiza después de elegir el plan, por transferencia o Mercado Pago. Luego enviás el comprobante por WhatsApp.</p>
 
         <div class="pricing-grid">
 
