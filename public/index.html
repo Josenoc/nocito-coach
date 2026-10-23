@@ -353,10 +353,10 @@
 
     /* ---------- Pricing ---------- */
     #planes { position: relative; }
-    .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 44px; align-items: stretch; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 44px; align-items: stretch; min-width: 0; }
     @media (max-width: 1080px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 560px) { .pricing-grid { grid-template-columns: 1fr; } }
-    .price-card {
+    .price-card { position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px 28px; transition: transform .28s cubic-bezier(.2,.7,.3,1), box-shadow .32s ease, border-color .28s ease; will-change: transform; }
       position: relative; display: flex; flex-direction: column;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 18px; padding: 32px 28px;
@@ -372,10 +372,10 @@
       background: linear-gradient(180deg, #232020, #1c1816 60%);
       border: 2px solid var(--orange);
       box-shadow: 0 0 0 1px rgba(255,196,0,.18), 0 28px 70px rgba(255,196,0,.22), 0 0 60px rgba(255,196,0,.12);
-      transform: scale(1.045);
+    transform: none;
     }
     .price-card.featured:hover {
-      transform: perspective(900px) translate3d(0,-10px,14px) scale(1.045);
+    transform: perspective(900px) translate3d(0,-10px,14px);
       border-color: var(--orange-soft);
       box-shadow: 0 0 0 1px rgba(255,196,0,.32), 0 38px 80px rgba(255,196,0,.34), 0 0 68px rgba(255,196,0,.24);
     }
@@ -445,7 +445,7 @@
       border-color: var(--blue);
       box-shadow: 0 26px 54px rgba(0,0,0,.45), 0 0 0 1px rgba(0,229,255,.15), 0 0 30px rgba(0,229,255,.12);
     }
-    .contact-card .ico { transition: transform .25s ease, background .25s ease, box-shadow .25s ease; }
+    body { overflow-x: hidden; margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
     .contact-card:hover .ico { transform: scale(1.08); background: rgba(255,87,34,.16); box-shadow: 0 0 22px rgba(255,87,34,.25); }
     .contact-card .ico {
       flex: 0 0 52px; width: 52px; height: 52px; border-radius: 14px;
@@ -858,7 +858,7 @@
       .step { width: 100%; max-width: none; }
     }
 
-    .pricing-grid { gap: 18px; margin-top: 60px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .pricing-grid { gap: 18px; margin-top: 60px; grid-template-columns: repeat(3, 1fr); }
     .price-card {
       border-radius: 10px; border-color: rgba(255,255,255,.1);
       background: linear-gradient(180deg, #121212, #0D0D0D); padding: 36px 30px;
