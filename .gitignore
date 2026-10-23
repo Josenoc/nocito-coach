@@ -8,3 +8,5 @@ out
 npm-debug.log*
 # material de estudio (PDFs extraidos)
 analysis/
+
+tsconfig.tsbuildinfo
