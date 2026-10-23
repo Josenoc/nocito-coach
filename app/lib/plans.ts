@@ -7,11 +7,9 @@ export type Plan = {
 };
 
 export const PLANS: Plan[] = [
-  { key: "estandar", name: "Plan Estándar (3 días)", price: 45000, months: 1, days: 3 },
-  { key: "pro", name: "Plan Pro (4 días)", price: 60000, months: 1, days: 4 },
-  { key: "elite", name: "Plan Elite (5 días)", price: 75000, months: 1, days: 5 },
-  // TODO-JOSE: definir el precio real de Rut&Nut antes de habilitar su cobro online.
-  { key: "rutnut", name: "Rut&Nut", price: 0, months: 1 },
+  { key: "estandar", name: "Plan Estándar (3 días)", price: 49000, months: 1, days: 3 },
+  { key: "pro", name: "Plan Pro (4 días)", price: 69000, months: 1, days: 4 },
+  { key: "elite", name: "Plan Elite (5 días)", price: 89000, months: 1, days: 5 },
 ];
 
 export function getPlan(index: number): Plan | undefined {
