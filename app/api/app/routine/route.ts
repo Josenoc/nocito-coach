@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
+import { todayInArgentina } from "@/lib/dates";
 import type { Exercise, Routine } from "@/lib/app-types";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const clientId =
       session.role === "coach" ? url.searchParams.get("client_id") : session.id;
-    const date = url.searchParams.get("date") || new Date().toISOString().slice(0, 10);
+    const date = url.searchParams.get("date") || todayInArgentina();
 
     if (!clientId) {
       return NextResponse.json(
@@ -32,6 +33,11 @@ export async function GET(req: NextRequest) {
       .eq("active", true)
       .order("position", { ascending: true });
     if (error) {
+      console.error("[app/routine] error leyendo rutinas", {
+        clientId,
+        code: error.code,
+        message: error.message,
+      });
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
 
@@ -45,7 +51,7 @@ export async function GET(req: NextRequest) {
     const exerciseIds = routines.flatMap((r) => (r.exercises ?? []).map((e) => e.id));
     let logs: unknown[] = [];
     if (exerciseIds.length) {
-      const { data: logData } = await supabase
+      const { data: logData, error: logError } = await supabase
         .from("sets_logs")
         .select("*")
         .eq("client_id", clientId)
@@ -53,6 +59,13 @@ export async function GET(req: NextRequest) {
         .order("log_date", { ascending: false })
         .order("set_number", { ascending: true })
         .limit(2000);
+      if (logError) {
+        console.error("[app/routine] error leyendo sets_logs", {
+          clientId,
+          code: logError.code,
+          message: logError.message,
+        });
+      }
       logs = logData ?? [];
     }
 
@@ -69,25 +82,29 @@ export async function GET(req: NextRequest) {
       trainingBlock?: { guideline?: string; weeks?: number } | null;
     } | null;
 
-    return NextResponse.json({
-      ok: true,
-      date,
-      routines: pending ? [] : routines,
-      logs: pending ? [] : logs,
-      status,
-      nutrition: pending ? null : prof?.nutrition_plan ?? null,
-      anamnesis: prof?.anamnesis ?? null,
-      setRir: pending ? {} : anamnesis?.setRir ?? {},
-      trainingBlock: pending ? null : anamnesis?.trainingBlock ?? null,
-      client: prof
-        ? {
-            full_name: prof.full_name ?? "",
-            email: prof.email ?? "",
-            phone: prof.phone ?? "",
-          }
-        : null,
-    });
-  } catch {
+    return NextResponse.json(
+      {
+        ok: true,
+        date,
+        routines: pending ? [] : routines,
+        logs: pending ? [] : logs,
+        status,
+        nutrition: pending ? null : prof?.nutrition_plan ?? null,
+        anamnesis: prof?.anamnesis ?? null,
+        setRir: pending ? {} : anamnesis?.setRir ?? {},
+        trainingBlock: pending ? null : anamnesis?.trainingBlock ?? null,
+        client: prof
+          ? {
+              full_name: prof.full_name ?? "",
+              email: prof.email ?? "",
+              phone: prof.phone ?? "",
+            }
+          : null,
+      },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  } catch (err) {
+    console.error("[app/routine] excepción", err);
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
   }
 }

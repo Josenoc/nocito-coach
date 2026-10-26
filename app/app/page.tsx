@@ -36,6 +36,16 @@ const TEST_LOGIN_ENABLED =
   process.env.NODE_ENV !== "production" ||
   process.env.NEXT_PUBLIC_ENABLE_TEST_LOGIN === "true";
 
+// Fecha local del alumno en formato YYYY-MM-DD. Evita el desfase de UTC:
+// un entrenamiento a las 22:00 en Argentina no debe quedar con la fecha del
+// día siguiente (que es lo que devuelve toISOString() después de las 21:00).
+function localISODate(d: Date = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 // Tiempo que permanece la confirmación de voz (con opción "Deshacer") antes de
 // confirmar el guardado y auto-ocultarse. Durante esta ventana el alumno puede
 // deshacer y no se persiste nada en el servidor.
@@ -266,6 +276,7 @@ export default function ClientApp() {
           fetch("/api/app/sets", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            keepalive: true,
             body: JSON.stringify({
               exercise_id: p.ex.id,
               set_number: s.set_number,
@@ -274,6 +285,7 @@ export default function ClientApp() {
               target_reps: p.ex.target_reps,
               target_weight: p.ex.target_weight,
               phantom_reference_10_percent: p.ex.target_weight,
+              log_date: localISODate(),
             }),
           }).catch(() => {});
         }
@@ -351,7 +363,7 @@ export default function ClientApp() {
       const rl: Routine[] = json.routines ?? [];
       const logsData: SetLog[] = json.logs ?? [];
       const rirMap = (json.setRir as Record<string, number>) ?? {};
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayStr = localISODate();
       setRoutines(rl);
       setPlanStatus(json.status ?? "active");
       setNutrition((json.nutrition as NutritionPlan | null) ?? null);
@@ -527,8 +539,11 @@ export default function ClientApp() {
           log_date: logDate,
         }),
       });
-      const json = await res.json();
-      if (json.ok) {
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || `Error ${res.status} al guardar la serie`);
+      }
+      {
         updateRow(ex.id, setNumber, { saved: true });
         if (json.log) upsertLog(json.log as SetLog);
         if (today) {
@@ -618,8 +633,29 @@ export default function ClientApp() {
           }
         }
       }
-    } catch {
-      /* ignore */
+    } catch (err: any) {
+      // Antes el error se ignoraba en silencio: la serie quedaba "cargada"
+      // en pantalla pero nunca llegaba a la base. Ahora revertimos el estado
+      // y avisamos al alumno con el motivo real.
+      updateRow(ex.id, setNumber, { saved: false });
+      const msg = String(err?.message || "");
+      const sessionExpired = /no autenticado|sesi[oó]n|session/i.test(msg);
+      console.error("[app/sets] error al guardar", {
+        exerciseId: ex.id,
+        setNumber,
+        message: msg,
+      });
+      showToast(
+        {
+          exId: ex.id,
+          kind: "err",
+          title: sessionExpired ? "Tu sesión venció" : "No se pudo guardar la serie",
+          detail: sessionExpired
+            ? "Volvé a iniciar sesión para seguir registrando."
+            : `${msg || "Error de conexión"} · Intentá de nuevo.`,
+        },
+        6000
+      );
     }
   };
 
@@ -661,6 +697,8 @@ export default function ClientApp() {
     pendingVoice.current = null;
     dismissToast();
     if (!p) return;
+    const saved = new Set<number>();
+    let lastError = "";
     for (const s of p.sets) {
       try {
         const res = await fetch("/api/app/sets", {
@@ -678,18 +716,55 @@ export default function ClientApp() {
           }),
         });
         const json = await res.json().catch(() => null);
-        if (json?.ok && json.log) upsertLog(json.log as SetLog);
-      } catch {
-        /* ignore */
+        if (!res.ok || !json?.ok) {
+          lastError = json?.error || `Error ${res.status}`;
+          continue;
+        }
+        saved.add(s.set_number);
+        if (json.log) upsertLog(json.log as SetLog);
+      } catch (err: any) {
+        lastError = err?.message || "Error de conexión";
       }
+    }
+    if (!saved.size) {
+      // Ninguna serie llegó a la base: no marcar nada como guardado.
+      setRows((prev) => ({
+        ...prev,
+        [p.ex.id]: (prev[p.ex.id] ?? []).map((r) =>
+          p.sets.some((s) => s.set_number === r.set_number) ? { ...r, saved: false } : r
+        ),
+      }));
+      showToast(
+        {
+          exId: p.ex.id,
+          kind: "err",
+          title: "No se pudieron guardar las series",
+          detail: `${lastError || "Error de conexión"} · Grabá de nuevo o cargá a mano.`,
+        },
+        7000
+      );
+      return;
     }
     setRows((prev) => ({
       ...prev,
       [p.ex.id]: (prev[p.ex.id] ?? []).map((r) =>
-        p.sets.some((s) => s.set_number === r.set_number) ? { ...r, saved: true } : r
+        p.sets.some((s) => s.set_number === r.set_number)
+          ? { ...r, saved: saved.has(r.set_number) }
+          : r
       ),
     }));
-    p.sets.forEach((s) => flashSet(p.ex.id, s.set_number));
+    saved.forEach((n) => flashSet(p.ex.id, n));
+    if (saved.size < p.sets.length) {
+      showToast(
+        {
+          exId: p.ex.id,
+          kind: "err",
+          title: "Algunas series no se guardaron",
+          detail: `${saved.size} de ${p.sets.length} guardadas. ${lastError} · Revisá tu conexión.`,
+        },
+        7000
+      );
+    }
   }
 
   // Revierte el relleno por voz si el alumno toca "Deshacer".

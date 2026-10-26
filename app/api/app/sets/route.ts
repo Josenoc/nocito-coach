@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
+import { todayInArgentina, isValidISODate } from "@/lib/dates";
 import { sendCoachActivityEmail } from "@/app/lib/notify";
 import { sendCoachPush } from "@/app/lib/push";
 
@@ -42,23 +43,76 @@ async function loadExerciseOwner(
 const MISSING_LINK_COL =
   /(routine_id|week_number|day_number|does not exist|PGRST204|42703)/i;
 
-// Guarda la serie. Si la migración que agrega las columnas de vínculo
-// (routine_id / week_number / day_number) todavía no se aplicó, reintenta
-// sin ellas para no romper el registro del alumno.
+// Guarda la serie. Es defensivo a propósito, porque el entorno de producción
+// puede estar en un estado intermedio de migraciones:
+//  a) si todavía no existen routine_id / week_number / day_number, reintenta
+//     sin esas columnas (la serie nunca se pierde);
+//  b) si falta la restricción única (exercise_id, client_id, log_date,
+//     set_number), Postgres responde 42P10 y el upsert falla siempre; en ese
+//     caso hacemos update-or-insert manual.
 async function upsertSetLog(
   row: Record<string, unknown>,
   link: Record<string, unknown>
 ) {
-  const supabase = getSupabaseAdmin();
+  const supabase = getSupabaseAdmin() as any;
   const onConflict = "exercise_id,client_id,log_date,set_number";
+  let current: Record<string, unknown> = { ...row, ...link };
+
   let res = await supabase
     .from("sets_logs")
-    .upsert({ ...row, ...link }, { onConflict })
+    .upsert(current, { onConflict })
     .select()
     .single();
+
   if (res.error && MISSING_LINK_COL.test(`${res.error.message} ${res.error.code ?? ""}`)) {
-    res = await supabase.from("sets_logs").upsert(row, { onConflict }).select().single();
+    console.warn("[sets] columnas de vínculo ausentes; guardando sin routine_id/week/day", {
+      code: res.error.code,
+      message: res.error.message,
+    });
+    current = { ...row };
+    res = await supabase
+      .from("sets_logs")
+      .upsert(current, { onConflict })
+      .select()
+      .single();
   }
+
+  if (
+    res.error &&
+    /42P10|no unique|on conflict/i.test(`${res.error.message} ${res.error.code ?? ""}`)
+  ) {
+    console.warn("[sets] falta la restricción única; usando update/insert manual", {
+      code: res.error.code,
+      message: res.error.message,
+    });
+    const match = {
+      exercise_id: row.exercise_id,
+      client_id: row.client_id,
+      log_date: row.log_date,
+      set_number: row.set_number,
+    };
+    const upd = await supabase
+      .from("sets_logs")
+      .update(current)
+      .match(match)
+      .select();
+    if (!upd.error && Array.isArray(upd.data) && upd.data.length) {
+      return { data: upd.data[0], error: null };
+    }
+    const ins = await supabase.from("sets_logs").insert(current).select().single();
+    if (!ins.error) return ins;
+    if (String(ins.error.code) === "23505") {
+      const upd2 = await supabase
+        .from("sets_logs")
+        .update(current)
+        .match(match)
+        .select()
+        .single();
+      if (!upd2.error) return upd2;
+    }
+    return ins;
+  }
+
   return res;
 }
 
@@ -89,10 +143,15 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await query;
     if (error) {
+      console.error("[sets] GET error", { clientId, code: error.code, message: error.message });
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ ok: true, logs: data ?? [] });
-  } catch {
+    return NextResponse.json(
+      { ok: true, logs: data ?? [] },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  } catch (err) {
+    console.error("[sets] GET excepción", err);
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
   }
 }
@@ -119,16 +178,22 @@ export async function POST(req: NextRequest) {
 
     const owner = await loadExerciseOwner(clientId, exerciseId);
     if (!owner) {
+      console.error("[sets] ejercicio no pertenece al cliente", {
+        clientId,
+        exerciseId,
+        role: session.role,
+      });
       return NextResponse.json(
-        { ok: false, error: "Ejercicio no pertenece al cliente" },
+        {
+          ok: false,
+          code: "EXERCISE_NOT_OWNED",
+          error: "Ejercicio no pertenece al cliente. Recargá la app para actualizar tu rutina.",
+        },
         { status: 403 }
       );
     }
 
-    const logDate =
-      typeof body?.log_date === "string" && body.log_date
-        ? body.log_date
-        : new Date().toISOString().slice(0, 10);
+    const logDate = isValidISODate(body?.log_date) ? body.log_date : todayInArgentina();
 
     const supabase = getSupabaseAdmin();
 
@@ -163,7 +228,32 @@ export async function POST(req: NextRequest) {
     const { data, error } = await upsertSetLog(row, link);
 
     if (error) {
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      const rlsBlocked =
+        String(error.code) === "42501" ||
+        /row-level security|permission denied|PGRST301/i.test(
+          `${error.message} ${error.details ?? ""}`
+        );
+      console.error("[sets] POST upsert error", {
+        clientId,
+        exerciseId,
+        setNumber,
+        logDate,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        rlsBlocked,
+      });
+      return NextResponse.json(
+        {
+          ok: false,
+          code: rlsBlocked ? "RLS_BLOCKED" : "SAVE_FAILED",
+          error: rlsBlocked
+            ? "La base rechazó el guardado por permisos (RLS). El administrador debe revisar SUPABASE_SERVICE_ROLE_KEY."
+            : `No se pudo guardar la serie: ${error.message}`,
+        },
+        { status: 500 }
+      );
     }
 
     const rirVal = toNum(body?.rir);
@@ -205,7 +295,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true, log: data }, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("[sets] POST excepción", err);
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
   }
 }
