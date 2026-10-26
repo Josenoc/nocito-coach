@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import LegalPage from "@/app/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Términos y condiciones (borrador) | nocito.coach",
-  description: "Borrador de los términos y condiciones de nocito.coach.",
-  robots: { index: false, follow: false },
+  title: "Términos y condiciones | nocito.coach",
+  description: "Términos y condiciones de uso de nocito.coach: planes, pagos, responsabilidad y contacto.",
+  robots: { index: true, follow: true },
 };
 
 export default function TerminosPage() {
@@ -14,9 +14,10 @@ export default function TerminosPage() {
       <p>
         nocito.coach ofrece asesoría de entrenamiento y alimentación, con planes
         personalizados y acceso a una app privada para hacer seguimiento. El
-        servicio lo presta José Nocito bajo la marca <strong>nocito.coach</strong>.
-        Datos legales pendientes:{" "}
-        <span className="legal-todo">TODO-JOSE: razón social, CUIT y domicilio legal</span>.
+        servicio lo presta <strong>José Nocito</strong>, CUIT{" "}
+        <strong>20-25272544-0</strong>, domiciliado en{" "}
+        <strong>Pasaje Babilonia 12, Ciudad de Mendoza, Provincia de Mendoza</strong>,
+        bajo la marca <strong>nocito.coach</strong>.
       </p>
 
       <h2>2. Planes, precios y pagos</h2>
@@ -35,9 +36,15 @@ export default function TerminosPage() {
           corresponda.
         </li>
         <li>
-          <span className="legal-todo">
-            TODO-JOSE: completar precios definitivos y alias/CBU antes de publicar.
-          </span>
+          Precios vigentes: <strong>Plan Estándar</strong> — $49.000 ARS/mes (3
+          días/semana); <strong>Plan Pro</strong> — $69.000 ARS/mes (4
+          días/semana); <strong>Plan Elite</strong> — $89.000 ARS/mes (5
+          días/semana). Los precios pueden actualizarse y la versión vigente es la
+          publicada en la sección Planes.
+        </li>
+        <li>
+          Transferencia bancaria: alias <strong>doce.contenidos</strong> · CVU{" "}
+          <strong>0000003100074304139861</strong>.
         </li>
       </ul>
 
@@ -100,10 +107,9 @@ export default function TerminosPage() {
 
       <h2>9. Ley aplicable y jurisdicción</h2>
       <p>
-        Estos términos se rigen por las leyes de la República Argentina.
-        <span className="legal-todo">
-          {" "}TODO-JOSE: definir ciudad/jurisdicción competente.
-        </span>
+        Estos términos se rigen por las leyes de la República Argentina. Cualquier
+        controversia será resuelta ante los tribunales competentes de la{" "}
+        <strong>Ciudad de Mendoza, Provincia de Mendoza</strong>.
       </p>
 
       <h2>10. Contacto</h2>

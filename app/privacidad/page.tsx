@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import LegalPage from "@/app/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Política de privacidad (borrador) | nocito.coach",
-  description: "Borrador de la política de privacidad de nocito.coach.",
-  robots: { index: false, follow: false },
+  title: "Política de privacidad | nocito.coach",
+  description: "Política de privacidad de nocito.coach: qué datos recopilamos, para qué los usamos y tus derechos.",
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacidadPage() {
@@ -12,9 +12,10 @@ export default function PrivacidadPage() {
     <LegalPage title="Política de privacidad">
       <h2>1. Quién es el responsable</h2>
       <p>
-        El responsable del tratamiento es José Nocito, que presta servicios bajo
-        la marca <strong>nocito.coach</strong>. Datos legales pendientes:{" "}
-        <span className="legal-todo">TODO-JOSE: razón social, CUIT y domicilio legal</span>.
+        El responsable del tratamiento es <strong>José Nocito</strong>, CUIT{" "}
+        <strong>20-25272544-0</strong>, domiciliado en{" "}
+        <strong>Pasaje Babilonia 12, Ciudad de Mendoza, Provincia de Mendoza</strong>,
+        que presta servicios bajo la marca <strong>nocito.coach</strong>.
         Contacto: <a href="mailto:nocito.coach@gmail.com">nocito.coach@gmail.com</a>.
       </p>
 
@@ -64,10 +65,15 @@ export default function PrivacidadPage() {
         vendemos tus datos personales.
       </p>
       <p>
-        <span className="legal-todo">
-          TODO-JOSE: listar los proveedores definitivos y sus países de
-          alojamiento si se requiere transferencia internacional.
-        </span>
+        Proveedores principales: <strong>Vercel</strong> (alojamiento, base de
+        claves y analítica — Estados Unidos), <strong>Supabase</strong> (base de
+        datos y autenticación — Estados Unidos),{" "}
+        <strong>Mercado Pago</strong> (procesamiento de pagos — Argentina),{" "}
+        <strong>Resend</strong> (envío de emails transaccionales — Estados Unidos),{" "}
+        <strong>Groq</strong> (transcripción de audios de voz a texto — Estados
+        Unidos), <strong>Google Fonts y Unsplash</strong> (tipografías e imágenes —
+        Estados Unidos). Estos proveedores tratan solo los datos necesarios para
+        prestar su servicio.
       </p>
 
       <h2>5. Cuánto tiempo los conservamos</h2>
@@ -115,12 +121,15 @@ export default function PrivacidadPage() {
 
       <h2>10. Cookies y analítica</h2>
       <p>
-        Podemos usar mediciones agregadas de tráfico y rendimiento. Si en el
-        futuro incorporamos cookies no esenciales, pediremos tu consentimiento
-        cuando corresponda.
-        <span className="legal-todo">
-          {" "}TODO-JOSE: confirmar herramientas de analítica y cookies definitivas.
-        </span>
+        Usamos <strong>Vercel Web Analytics</strong> para medir visitas de forma
+        agregada (sin cookies publicitarias ni de terceros). La app privada guarda
+        en tu navegador tu sesión y preferencias (almacenamiento local) para que no
+        tengas que iniciar sesión cada vez. No usamos cookies con fines
+        publicitarios ni vendemos información de navegación.
+      </p>
+      <p>
+        Si en el futuro incorporamos cookies no esenciales, pediremos tu
+        consentimiento cuando corresponda.
       </p>
 
       <h2>11. Cambios</h2>

@@ -14,11 +14,8 @@ export default function LegalPage({
           ← Volver al inicio
         </a>
         <h1 className="legal-title">{title}</h1>
-        <p className="legal-draft">
-          BORRADOR — revisar con un profesional legal antes de publicar.
-        </p>
         <p className="legal-updated">
-          Última actualización: TODO-JOSE (definir fecha de publicación).
+          Última actualización: 26 de octubre de 2026.
         </p>
         {children}
         <p className="legal-contact">
