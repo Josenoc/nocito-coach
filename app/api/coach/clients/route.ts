@@ -15,6 +15,10 @@ export async function GET() {
     .eq("role", "client")
     .order("full_name", { ascending: true });
   if (error) {
+    console.error("[coach/clients] error leyendo perfiles", {
+      code: error.code,
+      message: error.message,
+    });
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
   const clients = (data ?? []).map((c: any) => {
@@ -32,7 +36,10 @@ export async function GET() {
       has_client_update: updatedAt > 0 && updatedAt > seenAt,
     };
   });
-  return NextResponse.json({ ok: true, clients });
+  return NextResponse.json(
+    { ok: true, clients },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
 
 export async function POST(req: NextRequest) {

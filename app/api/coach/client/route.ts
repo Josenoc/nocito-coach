@@ -86,14 +86,36 @@ export async function GET(req: NextRequest) {
       .limit(100),
   ]);
 
-  return NextResponse.json({
-    ok: true,
-    profile,
-    routines,
-    logs: logsRes.data ?? [],
-    audio: audioRes.data ?? [],
-    changes,
-  });
+  // Sin estos logs, un error de lectura parecía "el alumno no cargó nada".
+  if (logsRes.error) {
+    console.error("[coach/client] error leyendo sets_logs", {
+      clientId: id,
+      code: logsRes.error.code,
+      message: logsRes.error.message,
+      details: logsRes.error.details,
+      hint: logsRes.error.hint,
+    });
+  }
+  if (audioRes.error) {
+    console.error("[coach/client] error leyendo audio_reports", {
+      clientId: id,
+      code: audioRes.error.code,
+      message: audioRes.error.message,
+    });
+  }
+
+  return NextResponse.json(
+    {
+      ok: true,
+      profile,
+      routines,
+      logs: logsRes.data ?? [],
+      audio: audioRes.data ?? [],
+      logsError: logsRes.error?.message ?? null,
+      changes,
+    },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
 
 // Campos de anamnesis que el coach puede editar (el resto de las claves

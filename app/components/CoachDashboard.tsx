@@ -8,6 +8,7 @@ import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
 import ProgramEditor from "@/app/components/ProgramEditor";
 import CoachProfileEditor from "@/app/components/CoachProfileEditor";
+import CoachProgressMirror from "@/app/components/CoachProgressMirror";
 
 interface ClientRow {
   id: string;
@@ -427,7 +428,7 @@ export default function CoachDashboard() {
   }, [coach]);
 
   const loadClients = async () => {
-    const res = await fetch("/api/coach/clients");
+    const res = await fetch("/api/coach/clients", { cache: "no-store" });
     const json = await res.json();
     if (json.ok) {
       const list: ClientRow[] = [...(json.clients ?? [])];
@@ -605,13 +606,65 @@ export default function CoachDashboard() {
   };
 
   // Refresco silencioso para el espejo en vivo: sólo actualiza los datos de
-  // progreso, sin tocar ediciones en curso (nutrición / guía del bloque).
-  const refreshProgress = async () => {
+  // progreso del alumno (series, audios, rutinas y anamnesis), sin pisar
+  // ediciones en curso (nutrición / guía del bloque).
+  const refreshProgress = async (): Promise<void> => {
     if (!selectedId) return;
-    const res = await fetch(`/api/coach/client?id=${selectedId}`);
-    const json = await res.json();
-    if (json.ok) setDetail(json);
+    const id = selectedId;
+    const res = await fetch(`/api/coach/client?id=${id}`, { cache: "no-store" });
+    const json = await res.json().catch(() => null);
+    if (!json?.ok) return;
+    setDetail((prev: any) => {
+      if (!prev) return json;
+      return {
+        ...prev,
+        logs: json.logs ?? [],
+        audio: json.audio ?? [],
+        routines: json.routines ?? prev.routines,
+        changes: json.changes ?? prev.changes,
+        profile: {
+          ...prev.profile,
+          anamnesis: json.profile?.anamnesis ?? prev.profile?.anamnesis,
+          routine_status: json.profile?.routine_status ?? prev.profile?.routine_status,
+        },
+      };
+    });
   };
+
+  // Sincronización automática del panel del coach: refresca la lista de
+  // alumnos y la ficha abierta cada 20 s (sólo con la pestaña visible) y al
+  // volver a la pestaña/ventana. Así las series que carga el alumno aparecen
+  // sin recargar la página.
+  useEffect(() => {
+    if (!coach) return;
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      try {
+        await loadClients();
+        // En la pestaña Perfil el "Espejo de entrenamiento" ya refresca solo
+        // cada 20 s; evitamos duplicar la descarga de series.
+        if (selectedId && tab !== "perfil") await refreshProgress();
+      } catch {
+        /* la próxima pasada reintenta */
+      }
+    };
+    const interval = window.setInterval(tick, 20000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    const onFocus = () => tick();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coach, selectedId, tab]);
 
   const setMeal = (idx: number, col: 0 | 1, value: string) => {
     setNutrition((n) => ({
@@ -1567,6 +1620,14 @@ export default function CoachDashboard() {
 
                 {tab === "perfil" && detail && (
                   <div style={{ marginTop: 12 }}>
+                    <CoachProgressMirror
+                      key={`mirror-${selectedId ?? "none"}`}
+                      detail={detail}
+                      clientName={
+                        detail?.profile?.full_name || detail?.profile?.email || "el alumno"
+                      }
+                      onRefresh={refreshProgress}
+                    />
                     <CoachProfileEditor
                       key={`perfil-${selectedId ?? "none"}`}
                       clientId={selectedId ?? ""}
