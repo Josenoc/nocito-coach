@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
 import { sendCoachActivityEmail } from "@/app/lib/notify";
-import { sendCoachPush } from "@/app/lib/push";
-
+import { sendPushToProfile } from "@/app/lib/push";
+import { notifyCoachEvent } from "@/app/lib/push-triggers";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -69,11 +69,8 @@ export async function POST(req: NextRequest) {
           : "Nota de voz general",
       }).catch((err) => console.error("notify voice", err));
 
-      sendCoachPush({
-        title: "Nocito Coach",
-        body: `${profileRes?.data?.full_name || profileRes?.data?.email || "Tu alumno"} envió una nota de voz`,
-        url: "/app/admin",
-      }).catch((err) => console.error("push voice", err));
+      sendPushToProfile(session.id, { title: "Nota guardada", body: "Tu nota de voz se envió al coach.", url: "/app", tag: `note-${exerciseId || "general"}` }).catch((e) => console.error("push student", e));
+      notifyCoachEvent(session.id, "voice", `envió una nota de voz${(exRes as any)?.data?.name ? ` (${(exRes as any).data.name})` : ""}`).catch((e) => console.error("push voice", e));
     }
 
     const { data: report, error: insErr } = await supabase
