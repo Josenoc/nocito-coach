@@ -198,6 +198,77 @@ function Dato({ label, value }: { label: string; value: string }) {
   );
 }
 
+function LastSessionBlock({ logs, routines }: { logs: any[]; routines: any[] }) {
+  const loaded = logs.filter((l) => l.actual_reps != null || l.actual_weight != null);
+  const fmt = (iso: string) => iso.split("-").reverse().join("/");
+  const sessions = Array.from(new Set(loaded.map((l) => String(l.log_date)))).sort().reverse();
+  const names: Record<string, string> = {};
+  routines.forEach((r: any) =>
+    (r.exercises ?? []).forEach((e: any) => {
+      names[e.id] = e.name;
+    })
+  );
+  const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
+  const head = (
+    <h4
+      style={{
+        margin: "0 0 10px",
+        fontSize: ".74rem",
+        letterSpacing: ".12em",
+        textTransform: "uppercase",
+        color: "#FFC400",
+      }}
+    >
+      Actividad del alumno
+    </h4>
+  );
+  if (sessions.length === 0) {
+    return (
+      <div style={wrap}>
+        {head}
+        <p className="muted" style={{ margin: 0 }}>Todavía no cargó series.</p>
+      </div>
+    );
+  }
+  const last = sessions[0];
+  const byEx: Record<string, any[]> = {};
+  loaded
+    .filter((l) => l.log_date === last && Number(l.set_number) > 0)
+    .forEach((l) => {
+      (byEx[l.exercise_id] = byEx[l.exercise_id] || []).push(l);
+    });
+  return (
+    <div style={wrap}>
+      {head}
+      <div className="muted" style={{ fontSize: ".85rem", marginBottom: 8 }}>
+        Última sesión: <b style={{ color: "#fff" }}>{fmt(last)}</b> · {sessions.length} sesiones
+        registradas
+      </div>
+      {Object.keys(byEx).map((exId) => {
+        const sets = [...byEx[exId]].sort((a, b) => a.set_number - b.set_number);
+        return (
+          <div
+            key={exId}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 8,
+              padding: "6px 0",
+              borderBottom: "1px solid #1c1c1c",
+              fontSize: ".85rem",
+            }}
+          >
+            <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{names[exId] ?? "Ejercicio"}</span>
+            <span className="muted" style={{ textAlign: "right", minWidth: 0, overflowWrap: "anywhere" }}>
+              {sets.length} series · {sets.map((s) => `${s.actual_reps ?? "-"}×${s.actual_weight ?? "-"}`).join(" / ")}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: string }) {
   const active = routines.filter((r) => r.active !== false);
   const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
@@ -645,7 +716,7 @@ export default function CoachDashboard() {
         await loadClients();
         // En la pestaña Perfil el "Espejo de entrenamiento" ya refresca solo
         // cada 20 s; evitamos duplicar la descarga de series.
-        if (selectedId && tab !== "perfil") await refreshProgress();
+        if (selectedId) await refreshProgress();
       } catch {
         /* la próxima pasada reintenta */
       }
@@ -1548,6 +1619,7 @@ export default function CoachDashboard() {
                         El cliente todavía no completó su ficha inicial.
                       </p>
                     )}
+                    <LastSessionBlock logs={detail.logs ?? []} routines={detail.routines ?? []} />
                     {tab !== "perfil" && (
                       <RoutineSummary
                         routines={detail.routines ?? []}
