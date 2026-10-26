@@ -23,6 +23,7 @@ function cleanExercises(
       return {
         routine_id: routineId,
         name,
+        id: typeof e.id === "string" ? e.id : undefined,
         video_url: e.video_url ? String(e.video_url).trim() : null,
         technique_notes: e.technique_notes ? String(e.technique_notes) : null,
         order_index: Number.isFinite(Number(e.order_index))
@@ -109,22 +110,54 @@ export async function PUT(req: NextRequest) {
   }
 
   if (Array.isArray(body?.exercises)) {
-    const { error: delErr } = await supabase
+    const { data: current, error: curErr } = await supabase
       .from("exercises")
-      .delete()
+      .select("id, name")
       .eq("routine_id", id);
-    if (delErr) {
-      return NextResponse.json({ ok: false, error: delErr.message }, { status: 500 });
+    if (curErr) {
+      return NextResponse.json({ ok: false, error: curErr.message }, { status: 500 });
     }
-    const exercises = cleanExercises(body.exercises, id);
-    if (exercises.length) {
-      const { error: exErr } = await supabase.from("exercises").insert(exercises);
-      if (exErr) {
-        return NextResponse.json({ ok: false, error: exErr.message }, { status: 500 });
+    const existing = new Map<string, string>(
+      (current ?? []).map((ex: { id: string; name: string }) => [ex.id, ex.name])
+    );
+    const rows = cleanExercises(body.exercises, id);
+    const keepIds = new Set<string>();
+
+    for (const row of rows) {
+      const rowId = typeof row.id === "string" && existing.has(row.id) ? row.id : null;
+      if (rowId) {
+        keepIds.add(rowId);
+        const { id: _omit, routine_id: _r, ...fields } = row;
+        const { error: updErr } = await supabase.from("exercises").update(fields).eq("id", rowId);
+        if (updErr) {
+          return NextResponse.json({ ok: false, error: updErr.message }, { status: 500 });
+        }
+      } else {
+        const { id: _omit, ...fields } = row;
+        const { error: insErr } = await supabase.from("exercises").insert(fields);
+        if (insErr) {
+          return NextResponse.json({ ok: false, error: insErr.message }, { status: 500 });
+        }
+      }
+    }
+
+    // Los ejercicios quitados de la rutina se borran, pero sus series quedan:
+    // primero se guarda su nombre en cada serie y después se desvinculan.
+    const removed = [...existing.keys()].filter((exId) => !keepIds.has(exId));
+    for (const exId of removed) {
+      await supabase
+        .from("sets_logs")
+        .update({ exercise_name: existing.get(exId) ?? null })
+        .eq("exercise_id", exId)
+        .is("exercise_name", null);
+    }
+    if (removed.length) {
+      const { error: delErr } = await supabase.from("exercises").delete().in("id", removed);
+      if (delErr) {
+        return NextResponse.json({ ok: false, error: delErr.message }, { status: 500 });
       }
     }
   }
-
   return NextResponse.json({ ok: true });
 }
 

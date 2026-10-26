@@ -16,6 +16,7 @@ function toNum(value: unknown): number | null {
 // Vínculo del ejercicio con su rutina (semana / día) para trazabilidad.
 type ExerciseOwner = {
   routineId: string;
+  exerciseName: string;
   weekNumber: number | null;
   dayNumber: number | null;
 };
@@ -27,7 +28,7 @@ async function loadExerciseOwner(
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("exercises")
-    .select("id, routines!inner(client_id, id, week_number, position)")
+    .select("id, name, routines!inner(client_id, id, week_number, position)")
     .eq("id", exerciseId)
     .single();
   if (error || !data) return null;
@@ -35,6 +36,7 @@ async function loadExerciseOwner(
   if (!routine || routine.client_id !== clientId) return null;
   return {
     routineId: String(routine.id),
+    exerciseName: String((data as any).name ?? ""),
     weekNumber: typeof routine.week_number === "number" ? routine.week_number : null,
     dayNumber: typeof routine.position === "number" ? routine.position : null,
   };
@@ -223,6 +225,7 @@ export async function POST(req: NextRequest) {
       routine_id: owner.routineId,
       week_number: owner.weekNumber,
       day_number: owner.dayNumber,
+      exercise_name: owner.exerciseName,
     };
 
     const { data, error } = await upsertSetLog(row, link);
