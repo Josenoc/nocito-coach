@@ -1384,12 +1384,24 @@ export default function ClientApp() {
                 const prevEx =
                   prevWeek >= 1 ? exerciseInWeek(prevWeek, dayNameOf(current), ex) : undefined;
                 const prevText = fmtLog(latestLogFor(prevEx?.id));
+                const dayName = dayNameOf(current);
+                const weeklyBests: (number | null)[] = [];
+                for (let w = 1; w < week; w++) {
+                  const past = exerciseInWeek(w, dayName, ex);
+                  const best = past
+                    ? logs
+                        .filter((l) => l.exercise_id === past.id && l.actual_weight != null)
+                        .reduce<number | null>(
+                          (m, l) => (m === null || Number(l.actual_weight) > m ? Number(l.actual_weight) : m),
+                          null
+                        )
+                    : null;
+                  weeklyBests.push(best);
+                }
                 const advice = proposeProgression({
                   exercise: ex,
                   sets: (rows[ex.id] ?? []).filter((r) => r.set_number > 0),
-                  prevBestWeight: prevEx
-                    ? latestLogFor(prevEx.id)?.actual_weight ?? null
-                    : null,
+                  weeklyBests,
                   unit: ex.unit,
                 });
                 return (
@@ -1546,7 +1558,7 @@ export default function ClientApp() {
 
                         <div style={{ marginTop: 14 }}>
                           <button
-                            className={`mic-btn ${recording ? "rec" : ""}`}
+                            className={`mic-btn ${recording ? "rec" : ""} ${processing ? "proc" : ""}`}
                             disabled={processing || (voiceBusy !== null && !processing)}
                             onClick={() => (recording ? stopRec() : startRec(ex))}
                           >

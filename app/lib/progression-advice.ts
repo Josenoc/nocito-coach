@@ -4,9 +4,14 @@ import type { Exercise } from "@/lib/app-types";
  * Motor de propuesta de progresión individual para el alumno.
  * Función *pura* (sin React ni red): compara lo que el alumno acaba de
  * registrar contra el objetivo prescripto (reps + RIR del ejercicio) y su
- * mejor marca de la semana previa, y devuelve una recomendación concreta
- * para la próxima sesión: subir carga, mantener, deload o cambiar variante.
+ * historial semanal de cargas, y devuelve una recomendación concreta para la
+ * próxima sesión: subir carga, mantener, deload o cambiar variante.
+ *
+ * Regla de progresión: solo se sugiere SUBIR la carga cuando el mismo ejercicio
+ * se hizo con el mismo peso durante SUSTAIN_WEEKS semanas consecutivas.
  */
+
+export const SUSTAIN_WEEKS = 4;
 
 export type AdviceKind = "progress" | "hold" | "deload" | "variation";
 
@@ -52,13 +57,33 @@ function fmtKg(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1).replace(".", ",");
 }
 
+/**
+ * Cuántas semanas seguidas (contando la actual, al final) el ejercicio se hizo
+ * con exactamente la misma carga. Una semana sin registro corta la racha.
+ */
+export function sameWeightStreak(
+  weeklyBests: (number | null | undefined)[],
+  currentWeight: number | null
+): number {
+  if (currentWeight === null || currentWeight <= 0) return 0;
+  const series = [...weeklyBests, currentWeight];
+  let streak = 0;
+  for (let i = series.length - 1; i >= 0; i--) {
+    const w = series[i];
+    if (w === null || w === undefined || w !== currentWeight) break;
+    streak++;
+  }
+  return streak;
+}
+
 export function proposeProgression(input: {
   exercise: Exercise;
   sets: AdviceSetInput[];
-  prevBestWeight?: number | null;
+  /** Mejor carga de cada semana anterior, de la más vieja a la más nueva. */
+  weeklyBests?: (number | null | undefined)[];
   unit?: string | null;
 }): ProgressionAdvice | null {
-  const { exercise, sets, prevBestWeight = null, unit = "kg" } = input;
+  const { exercise, sets, weeklyBests = [], unit = "kg" } = input;
 
   const effective = sets.filter(
     (s) => toNum(s.actual_reps) !== null || toNum(s.actual_weight) !== null
@@ -90,6 +115,9 @@ export function proposeProgression(input: {
   const belowCount = reps.filter((r) => r < targetReps).length;
   const canLoad = bestWeight !== null && bestWeight > 0;
   const step = 2.5;
+  const streak = sameWeightStreak(weeklyBests, bestWeight);
+  const canRaise = canLoad && streak >= SUSTAIN_WEEKS;
+  const weeksLeft = Math.max(0, SUSTAIN_WEEKS - streak);
 
   // 1) Falló reps en alguna serie → mantener o deload.
   if (!hitReps && minReps !== null && belowCount > 0) {
@@ -115,18 +143,27 @@ export function proposeProgression(input: {
     };
   }
 
-  // 2) Cumplió reps: decidir por el RIR registrado.
+  // 2) Cumplió reps: decidir por el RIR registrado y la racha de semanas.
   if (hitReps) {
     const tooEasy = avgRir !== null && avgRir > targetRir + 0.5;
     const grinding = avgRir !== null && avgRir <= targetRir;
 
-    if (tooEasy && canLoad) {
-      const next = roundTo(bestWeight + step, step);
+    if (tooEasy) {
+      if (canRaise) {
+        return {
+          kind: "progress",
+          title: `Subí ${fmtKg(step)} ${unit} la próxima`,
+          detail: `Hiciste ${fmtKg(bestWeight ?? 0)} ${unit} durante ${SUSTAIN_WEEKS} semanas seguidas y cerraste con RIR ${avgRir} (objetivo ${targetRir}). Ya es momento de sumar carga.`,
+          nextWeight: roundTo((bestWeight ?? 0) + step, step),
+          nextReps: targetReps,
+          targetRir,
+        };
+      }
       return {
-        kind: "progress",
-        title: `Subí ${fmtKg(step)} ${unit} la próxima`,
-        detail: `Cerraste todas las series con RIR ${avgRir} (objetivo ${targetRir}). Sobra margen: sobrecarga progresiva limpia.`,
-        nextWeight: next,
+        kind: "hold",
+        title: "Mantené la carga",
+        detail: `Te sobra margen, pero la carga todavía no se sube: llevás ${streak} de ${SUSTAIN_WEEKS} semanas con ${fmtKg(bestWeight ?? 0)} ${unit}. Sostenela ${weeksLeft} semana${weeksLeft === 1 ? "" : "s"} más.`,
+        nextWeight: canLoad ? bestWeight : null,
         nextReps: targetReps,
         targetRir,
       };
@@ -136,38 +173,35 @@ export function proposeProgression(input: {
       return {
         kind: "hold",
         title: "Consolidá antes de subir",
-        detail: `Llegaste al RIR objetivo (${targetRir}). Repetí ${fmtKg(bestWeight ?? 0)} ${unit} y sumá 1 rep cuando salga cómodo.`,
+        detail: `Llegaste al RIR objetivo (${targetRir}). Repetí ${fmtKg(bestWeight ?? 0)} ${unit}. Semana ${streak} de ${SUSTAIN_WEEKS} con esta carga.`,
         nextWeight: canLoad ? bestWeight : null,
         nextReps: targetReps + 1,
         targetRir,
       };
     }
 
-    // Estancado vs. semana previa con reps cumplidas → cambiar variante.
-    if (
-      prevBestWeight !== null &&
-      bestWeight !== null &&
-      bestWeight <= prevBestWeight &&
-      (avgRir === null || avgRir >= targetRir)
-    ) {
+    // Estancado: misma carga durante varias semanas con reps cumplidas → variante.
+    if (canLoad && streak >= SUSTAIN_WEEKS && (avgRir === null || avgRir >= targetRir)) {
       return {
         kind: "variation",
         title: "Probá una variante",
-        detail: `Misma carga que la semana pasada (${fmtKg(bestWeight)} ${unit}). Si no sube, cambiá a una variante del mismo patrón para desestancar.`,
-        nextWeight: canLoad ? roundTo(bestWeight + step, step) : null,
+        detail: `Llevás ${SUSTAIN_WEEKS} semanas con ${fmtKg(bestWeight)} ${unit} sin subir. Cambiá a una variante del mismo patrón para desestancar.`,
+        nextWeight: null,
         nextReps: targetReps,
         targetRir,
       };
     }
 
-    // Sin RIR registrado pero cumplió todas las reps.
+    // Cumplió todas las reps, sin RIR suficiente para decidir: mantener y contar semanas.
     return {
-      kind: "progress",
-      title: canLoad ? `Listo para ${fmtKg(bestWeight + step)} ${unit}` : "Buen trabajo",
+      kind: "hold",
+      title: "Mantené la carga",
       detail: `Completaste ${reps.length} serie${reps.length === 1 ? "" : "s"} en objetivo. ${
-        canLoad ? "Si la técnica fue sólida, subí la carga." : "Sumá carga externa cuando puedas."
+        canLoad
+          ? `Semana ${streak} de ${SUSTAIN_WEEKS} con ${fmtKg(bestWeight)} ${unit}: la carga sube recién después de ${SUSTAIN_WEEKS} semanas seguidas.`
+          : "Sumá carga externa cuando puedas."
       }`,
-      nextWeight: canLoad ? roundTo(bestWeight + step, step) : null,
+      nextWeight: canLoad ? bestWeight : null,
       nextReps: targetReps,
       targetRir,
     };
