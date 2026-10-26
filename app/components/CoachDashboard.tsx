@@ -7,7 +7,6 @@ import { waLink } from "@/app/lib/coach";
 import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
 import ProgramEditor from "@/app/components/ProgramEditor";
-import CoachProgressMirror from "@/app/components/CoachProgressMirror";
 import CoachProfileEditor from "@/app/components/CoachProfileEditor";
 
 interface ClientRow {
@@ -1510,20 +1509,6 @@ export default function CoachDashboard() {
                         await reloadDetail();
                       }}
                     />
-                    <div style={{ marginTop: 28 }}>
-                      <h3 style={{ margin: "0 0 4px", textTransform: "uppercase" }}>
-                        Rutina y bloque actual
-                      </h3>
-                      <p className="muted" style={{ marginTop: 0, fontSize: ".85rem" }}>
-                        Semana en curso, resumen de la rutina y detalle de ejercicios.
-                      </p>
-                      <CoachProgressMirror
-                        key={selectedId ?? "none"}
-                        detail={detail}
-                        clientName={selected.full_name || selected.email}
-                        onRefresh={refreshProgress}
-                      />
-                    </div>
                   </div>
                 )}
 
