@@ -197,6 +197,84 @@ function Dato({ label, value }: { label: string; value: string }) {
   );
 }
 
+function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: string }) {
+  const active = routines.filter((r) => r.active !== false);
+  if (active.length === 0) {
+    return (
+      <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" }}>
+        <p className="muted" style={{ margin: 0 }}>Sin rutina activa.</p>
+      </div>
+    );
+  }
+  const byWeek: Record<number, any[]> = {};
+  active.forEach((r) => {
+    const w = Number(r.week_number) || 1;
+    (byWeek[w] = byWeek[w] || []).push(r);
+  });
+  const weekKeys = Object.keys(byWeek).map(Number).sort((a, b) => a - b);
+  const firstDays = byWeek[weekKeys[0]].map((d) => d.day_name || d.name).join(" · ");
+
+  return (
+    <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" }}>
+      <h4
+        style={{
+          margin: "0 0 10px",
+          fontSize: ".74rem",
+          letterSpacing: ".12em",
+          textTransform: "uppercase",
+          color: "#FFC400",
+        }}
+      >
+        Rutina activa
+      </h4>
+      {guideline && (
+        <p
+          style={{
+            margin: "0 0 10px",
+            fontSize: ".85rem",
+            color: "#A6A6A6",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            overflowWrap: "anywhere",
+          }}
+        >
+          {guideline}
+        </p>
+      )}
+      {weekKeys.map((w) => {
+        const days = byWeek[w];
+        const total = days.reduce((acc, d) => acc + (d.exercises ?? []).length, 0);
+        return (
+          <div
+            key={w}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 8,
+              padding: "6px 0",
+              borderBottom: "1px solid #1c1c1c",
+              fontSize: ".85rem",
+            }}
+          >
+            <span style={{ fontWeight: 700, whiteSpace: "nowrap" }}>Sem {w}</span>
+            <span className="muted" style={{ textAlign: "right", minWidth: 0, overflowWrap: "anywhere" }}>
+              {days.length} días · {total} ejercicios
+            </span>
+          </div>
+        );
+      })}
+      <p
+        className="muted"
+        style={{ margin: "10px 0 0", fontSize: ".8rem", overflowWrap: "anywhere" }}
+      >
+        Días: {firstDays}
+      </p>
+    </div>
+  );
+}
+
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
 export default function CoachDashboard() {
@@ -1352,6 +1430,10 @@ export default function CoachDashboard() {
                         El cliente todavía no completó su ficha inicial.
                       </p>
                     )}
+                    <RoutineSummary
+                      routines={detail.routines ?? []}
+                      guideline={detail.profile?.anamnesis?.trainingBlock?.guideline}
+                    />
                   </div>
                 )}
                   </aside>
