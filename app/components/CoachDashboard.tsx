@@ -1357,13 +1357,63 @@ export default function CoachDashboard() {
                   </aside>
                   <div key={tab} className="tab-panel">
 
-                {tab === "historial" && detail && (
-                  <CoachProgressMirror
-                    key={selectedId ?? "none"}
-                    detail={detail}
-                    clientName={selected.full_name || selected.email}
-                    onRefresh={refreshProgress}
-                  />
+                {tab === "historial" && (
+                  <div className="card" style={{ marginTop: 12 }}>
+                    <h3 style={{ marginTop: 0 }}>Métricas generales</h3>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                        gap: 12,
+                      }}
+                    >
+                      {[
+                        { label: "Clientes", value: clients.length },
+                        { label: "Activos", value: clients.filter((c) => c.activo).length },
+                        {
+                          label: "Rutina publicada",
+                          value: clients.filter((c) => c.routine_status === "active").length,
+                        },
+                        {
+                          label: "Pendientes de revisión",
+                          value: clients.filter((c) => c.routine_status === "pending_review")
+                            .length,
+                        },
+                        {
+                          label: "Con novedades",
+                          value: clients.filter((c) => c.has_client_update).length,
+                        },
+                        { label: "Suspendidos", value: clients.filter((c) => !c.activo).length },
+                      ].map((m) => (
+                        <div
+                          key={m.label}
+                          style={{
+                            background: "#121212",
+                            border: "1px solid #242424",
+                            borderRadius: 12,
+                            padding: "14px 16px",
+                          }}
+                        >
+                          <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#FFC400" }}>
+                            {m.value}
+                          </div>
+                          <div
+                            className="muted"
+                            style={{
+                              fontSize: ".72rem",
+                              textTransform: "uppercase",
+                              letterSpacing: ".08em",
+                            }}
+                          >
+                            {m.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="muted" style={{ fontSize: ".85rem", marginBottom: 0 }}>
+                      Series, ejercicios y progreso de cada alumno están en su ficha, pestaña Perfil.
+                    </p>
+                  </div>
                 )}
 
                 {tab === "perfil" && detail && (
@@ -1378,6 +1428,20 @@ export default function CoachDashboard() {
                         await reloadDetail();
                       }}
                     />
+                    <div style={{ marginTop: 28 }}>
+                      <h3 style={{ margin: "0 0 4px", textTransform: "uppercase" }}>
+                        Rutina y bloque actual
+                      </h3>
+                      <p className="muted" style={{ marginTop: 0, fontSize: ".85rem" }}>
+                        Semana en curso, resumen de la rutina y detalle de ejercicios.
+                      </p>
+                      <CoachProgressMirror
+                        key={selectedId ?? "none"}
+                        detail={detail}
+                        clientName={selected.full_name || selected.email}
+                        onRefresh={refreshProgress}
+                      />
+                    </div>
                   </div>
                 )}
 
