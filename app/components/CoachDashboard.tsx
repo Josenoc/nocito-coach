@@ -198,9 +198,24 @@ function Dato({ label, value }: { label: string; value: string }) {
 
 function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: string }) {
   const active = routines.filter((r) => r.active !== false);
+  const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
+  const head = (
+    <h4
+      style={{
+        margin: "0 0 10px",
+        fontSize: ".74rem",
+        letterSpacing: ".12em",
+        textTransform: "uppercase",
+        color: "#FFC400",
+      }}
+    >
+      Rutina activa
+    </h4>
+  );
   if (active.length === 0) {
     return (
-      <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" }}>
+      <div style={wrap}>
+        {head}
         <p className="muted" style={{ margin: 0 }}>Sin rutina activa.</p>
       </div>
     );
@@ -211,21 +226,10 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
     (byWeek[w] = byWeek[w] || []).push(r);
   });
   const weekKeys = Object.keys(byWeek).map(Number).sort((a, b) => a - b);
-  const firstDays = byWeek[weekKeys[0]].map((d) => d.day_name || d.name).join(" · ");
 
   return (
-    <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" }}>
-      <h4
-        style={{
-          margin: "0 0 10px",
-          fontSize: ".74rem",
-          letterSpacing: ".12em",
-          textTransform: "uppercase",
-          color: "#FFC400",
-        }}
-      >
-        Rutina activa
-      </h4>
+    <div style={wrap}>
+      {head}
       {guideline && (
         <p
           style={{
@@ -243,33 +247,79 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
         </p>
       )}
       {weekKeys.map((w) => {
-        const days = byWeek[w];
+        const days = [...byWeek[w]].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
         const total = days.reduce((acc, d) => acc + (d.exercises ?? []).length, 0);
         return (
-          <div
-            key={w}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 8,
-              padding: "6px 0",
-              borderBottom: "1px solid #1c1c1c",
-              fontSize: ".85rem",
-            }}
-          >
-            <span style={{ fontWeight: 700, whiteSpace: "nowrap" }}>Sem {w}</span>
-            <span className="muted" style={{ textAlign: "right", minWidth: 0, overflowWrap: "anywhere" }}>
-              {days.length} días · {total} ejercicios
-            </span>
+          <div key={w} style={{ marginBottom: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 8,
+                padding: "6px 0",
+                borderBottom: "1px solid #242424",
+                fontSize: ".85rem",
+              }}
+            >
+              <span style={{ fontWeight: 700, color: "#FFC400" }}>Semana {w}</span>
+              <span className="muted">{days.length} días · {total} ejercicios</span>
+            </div>
+            {days.map((d, di) => {
+              const exs = [...(d.exercises ?? [])].sort(
+                (a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0)
+              );
+              return (
+                <details key={d.id ?? di} style={{ borderBottom: "1px solid #1c1c1c" }}>
+                  <summary
+                    style={{
+                      cursor: "pointer",
+                      listStyle: "none",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "7px 0",
+                      fontSize: ".85rem",
+                      fontWeight: 600,
+                      minWidth: 0,
+                    }}
+                  >
+                    <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>
+                      {d.day_name || d.name || `Día ${di + 1}`}
+                    </span>
+                    <span className="muted" style={{ fontWeight: 400, whiteSpace: "nowrap" }}>
+                      {exs.length} ej.
+                    </span>
+                  </summary>
+                  <ul style={{ listStyle: "none", margin: "0 0 8px", padding: 0 }}>
+                    {exs.map((ex: any, ei: number) => (
+                      <li
+                        key={ei}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "minmax(0, 1fr) auto",
+                          gap: 8,
+                          padding: "4px 0",
+                          fontSize: ".8rem",
+                          borderTop: "1px dashed #1c1c1c",
+                        }}
+                      >
+                        <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>
+                          {ei + 1}. {ex.name}
+                        </span>
+                        <span className="muted" style={{ whiteSpace: "nowrap" }}>
+                          {ex.target_sets ?? "-"} × {ex.target_reps ?? "-"}
+                          {ex.target_weight ? ` · ${ex.target_weight} ${ex.unit ?? "kg"}` : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              );
+            })}
           </div>
         );
       })}
-      <p
-        className="muted"
-        style={{ margin: "10px 0 0", fontSize: ".8rem", overflowWrap: "anywhere" }}
-      >
-        Días: {firstDays}
-      </p>
     </div>
   );
 }
@@ -1429,10 +1479,12 @@ export default function CoachDashboard() {
                         El cliente todavía no completó su ficha inicial.
                       </p>
                     )}
-                    <RoutineSummary
-                      routines={detail.routines ?? []}
-                      guideline={detail.profile?.anamnesis?.trainingBlock?.guideline}
-                    />
+                    {tab !== "perfil" && (
+                      <RoutineSummary
+                        routines={detail.routines ?? []}
+                        guideline={detail.profile?.anamnesis?.trainingBlock?.guideline}
+                      />
+                    )}
                   </div>
                 )}
                   </aside>
