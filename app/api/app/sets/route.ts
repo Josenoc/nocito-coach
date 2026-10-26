@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     const clientId =
       session.role === "coach" && body?.client_id ? String(body.client_id) : session.id;
 
-    if (!exerciseId || setNumber === null || setNumber < 1) {
+    if (!exerciseId || setNumber === null || setNumber < 0) {
       return NextResponse.json(
         { ok: false, error: "exercise_id y set_number requeridos" },
         { status: 400 }

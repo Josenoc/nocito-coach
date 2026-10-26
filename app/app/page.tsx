@@ -68,8 +68,10 @@ function embedUrl(url?: string | null): { kind: "iframe" | "video" | "none"; src
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/
   );
   if (yt) return { kind: "iframe", src: `https://www.youtube.com/embed/${yt[1]}` };
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return { kind: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
   if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) return { kind: "video", src: url };
-  return { kind: "iframe", src: url };
+  return { kind: "none", src: "" };
 }
 
 function ExerciseDemo({ name }: { name: string }) {
@@ -372,8 +374,8 @@ export default function ClientApp() {
           const existing = logsData.filter(
             (l) => l.exercise_id === ex.id && l.log_date === todayStr
           );
-          next[ex.id] = Array.from({ length: count }, (_, i) => {
-            const setNumber = i + 1;
+          next[ex.id] = Array.from({ length: count + 1 }, (_, i) => {
+            const setNumber = i;
             const log = existing.find((l) => l.set_number === setNumber);
             const rir = rirMap[`${ex.id}|${todayStr}|${setNumber}`];
             return {
@@ -756,7 +758,7 @@ export default function ClientApp() {
     const lastSet = sets.reduce((m, s) => Math.max(m, s.set_number), 0);
     const total = Math.min(
       12,
-      Math.max(lastSet, rows[ex.id]?.length ?? 0, ex.target_sets ?? 0)
+      Math.max(lastSet, (rows[ex.id]?.length ?? 1) - 1, ex.target_sets ?? 0)
     );
     const order: Record<string, number> = {};
     sets.forEach((s, i) => {
@@ -765,8 +767,8 @@ export default function ClientApp() {
 
     setRows((prev) => {
       const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
-      while (base.length < total) {
-        base.push({ set_number: base.length + 1, actual_reps: "", actual_weight: "", rir: "" });
+      while (base.length - 1 < total) {
+        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "" });
       }
       for (const s of sets) {
         const r = base.find((x) => x.set_number === s.set_number);
@@ -1306,7 +1308,7 @@ export default function ClientApp() {
                 const prevText = fmtLog(latestLogFor(prevEx?.id));
                 const advice = proposeProgression({
                   exercise: ex,
-                  sets: rows[ex.id] ?? [],
+                  sets: (rows[ex.id] ?? []).filter((r) => r.set_number > 0),
                   prevBestWeight: prevEx
                     ? latestLogFor(prevEx.id)?.actual_weight ?? null
                     : null,
@@ -1389,6 +1391,7 @@ export default function ClientApp() {
                               <tr
                                 key={r.set_number}
                                 className={[
+                                  r.set_number === 0 ? "warmup-row" : "",
                                   savedFlash[fillKey] ? "row-flash" : "",
                                   stagger !== undefined ? "row-fill" : "",
                                 ]
@@ -1400,7 +1403,7 @@ export default function ClientApp() {
                                     : undefined
                                 }
                               >
-                                <td className="set-index">{r.set_number}</td>
+                                <td className="set-index">{r.set_number === 0 ? "Cal." : r.set_number}</td>
                                 <td>
                                   <div className="cell-wrap">
                                     <span className="phantom">{ex.target_reps ?? ""}</span>
