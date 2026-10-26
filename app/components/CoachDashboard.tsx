@@ -1016,6 +1016,7 @@ export default function CoachDashboard() {
         .filter((e) => e.name.trim())
         .map((e, i) => ({
           name: e.name.trim(),
+          id: e.id,
           video_url: e.video_url.trim(),
           technique_notes: notesWithRir(e.technique_notes, e.target_rir),
           order_index: i,
