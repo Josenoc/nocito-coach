@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
 import { getSession } from "@/lib/auth";
 import { todayInArgentina, isValidISODate } from "@/lib/dates";
 import { sendCoachActivityEmail } from "@/app/lib/notify";
-import { sendCoachPush } from "@/app/lib/push";
+import { notifyCoachLoad, notifyStudentMilestones } from "@/app/lib/push-triggers";
 
 export const dynamic = "force-dynamic";
 
@@ -290,13 +290,19 @@ export async function POST(req: NextRequest) {
         detail: `Fecha: ${logDate}`,
       }).catch((err) => console.error("notify workout", err));
 
-      sendCoachPush({
-        title: "Nocito Coach",
-        body: `${profile?.full_name || profile?.email || "Tu alumno"} registró su sesión`,
-        url: "/app/admin",
-      }).catch((err) => console.error("push workout", err));
     }
 
+    if (session.role === "client") {
+      await notifyCoachLoad(clientId, `cargó la serie ${Math.round(setNumber)} de ${owner.exerciseName}`);
+      await notifyStudentMilestones({
+        clientId,
+        routineId: owner.routineId,
+        weekNumber: owner.weekNumber,
+        logDate,
+        exerciseId,
+        setNumber: Math.round(setNumber),
+      });
+    }
     return NextResponse.json({ ok: true, log: data }, { status: 201 });
   } catch (err) {
     console.error("[sets] POST excepción", err);
