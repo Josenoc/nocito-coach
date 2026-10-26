@@ -20,6 +20,7 @@ interface ClientRow {
 }
 
 interface ExRow {
+  id?: string;
   name: string;
   video_url: string;
   technique_notes: string;
@@ -860,6 +861,20 @@ export default function CoachDashboard() {
     }));
   };
 
+  const persistExerciseSets = async (exerciseId: string, sets: number) => {
+    const res = await fetch("/api/coach/exercise-sets", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ exercise_id: exerciseId, target_sets: sets }),
+    });
+    const json = await res.json().catch(() => ({ ok: false, error: "Error" }));
+    if (!json.ok) {
+      setMsg({ type: "err", text: json.error || "No se pudo guardar la serie." });
+      return;
+    }
+    await reloadDetail();
+  };
+
   const saveRoutine = async () => {
     if (!selectedId) return;
     if (!draft.exercises.some((e) => e.name.trim())) {
@@ -907,6 +922,7 @@ export default function CoachDashboard() {
       .sort((a: any, b: any) => a.order_index - b.order_index)
       .map((e: any) => ({
         name: e.name,
+        id: e.id,
         video_url: e.video_url ?? "",
         technique_notes: e.technique_notes ?? "",
         target_sets: e.target_sets != null ? String(e.target_sets) : "",
@@ -1788,8 +1804,11 @@ export default function CoachDashboard() {
                           1,
                           Math.min(12, parseInt(ex.target_sets, 10) || 1)
                         );
-                        const setSets = (n: number) =>
-                          setEx(idx, { target_sets: String(Math.max(1, Math.min(12, n))) });
+                        const setSets = (n: number) => {
+                          const next = Math.max(1, Math.min(12, n));
+                          setEx(idx, { target_sets: String(next) });
+                          if (ex.id) void persistExerciseSets(ex.id, next);
+                        };
                         return (
                           <div key={idx} className="card ex-edit-block">
                             <div className="ex-edit-head">
@@ -2006,6 +2025,57 @@ export default function CoachDashboard() {
                             </button>
                           </div>
                         </div>
+                        {(r.exercises ?? []).length > 0 && (
+                          <div style={{ marginTop: 10, borderTop: "1px solid #242424", paddingTop: 6 }}>
+                            {[...r.exercises]
+                              .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+                              .map((ex: any) => {
+                                const sets = ex.target_sets ?? 1;
+                                return (
+                                  <div
+                                    key={ex.id}
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      alignItems: "center",
+                                      gap: 10,
+                                      flexWrap: "wrap",
+                                      padding: "8px 0",
+                                      borderBottom: "1px solid #1c1c1c",
+                                    }}
+                                  >
+                                    <div style={{ minWidth: 0, flex: "1 1 180px" }}>
+                                      <div style={{ fontSize: ".9rem", overflowWrap: "anywhere" }}>{ex.name}</div>
+                                      <div className="muted" style={{ fontSize: ".78rem" }}>
+                                        {ex.target_reps ?? "-"} reps · {ex.target_weight ?? "-"} {ex.unit ?? "kg"}
+                                      </div>
+                                    </div>
+                                    <div className="set-stepper">
+                                      <button
+                                        type="button"
+                                        className="step-btn"
+                                        aria-label="Quitar serie"
+                                        disabled={sets <= 1}
+                                        onClick={() => persistExerciseSets(ex.id, sets - 1)}
+                                      >
+                                        -
+                                      </button>
+                                      <span className="step-val">{sets}</span>
+                                      <button
+                                        type="button"
+                                        className="step-btn"
+                                        aria-label="Agregar serie"
+                                        disabled={sets >= 12}
+                                        onClick={() => persistExerciseSets(ex.id, sets + 1)}
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
