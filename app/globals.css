@@ -561,10 +561,21 @@ h1, h2, h3, h4 {
 .mic-btn:hover { border-color: var(--amber); background: rgba(245, 158, 11, 0.16); }
 .mic-btn svg { width: 16px; height: 16px; }
 .mic-btn.rec {
-  border-color: rgba(245, 158, 11, 0.9);
-  background: rgba(245, 158, 11, 0.14);
-  color: #fbbf24;
-  animation: pulse 1.3s infinite;
+  border-color: #ef4444;
+  background: #dc2626;
+  color: #fff;
+  animation: micBlink 0.9s ease-in-out infinite;
+}
+.mic-btn.proc {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
+  animation: none;
+}
+.mic-btn:disabled { cursor: progress; }
+@keyframes micBlink {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
 }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 
