@@ -401,6 +401,9 @@ export default function ClientApp() {
                   ? String(log.actual_weight)
                   : "",
               rir: rir !== null && rir !== undefined ? String(rir) : "",
+              // Sin esto, al recargar la app las series seguían guardadas en la
+              // base pero perdían el ✓ y parecía que no se habían guardado.
+              saved: !!log,
             };
           });
         }
