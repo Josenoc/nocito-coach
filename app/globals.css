@@ -293,8 +293,9 @@ h1, h2, h3, h4 {
   .exercise-card { padding: 14px; }
   .exercise-name { font-size: 1.12rem; word-break: break-word; }
   .track-head { flex-wrap: wrap; }
-  .track-table th { padding: 6px 4px; font-size: 0.7rem; }
-  .track-table td { padding: 4px 8px; }
+  .track-table { border-collapse: separate; border-spacing: 8px 4px; }
+  .track-table th { padding: 4px 2px; font-size: 0.7rem; }
+  .track-table td { padding: 2px; }
   .num-input { min-width: 0; padding: 10px 6px; font-size: 1rem; }
   .cell-wrap .phantom { font-size: 1rem; }
   .mic-btn { width: 100%; justify-content: center; padding: 12px 16px; }
