@@ -913,7 +913,7 @@ textarea.input { resize: vertical; }
 .notice-update span { font-weight: 600; }
 .coach-layout {
   display: grid;
-  grid-template-columns: minmax(200px, 220px) 1fr;
+  grid-template-columns: minmax(240px, 300px) 1fr;
   gap: 22px;
   align-items: start;
 }
@@ -1090,13 +1090,14 @@ textarea.input { resize: vertical; }
 
 /* ---- Coach: editor en pantalla completa (spec 3) ---- */
 .coach-focus {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
   background:
     radial-gradient(900px 520px at 90% -10%, rgba(245, 158, 11, 0.08), transparent 60%),
     var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 14px 60px;
-  width: 100%;
+  overflow-y: auto;
+  padding: 18px clamp(14px, 4vw, 40px) 80px;
 }
 .focus-bar {
   display: flex;
