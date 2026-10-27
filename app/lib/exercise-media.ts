@@ -33,6 +33,7 @@ const RULES: Rule[] = [
   { match: /dominadas/, slug: "pull-up", en: "Pull-Up" },
   { match: /jalon/, slug: "lat-pulldown", en: "Lat Pulldown" },
   { match: /remo con barra/, slug: "barbell-row", en: "Barbell Row" },
+  { match: /remo en barra t|remo.*barra.*t\b/, slug: "barbell-row", en: "Barbell Row" },
   { match: /remo (sentado|en polea)/, slug: "seated-cable-row", en: "Seated Cable Row" },
   { match: /peso muerto rumano/, slug: "romanian-deadlift", en: "Romanian Deadlift" },
   { match: /sentadilla/, slug: "barbell-squat", en: "Barbell Back Squat" },
