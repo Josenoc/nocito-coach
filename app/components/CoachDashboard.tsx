@@ -1342,8 +1342,9 @@ export default function CoachDashboard() {
           </div>
         </div>
 
-        <div className="coach-layout">
-          <aside className="card">
+        {!selected ? (
+          <div className="coach-layout">
+            <aside className="card">
             <div className="row-between" style={{ marginBottom: 12, gap: 8 }}>
               <h3 style={{ margin: 0 }}>Clientes</h3>
               {pendingCount > 0 && (
@@ -1407,14 +1408,13 @@ export default function CoachDashboard() {
           </aside>
 
           <section>
-            {!selected && (
-              <div className="card">
-                <p className="muted">Seleccioná un cliente para ver su actividad.</p>
-              </div>
-            )}
-
-            {selected && (
-              <div className="coach-focus">
+            <div className="card">
+              <p className="muted">Seleccioná un cliente para ver su actividad.</p>
+            </div>
+          </section>
+        </div>
+        ) : (
+          <div className="coach-focus">
                 <div className="focus-bar">
                   <div style={{ minWidth: 0 }}>
                     <span className="focus-eyebrow">Ficha del alumno</span>
@@ -1438,8 +1438,8 @@ export default function CoachDashboard() {
                         Aprobar y Publicar
                       </button>
                     )}
-                    <button className="btn btn-outline" onClick={backToClients}>
-                      ← Volver a Clientes
+                    <button className="btn btn-primary" onClick={backToClients}>
+                      Ver todos los clientes
                     </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
@@ -2541,8 +2541,6 @@ export default function CoachDashboard() {
                 </div>
               </div>
             )}
-          </section>
-        </div>
       </div>
     </main>
   );
