@@ -17,12 +17,13 @@ Devolve SOLO JSON valido con este esquema:
 Reglas:
 - Si el alumno dice "3 series de 10 con 50", devolve 3 objetos: set_number 1, 2 y 3, reps 10, weight 50.
 - Si dice "4x8 con 40", igual: 4 objetos con reps 8 y weight 40.
+- Si menciona series de calentamiento ("2 de calentamiento con 20"), usa set_number 0 para cada una (pueden repetirse? no: una sola serie por set_number; si son varias de calentamiento, numera 0, y las efectivas desde 1).
 - Si menciona un solo valor global para todas las series, repetilo en las series objetivo indicadas.
 - Si menciona series distintas ("primera 12 con 30, segunda 10 con 35"), respeta cada set_number.
 - No inventes reps ni peso que no dijo: usa null.
 - "sin peso" o "solo el peso corporal" -> weight 0.
 - Si el alumno dice una unidad distinta a la del ejercicio, converti el peso a la unidad del ejercicio (1 kg = 2.20462 lbs y viceversa).
-- set_number empieza en 1. Maximo 12 sets. Responde solo JSON.`;
+- set_number empieza en 0 para calentamiento y en 1 para efectivas. Maximo 10 sets en total. Responde solo JSON.`;
 
 type SetOut = { set_number: number; reps: number | null; weight: number | null };
 
@@ -33,7 +34,7 @@ function clampSets(input: unknown, fallbackCount: number): SetOut[] {
     if (!raw || typeof raw !== "object") continue;
     const n = Number((raw as any).set_number);
     const setNumber = Number.isFinite(n)
-      ? Math.min(12, Math.max(1, Math.round(n)))
+      ? Math.min(10, Math.max(0, Math.round(n)))
       : out.length + 1;
     const repsRaw = Number((raw as any).reps);
     const weightRaw = Number((raw as any).weight);
@@ -46,7 +47,7 @@ function clampSets(input: unknown, fallbackCount: number): SetOut[] {
   return out
     .filter((s) => (seen.has(s.set_number) ? false : (seen.add(s.set_number), true)))
     .sort((a, b) => a.set_number - b.set_number)
-    .slice(0, Math.max(1, Math.min(12, fallbackCount || 12)));
+    .slice(0, 10);
 }
 
 export async function POST(req: NextRequest) {
