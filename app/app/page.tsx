@@ -350,6 +350,7 @@ export default function ClientApp() {
         }
       }
     };
+    fetch("/api/app/push/flush", { method: "POST", keepalive: true }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -364,6 +365,8 @@ export default function ClientApp() {
         return next;
       });
     }, 900);
+    // Disparador interno: procesa la cola de push en background.
+    fetch("/api/app/push/flush", { method: "POST", keepalive: true }).catch(() => {});
   };
 
   useEffect(() => {
@@ -651,6 +654,7 @@ export default function ClientApp() {
               .then((r) => r.json())
               .then((j) => {
                 if (j?.ok && j.log) upsertLog(j.log as SetLog);
+                fetch("/api/app/push/flush", { method: "POST", keepalive: true }).catch(() => {});
               })
               .catch(() => {});
 

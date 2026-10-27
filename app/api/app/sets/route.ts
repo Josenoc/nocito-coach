@@ -302,6 +302,11 @@ export async function POST(req: NextRequest) {
         exerciseId,
         setNumber: Math.round(setNumber),
       });
+      // Disparador interno: procesa la cola de push en background sin bloquear.
+      fetch(new URL("/api/app/push/flush", req.url), {
+        method: "POST",
+        headers: { cookie: req.headers.get("cookie") || "" },
+      }).catch(() => {});
     }
     return NextResponse.json({ ok: true, log: data }, { status: 201 });
   } catch (err) {
