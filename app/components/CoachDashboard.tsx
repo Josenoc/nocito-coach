@@ -312,73 +312,6 @@ function latestStudentLogs(
   return { date, sets };
 }
 
-function StudentMarks({
-  logs,
-  exerciseId,
-  exerciseName,
-  routineId,
-  unit,
-  setRir,
-}: {
-  logs: any[];
-  exerciseId?: string;
-  exerciseName: string;
-  routineId?: string;
-  unit: string;
-  setRir?: Record<string, number>;
-}) {
-  const latest = latestStudentLogs(logs, { exerciseId, exerciseName, routineId });
-  if (!latest) {
-    return (
-      <p className="muted" style={{ margin: "8px 0 0", fontSize: ".8rem" }}>
-        El alumno todavía no cargó marcas de este ejercicio.
-      </p>
-    );
-  }
-  const [y, m, d] = latest.date.split("-");
-  const dateLabel = y && m && d ? `${d}/${m}/${y}` : latest.date;
-  return (
-    <div style={{ marginTop: 10 }}>
-      <div className="track-head" style={{ marginBottom: 4 }}>
-        <h4>Marcas del alumno</h4>
-        <span className="muted" style={{ fontSize: ".76rem" }}>
-          Última sesión: {dateLabel}
-        </span>
-      </div>
-      <div className="scroll-x">
-        <table className="data-table mirror-table" style={{ minWidth: 340 }}>
-          <thead>
-            <tr>
-              <th>Serie</th>
-              <th>Reps</th>
-              <th>Peso ({unit})</th>
-              <th>RIR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {latest.sets.map((s) => {
-              const rir =
-                setRir?.[`${s.exercise_id}|${s.log_date}|${s.set_number}`] ?? null;
-              return (
-                <tr key={`${s.set_number}-${s.id ?? ""}`}>
-                  <td className="set-index">{s.set_number}</td>
-                  <td>
-                    <b>{s.actual_reps ?? "—"}</b>
-                  </td>
-                  <td>
-                    <b>{s.actual_weight ?? "—"}</b>
-                  </td>
-                  <td>{rir ?? "—"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
 function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: string }) {
   const active = routines.filter((r) => r.active !== false);
   const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
@@ -528,7 +461,6 @@ export default function CoachDashboard() {
   const [tab, setTab] = useState<
     "historial" | "perfil" | "rutinas" | "importar" | "generar" | "nutricion" | "acceso"
   >("historial");
-  const [focus, setFocus] = useState<null | "rutinas" | "nutricion">(null);
 
   const [draft, setDraft] = useState<Draft>(emptyDraft());
   const [baseline, setBaseline] = useState<ExRow[] | null>(null);
@@ -550,19 +482,27 @@ export default function CoachDashboard() {
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
 
+  // La ficha del alumno es siempre inmersiva: al elegir un cliente se bloquea
+  // el scroll del listado y Escape vuelve a la lista.
   useEffect(() => {
-    if (!focus) return;
+    if (!selectedId) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFocus(null);
+      if (e.key !== "Escape") return;
+      setSelectedId(null);
+      setDetail(null);
+      setProgram(null);
+      setEditingProgram(false);
+      setConfirmDelete(false);
+      setMsg(null);
     };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [focus]);
+  }, [selectedId]);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -1078,7 +1018,6 @@ export default function CoachDashboard() {
   };
 
   const backToClients = () => {
-    setFocus(null);
     setSelectedId(null);
     setDetail(null);
     setProgram(null);
@@ -1152,8 +1091,36 @@ export default function CoachDashboard() {
     }
   };
 
-  const editRoutine = (r: any) => {
-    const exercises: ExRow[] = (r.exercises ?? [])
+  const editRoutine = async (r: any) => {
+    // Traemos la última actividad real del alumno antes de abrir el editor,
+    // así los objetivos se completan sin esperar al refresco de 20 s.
+    let logs: any[] = detail?.logs ?? [];
+    if (selectedId) {
+      try {
+        const res = await fetch(`/api/coach/client?id=${selectedId}`, {
+          cache: "no-store",
+        });
+        const json = await res.json();
+        if (json?.ok) {
+          logs = json.logs ?? [];
+          setDetail((prev: any) =>
+            prev
+              ? {
+                  ...prev,
+                  logs,
+                  audio: json.audio ?? prev.audio,
+                  routines: json.routines ?? prev.routines,
+                }
+              : json
+          );
+        }
+      } catch {
+        /* si falla, usamos lo que ya estaba cargado */
+      }
+    }
+
+    const baseRows: ExRow[] = (r.exercises ?? [])
+      .slice()
       .sort((a: any, b: any) => a.order_index - b.order_index)
       .map((e: any) => ({
         name: e.name,
@@ -1166,6 +1133,28 @@ export default function CoachDashboard() {
         target_rir: rirFromNotes(e.technique_notes ?? ""),
         unit: e.unit ?? "kg",
       }));
+
+    // La última sesión del alumno se vuelca en el objetivo de series. El
+    // objetivo anterior queda como referencia fantasma en la tabla.
+    const exercises: ExRow[] = baseRows.map((row) => {
+      const latest = latestStudentLogs(logs, {
+        exerciseId: row.id,
+        exerciseName: row.name,
+        routineId: r.id,
+      });
+      if (!latest) return row;
+      const first = latest.sets[0];
+      const plannedSets = parseInt(row.target_sets, 10) || 0;
+      return {
+        ...row,
+        target_sets: String(Math.max(plannedSets, latest.sets.length)),
+        target_reps:
+          first?.actual_reps != null ? String(first.actual_reps) : row.target_reps,
+        target_weight:
+          first?.actual_weight != null ? String(first.actual_weight) : row.target_weight,
+      };
+    });
+
     setDraft({
       id: r.id,
       name: r.name,
@@ -1175,13 +1164,9 @@ export default function CoachDashboard() {
       active: r.active,
       exercises,
     });
-    setBaseline(exercises.map((e) => ({ ...e })));
+    setBaseline(baseRows.map((e) => ({ ...e })));
     setTab("rutinas");
-    setFocus("rutinas");
     setMsg(null);
-    // Trae las marcas más recientes del alumno al abrir el día, sin esperar
-    // al refresco automático de 20 s.
-    void refreshProgress();
   };
 
   const deleteRoutine = async (id: string) => {
@@ -1429,75 +1414,33 @@ export default function CoachDashboard() {
             )}
 
             {selected && (
-              <div className={focus ? "coach-focus" : undefined}>
-                {focus && (
-                  <div className="focus-bar">
-                    <div>
-                      <span className="focus-eyebrow">Editor en pantalla completa</span>
-                      <h2 style={{ margin: "4px 0 0", fontSize: "1.15rem" }}>
-                        {focus === "nutricion" ? "Plan nutricional" : "Rutinas"} —{" "}
-                        {selected.full_name || selected.email}
-                      </h2>
-                    </div>
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <button className="btn btn-outline" onClick={backToClients}>
-                        ← Volver a Clientes
-                      </button>
-                      <button className="btn btn-outline" onClick={() => setFocus(null)}>
-                        Cerrar (Esc)
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div
-                  className="row-between"
-                  style={{ marginBottom: 16, flexWrap: "wrap", gap: 10 }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                    <h2 style={{ margin: 0, fontSize: "1.3rem" }}>
+              <div className="coach-focus">
+                <div className="focus-bar">
+                  <div style={{ minWidth: 0 }}>
+                    <span className="focus-eyebrow">Ficha del alumno</span>
+                    <h2 style={{ margin: "4px 0 0", fontSize: "1.15rem" }}>
                       {selected.full_name || selected.email}
                     </h2>
-                    <span className="badge">
-                      {selected.routine_status === "pending_review"
-                        ? "Pendiente de revisión"
-                        : "Rutina activa"}
-                    </span>
-                    {selected.has_client_update && (
-                      <span className="pill update">● Actualizó datos</span>
-                    )}
+                    <div className="focus-meta">
+                      <span className="badge">
+                        {selected.routine_status === "pending_review"
+                          ? "Pendiente de revisión"
+                          : "Rutina activa"}
+                      </span>
+                      {selected.has_client_update && (
+                        <span className="pill update">● Actualizó datos</span>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                  <div className="focus-actions">
                     {selected.routine_status === "pending_review" && (
                       <button className="btn btn-primary" onClick={approve}>
                         Aprobar y Publicar
                       </button>
                     )}
-                    <div className="tabs" style={{ margin: 0 }}>
-                      {(
-                        ["historial", "perfil", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
-                      ).map((t) => (
-                        <button
-                          key={t}
-                          className={`chip ${tab === t ? "active" : ""}`}
-                          onClick={() => setTab(t)}
-                        >
-                          {t === "historial"
-                            ? "Historial"
-                            : t === "perfil"
-                            ? "Perfil"
-                            : t === "rutinas"
-                            ? "Rutinas"
-                            : t === "importar"
-                            ? "Importar"
-                            : t === "generar"
-                            ? "Generar IA"
-                            : t === "nutricion"
-                            ? "Nutrición"
-                            : "Acceso"}
-                        </button>
-                      ))}
-                    </div>
+                    <button className="btn btn-outline" onClick={backToClients}>
+                      ← Volver a Clientes
+                    </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
@@ -1744,6 +1687,31 @@ export default function CoachDashboard() {
                 )}
                   </aside>
                   <div key={tab} className="tab-panel">
+                    <div className="tabs detail-tabs">
+                      {(
+                        ["historial", "perfil", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
+                      ).map((t) => (
+                        <button
+                          key={t}
+                          className={`chip ${tab === t ? "active" : ""}`}
+                          onClick={() => setTab(t)}
+                        >
+                          {t === "historial"
+                            ? "Historial"
+                            : t === "perfil"
+                            ? "Perfil"
+                            : t === "rutinas"
+                            ? "Rutinas"
+                            : t === "importar"
+                            ? "Importar"
+                            : t === "generar"
+                            ? "Generar IA"
+                            : t === "nutricion"
+                            ? "Nutrición"
+                            : "Acceso"}
+                        </button>
+                      ))}
+                    </div>
 
                 {tab === "historial" && (
                   <div className="card" style={{ marginTop: 12 }}>
@@ -1990,15 +1958,6 @@ export default function CoachDashboard() {
                         <h3 style={{ margin: 0 }}>
                           {draft.id ? "Editar rutina" : "Nueva rutina (día)"}
                         </h3>
-                        {focus !== "rutinas" && (
-                          <button
-                            className="btn btn-outline"
-                            style={{ padding: "6px 12px", fontSize: ".8rem" }}
-                            onClick={() => setFocus("rutinas")}
-                          >
-                            Pantalla completa
-                          </button>
-                        )}
                       </div>
                       <div className="grid-4" style={{ marginBottom: 12 }}>
                         <div>
@@ -2199,17 +2158,9 @@ export default function CoachDashboard() {
                               </tbody>
                             </table>
                             <p className="muted" style={{ margin: "6px 0 0", fontSize: ".76rem" }}>
-                              Los valores se aplican a todas las series del ejercicio.
+                              Se completa con la última sesión del alumno. Ajustá y guardá los
+                              cambios.
                             </p>
-
-                            <StudentMarks
-                              logs={detail?.logs ?? []}
-                              exerciseId={ex.id}
-                              exerciseName={base?.name || ex.name}
-                              routineId={draft.id}
-                              unit={ex.unit}
-                              setRir={detail?.profile?.anamnesis?.setRir ?? {}}
-                            />
 
                             <textarea
                               className="input"
@@ -2342,15 +2293,6 @@ export default function CoachDashboard() {
                     <div className="card">
                       <div className="row-between" style={{ marginBottom: 6 }}>
                         <h3 style={{ margin: 0 }}>Plan nutricional</h3>
-                        {focus !== "nutricion" && (
-                          <button
-                            className="btn btn-outline"
-                            style={{ padding: "6px 12px", fontSize: ".8rem" }}
-                            onClick={() => setFocus("nutricion")}
-                          >
-                            Pantalla completa
-                          </button>
-                        )}
                       </div>
                       <div className="grid-4" style={{ marginBottom: 10 }}>
                         <div>

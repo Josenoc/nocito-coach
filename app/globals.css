@@ -1123,6 +1123,62 @@ textarea.input { resize: vertical; }
 .coach-focus .input, .coach-focus .num-input { font-size: 0.95rem; }
 .coach-focus h2 { font-size: 1.15rem; }
 
+/* Ficha inmersiva: dos columnas fijas. Izquierda, el alumno; derecha,
+   las pestañas y su contenido a todo el ancho disponible. */
+.focus-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.focus-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.coach-focus .split {
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  gap: 26px;
+  margin-top: 4px;
+}
+.coach-focus .split > aside {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  max-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+.coach-focus .split > aside::-webkit-scrollbar { width: 6px; }
+.coach-focus .split > aside::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 99px;
+}
+.coach-focus .detail-tabs {
+  position: sticky;
+  top: 96px;
+  z-index: 4;
+  margin: 0 0 12px;
+  padding: 10px 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 900px) {
+  .coach-focus { padding: 12px 14px 60px; }
+  .coach-focus .split { grid-template-columns: 1fr; gap: 16px; }
+  .coach-focus .split > aside {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+  .coach-focus .detail-tabs { position: static; }
+}
+
 /* ---- Claridad visual del panel del coach (spec 3) ---- */
 .card { padding: 22px; }
 .list-item { padding: 14px 16px; }
