@@ -31,6 +31,9 @@ import {
   EXERCISE_MEDIA_MODE,
   GENERIC_ANATOMY_SRC,
 } from "@/app/lib/exercise-media";
+import { safeBase64ToUint8Array } from "@/app/lib/base64";
+
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
 const TEST_LOGIN_ENABLED =
   process.env.NODE_ENV !== "production" ||
@@ -174,6 +177,62 @@ export default function ClientApp() {
   const [nutrition, setNutrition] = useState<NutritionPlan | null>(null);
   const [anamnesis, setAnamnesis] = useState<Anamnesis | null>(null);
   const [view, setView] = useState<"train" | "nutrition">("train");
+  const [pushStatus, setPushStatus] = useState<
+    "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
+  >("checking");
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window)
+    ) {
+      setPushStatus("unsupported");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      setPushStatus("denied");
+      return;
+    }
+    navigator.serviceWorker
+      .getRegistration()
+      .then(async (reg) => {
+        if (!reg) return setPushStatus("idle");
+        const sub = await reg.pushManager.getSubscription();
+        setPushStatus(sub ? "on" : "idle");
+      })
+      .catch(() => setPushStatus("idle"));
+  }, []);
+
+  const enablePush = async () => {
+    try {
+      if (!VAPID_PUBLIC_KEY) return setPushStatus("unsupported");
+      const applicationServerKey = safeBase64ToUint8Array(VAPID_PUBLIC_KEY);
+      if (!applicationServerKey) return setPushStatus("idle");
+      setPushStatus("busy");
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return setPushStatus("denied");
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey as BufferSource,
+        });
+      }
+      const res = await fetch("/api/app/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: sub.toJSON() }),
+      });
+      const json = await res.json();
+      setPushStatus(json.ok ? "on" : "idle");
+    } catch (err) {
+      console.error("[push] enablePush", err);
+      setPushStatus("idle");
+    }
+  };
 
   const [recordingFor, setRecordingFor] = useState<string | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
@@ -1202,6 +1261,24 @@ export default function ClientApp() {
             <span className="muted hide-sm" style={{ fontSize: ".9rem" }}>
               {profile.full_name || profile.email.split("@")[0]}
             </span>
+            <button
+              className={`btn ${pushStatus === "on" ? "btn-outline" : "btn-primary"}`}
+              onClick={enablePush}
+              disabled={pushStatus !== "idle" && pushStatus !== "denied"}
+              style={{ padding: "8px 14px" }}
+            >
+              {pushStatus === "on"
+                ? "Avisos activados"
+                : pushStatus === "busy"
+                ? "Activando…"
+                : pushStatus === "denied"
+                ? "Avisos bloqueados"
+                : pushStatus === "unsupported"
+                ? "Avisos no disponibles"
+                : pushStatus === "checking"
+                ? "…"
+                : "Activar avisos"}
+            </button>
             <button className="btn btn-outline" onClick={logout} style={{ padding: "8px 14px" }}>
               Salir
             </button>
