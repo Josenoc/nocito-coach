@@ -1203,7 +1203,7 @@ textarea.input { resize: vertical; }
   flex-wrap: wrap;
 }
 .coach-focus .split {
-  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+  grid-template-columns: minmax(192px, 228px) minmax(0, 1fr);
   gap: 26px;
   margin-top: 4px;
 }
