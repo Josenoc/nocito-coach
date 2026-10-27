@@ -20,6 +20,7 @@ const RULES: Rule[] = [
   { match: /scott/, slug: "preacher-curl", en: "Preacher Curl" },
   { match: /curl martillo/, slug: "hammer-curl", en: "Hammer Curl" },
   { match: /curl con barra/, slug: "barbell-curl", en: "Barbell Curl" },
+  { match: /curl.*(inclinado|banco a 45|banco inclinado)/, slug: "incline-dumbbell-curl", en: "Incline Dumbbell Curl" },
   { match: /curl de biceps|curl biceps/, slug: "biceps-curl", en: "Dumbbell Biceps Curl" },
   {
     match: /triceps.*(por encima|sobre la cabeza)|triceps sobre|overhead/,
@@ -28,7 +29,8 @@ const RULES: Rule[] = [
   },
   { match: /extension de triceps|triceps en polea/, slug: "triceps-pushdown", en: "Triceps Pushdown" },
   { match: /triceps.*(polea|agarre individual)|polea.*triceps/, slug: "triceps-pushdown", en: "Triceps Pushdown" },
-  { match: /press.*(triceps|frances|a 45)|triceps.*press/, slug: "overhead-triceps-extension", en: "Overhead Triceps Extension" },
+  { match: /press.*(frances|a 45)/, slug: "overhead-triceps-extension", en: "Overhead Triceps Extension" },
+  { match: /press.*(triceps|mancuerna)|triceps.*press/, slug: "dumbbell-lying-triceps-extension", en: "Dumbbell Lying Triceps Extension" },
   { match: /fondos en banco|fondos/, slug: "bench-dips", en: "Bench Dips" },
   { match: /dominadas/, slug: "pull-up", en: "Pull-Up" },
   { match: /jalon/, slug: "lat-pulldown", en: "Lat Pulldown" },
@@ -40,6 +42,7 @@ const RULES: Rule[] = [
   { match: /prensa/, slug: "leg-press", en: "45-Degree Leg Press" },
   { match: /extension(es)? de cuadriceps/, slug: "leg-extension", en: "Leg Extension" },
   { match: /gemelos sentado|elevacion de gemelos sentado/, slug: "seated-calf-raise", en: "Seated Calf Raise" },
+  { match: /gemelos.*(parado|maquina|pie)/, slug: "lever-standing-calf-raise", en: "Lever Standing Calf Raise" },
   { match: /gemelos|elevacion de talon/, slug: "standing-calf-raise", en: "Standing Calf Raise" },
   { match: /hip thrust/, slug: "hip-thrust", en: "Hip Thrust" },
   { match: /plancha/, slug: "plank", en: "Plank" },
@@ -115,6 +118,9 @@ const GIF_BY_SLUG: Record<string, string> = {
   "plank": "abs/weighted-front-plank",
   "hanging-leg-raise": "abs/hanging-leg-raise",
   "hiit-cardio": "cardio/burpee",
+  "incline-dumbbell-curl": "biceps/dumbbell-incline-biceps-curl",
+  "dumbbell-lying-triceps-extension": "triceps/dumbbell-lying-triceps-extension",
+  "lever-standing-calf-raise": "calves/lever-standing-calf-raise",
 };
 
 export function exerciseGifSrc(name: string): string | null {
@@ -166,6 +172,9 @@ const PD_BY_SLUG: Record<string, string> = {
   "plank": "Plank",
   "hanging-leg-raise": "Hanging_Leg_Raise",
   "hiit-cardio": "Mountain_Climbers",
+  "incline-dumbbell-curl": "Dumbbell_Bicep_Curl",
+  "dumbbell-lying-triceps-extension": "Triceps_Pushdown",
+  "lever-standing-calf-raise": "Standing_Calf_Raises",
 };
 
 /** Dos fotogramas (posición inicial/final) de free-exercise-db, o null. */
