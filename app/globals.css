@@ -1012,6 +1012,10 @@ textarea.input { resize: vertical; }
 
 @media (max-width: 900px) {
   .coach-layout { grid-template-columns: 1fr; }
+  .coach-layout > aside {
+    max-height: 45vh;
+    overflow-y: auto;
+  }
 }
 
 @media (max-width: 900px) {
