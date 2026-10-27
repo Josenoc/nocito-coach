@@ -206,6 +206,19 @@ export default function ClientApp() {
 
   const enablePush = async () => {
     try {
+      if (Notification.permission === "denied") {
+        showToast(
+          {
+            exId: "",
+            kind: "info",
+            title: "Avisos bloqueados",
+            detail:
+              "Reactivalos desde el icono del candado en la barra de direcciones del navegador.",
+          },
+          6000
+        );
+        return;
+      }
       if (!VAPID_PUBLIC_KEY) return setPushStatus("unsupported");
       const applicationServerKey = safeBase64ToUint8Array(VAPID_PUBLIC_KEY);
       if (!applicationServerKey) return setPushStatus("idle");
@@ -1280,7 +1293,7 @@ export default function ClientApp() {
                 : pushStatus === "busy"
                 ? "Activando…"
                 : pushStatus === "denied"
-                ? "Avisos bloqueados"
+                ? "Activar avisos"
                 : pushStatus === "unsupported"
                 ? "Avisos no disponibles"
                 : pushStatus === "checking"
