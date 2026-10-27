@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FoodItem, FoodLogs, MealSlot, NutritionPlan, Profile } from "@/lib/app-types";
 import { waLink } from "@/app/lib/coach";
@@ -456,6 +456,12 @@ export default function CoachDashboard() {
   const [filter, setFilter] = useState<"pending" | "active" | "all">("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<any>(null);
+  const [clientPickerOpen, setClientPickerOpen] = useState(false);
+  const [clientPickerFilter, setClientPickerFilter] = useState<"pending" | "active" | "all">(
+    "all"
+  );
+  const clientPickerOpenRef = useRef(clientPickerOpen);
+  clientPickerOpenRef.current = clientPickerOpen;
   const [blockGuideline, setBlockGuideline] = useState("");
   const [blockSaving, setBlockSaving] = useState(false);
   const [tab, setTab] = useState<
@@ -490,6 +496,10 @@ export default function CoachDashboard() {
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+      if (clientPickerOpenRef.current) {
+        setClientPickerOpen(false);
+        return;
+      }
       setSelectedId(null);
       setDetail(null);
       setProgram(null);
@@ -503,6 +513,22 @@ export default function CoachDashboard() {
       window.removeEventListener("keydown", onKey);
     };
   }, [selectedId]);
+
+  // Cierra el selector flotante al hacer clic fuera.
+  useEffect(() => {
+    if (!clientPickerOpen) return;
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      const picker = document.querySelector(".client-picker");
+      const trigger = document.querySelector(".client-picker-trigger");
+      if (picker && picker.contains(target)) return;
+      if (trigger && trigger.contains(target)) return;
+      setClientPickerOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [clientPickerOpen]);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -1304,11 +1330,6 @@ export default function CoachDashboard() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-            {selected && (
-              <button className="btn btn-outline" onClick={backToClients}>
-                ← Volver a Clientes
-              </button>
-            )}
             <button
               className={`btn ${pushStatus === "on" ? "btn-outline" : "btn-primary"}`}
               onClick={enablePush}
@@ -1416,21 +1437,96 @@ export default function CoachDashboard() {
             {selected && (
               <div className="coach-focus">
                 <div className="focus-bar">
-                  <div style={{ minWidth: 0 }}>
-                    <span className="focus-eyebrow">Ficha del alumno</span>
-                    <h2 style={{ margin: "4px 0 0", fontSize: "1.15rem" }}>
-                      {selected.full_name || selected.email}
-                    </h2>
-                    <div className="focus-meta">
-                      <span className="badge">
-                        {selected.routine_status === "pending_review"
-                          ? "Pendiente de revisión"
-                          : "Rutina activa"}
-                      </span>
-                      {selected.has_client_update && (
-                        <span className="pill update">● Actualizó datos</span>
-                      )}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 14,
+                      flexWrap: "wrap",
+                      minWidth: 0,
+                      position: "relative",
+                    }}
+                  >
+                    <button
+                      className="btn btn-primary client-picker-trigger"
+                      onClick={() => setClientPickerOpen((v) => !v)}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      Ver todos los alumnos
+                    </button>
+                    <div style={{ minWidth: 0 }}>
+                      <span className="focus-eyebrow">Ficha del alumno</span>
+                      <h2 style={{ margin: "4px 0 0", fontSize: "1.15rem" }}>
+                        {selected.full_name || selected.email}
+                      </h2>
+                      <div className="focus-meta">
+                        <span className="badge">
+                          {selected.routine_status === "pending_review"
+                            ? "Pendiente de revisión"
+                            : "Rutina activa"}
+                        </span>
+                        {selected.has_client_update && (
+                          <span className="pill update">● Actualizó datos</span>
+                        )}
+                      </div>
                     </div>
+                    {clientPickerOpen && (
+                      <div className="client-picker">
+                        <div className="client-picker-tabs">
+                          {(["pending", "active", "all"] as const).map((f) => (
+                            <button
+                              key={f}
+                              className={`chip ${clientPickerFilter === f ? "active" : ""}`}
+                              onClick={() => setClientPickerFilter(f)}
+                            >
+                              {f === "pending"
+                                ? "Pendientes"
+                                : f === "active"
+                                ? "Activos"
+                                : "Todos"}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="client-picker-list">
+                          {(() => {
+                            const filtered = clients.filter((c) => {
+                              if (clientPickerFilter === "pending")
+                                return c.routine_status === "pending_review";
+                              if (clientPickerFilter === "active")
+                                return c.routine_status === "active";
+                              return true;
+                            });
+                            if (!filtered.length) {
+                              return (
+                                <div className="client-picker-empty">
+                                  Sin alumnos en este filtro.
+                                </div>
+                              );
+                            }
+                            return filtered.map((c) => (
+                              <button
+                                key={c.id}
+                                className={`client-picker-item ${
+                                  selectedId === c.id ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                  setClientPickerOpen(false);
+                                  void selectClient(c.id);
+                                }}
+                              >
+                                <span className="name">{c.full_name || c.email}</span>
+                                <span className="meta">
+                                  {c.email} ·{" "}
+                                  {c.routine_status === "pending_review"
+                                    ? "Pendiente"
+                                    : "Activa"}
+                                </span>
+                              </button>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="focus-actions">
                     {selected.routine_status === "pending_review" && (
@@ -1438,9 +1534,6 @@ export default function CoachDashboard() {
                         Aprobar y Publicar
                       </button>
                     )}
-                    <button className="btn btn-outline" onClick={backToClients}>
-                      ← Volver a Clientes
-                    </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
