@@ -1,5 +1,8 @@
 -- Migracion: estandarizar nombres de ejercicios (corregir erratas)
 -- Ejecutar en el SQL Editor de Supabase (proyecto uatjjjmsbpxlwmgweszq).
+-- RECOMENDADO: ejecutar ANTES supabase-logs-permanentes.sql para que sets_logs
+-- tenga la columna exercise_name y se actualice el historial. Si no existe,
+-- la migracion omite esas actualizaciones sin fallar.
 -- Actualiza exercises.name y, si existe, el exercise_name desnormalizado en sets_logs.
 
 -- 1. flexiones en barra a 45° -> Press frances en barra a 45°
