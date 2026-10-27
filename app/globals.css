@@ -445,7 +445,7 @@ h1, h2, h3, h4 {
   font-weight: 700;
 }
 
-.track-table { width: 100%; border-collapse: collapse; }
+.track-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
 .track-table th {
   text-align: left;
   font-size: 0.8rem;
@@ -459,7 +459,7 @@ h1, h2, h3, h4 {
 .track-table tbody tr + tr td { border-top: 1px solid var(--border); }
 .track-table tr.warmup-row td { background: rgba(255, 196, 0, .045); color: var(--muted); font-size: .85rem; }
 .track-table tr.warmup-row .set-index { color: var(--orange); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.set-index { color: var(--gold); font-weight: 700; width: 96px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.set-index { color: var(--gold); font-weight: 700; width: auto; min-width: 48px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
 
 .cell-wrap { position: relative; background: #1f1f22; border-radius: 8px; }
 .cell-wrap .phantom {
