@@ -269,6 +269,116 @@ function LastSessionBlock({ logs, routines }: { logs: any[]; routines: any[] }) 
   );
 }
 
+// Última sesión cargada por el alumno para un ejercicio. Se vincula por
+// exercise_id (camino principal) y, si ese vínculo se perdió al recrear el
+// ejercicio, por nombre + rutina como respaldo. Nunca toca la rutina.
+function latestStudentLogs(
+  logs: any[],
+  opts: { exerciseId?: string; exerciseName?: string; routineId?: string }
+): { date: string; sets: any[] } | null {
+  const norm = (v: unknown) => String(v ?? "").trim().toLowerCase();
+  const sameRoutine = (l: any) =>
+    !opts.routineId || !l.routine_id || String(l.routine_id) === opts.routineId;
+  const byId = opts.exerciseId
+    ? logs.filter(
+        (l) => sameRoutine(l) && String(l.exercise_id ?? "") === opts.exerciseId
+      )
+    : [];
+  const name = norm(opts.exerciseName);
+  const matches =
+    byId.length > 0
+      ? byId
+      : name
+      ? logs.filter(
+          (l) =>
+            sameRoutine(l) &&
+            (norm(l.exercise_name) === name || norm(l.exercises?.name) === name)
+        )
+      : [];
+  const loaded = matches.filter(
+    (l) => l.actual_reps != null || l.actual_weight != null
+  );
+  if (!loaded.length) return null;
+  const dates = Array.from(new Set(loaded.map((l) => String(l.log_date ?? ""))))
+    .filter(Boolean)
+    .sort()
+    .reverse();
+  if (!dates.length) return null;
+  const date = dates[0];
+  const sets = loaded
+    .filter((l) => String(l.log_date ?? "") === date && Number(l.set_number) > 0)
+    .sort((a, b) => Number(a.set_number) - Number(b.set_number));
+  if (!sets.length) return null;
+  return { date, sets };
+}
+
+function StudentMarks({
+  logs,
+  exerciseId,
+  exerciseName,
+  routineId,
+  unit,
+  setRir,
+}: {
+  logs: any[];
+  exerciseId?: string;
+  exerciseName: string;
+  routineId?: string;
+  unit: string;
+  setRir?: Record<string, number>;
+}) {
+  const latest = latestStudentLogs(logs, { exerciseId, exerciseName, routineId });
+  if (!latest) {
+    return (
+      <p className="muted" style={{ margin: "8px 0 0", fontSize: ".8rem" }}>
+        El alumno todavía no cargó marcas de este ejercicio.
+      </p>
+    );
+  }
+  const [y, m, d] = latest.date.split("-");
+  const dateLabel = y && m && d ? `${d}/${m}/${y}` : latest.date;
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div className="track-head" style={{ marginBottom: 4 }}>
+        <h4>Marcas del alumno</h4>
+        <span className="muted" style={{ fontSize: ".76rem" }}>
+          Última sesión: {dateLabel}
+        </span>
+      </div>
+      <div className="scroll-x">
+        <table className="data-table mirror-table" style={{ minWidth: 340 }}>
+          <thead>
+            <tr>
+              <th>Serie</th>
+              <th>Reps</th>
+              <th>Peso ({unit})</th>
+              <th>RIR</th>
+            </tr>
+          </thead>
+          <tbody>
+            {latest.sets.map((s) => {
+              const rir =
+                setRir?.[`${s.exercise_id}|${s.log_date}|${s.set_number}`] ?? null;
+              return (
+                <tr key={`${s.set_number}-${s.id ?? ""}`}>
+                  <td className="set-index">{s.set_number}</td>
+                  <td>
+                    <b>{s.actual_reps ?? "—"}</b>
+                  </td>
+                  <td>
+                    <b>{s.actual_weight ?? "—"}</b>
+                  </td>
+                  <td>{rir ?? "—"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: string }) {
   const active = routines.filter((r) => r.active !== false);
   const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
@@ -1069,6 +1179,9 @@ export default function CoachDashboard() {
     setTab("rutinas");
     setFocus("rutinas");
     setMsg(null);
+    // Trae las marcas más recientes del alumno al abrir el día, sin esperar
+    // al refresco automático de 20 s.
+    void refreshProgress();
   };
 
   const deleteRoutine = async (id: string) => {
@@ -1988,7 +2101,7 @@ export default function CoachDashboard() {
                             </div>
 
                             <div className="track-head" style={{ marginTop: 12, marginBottom: 4 }}>
-                              <h4>Series del alumno</h4>
+                              <h4>Objetivo de series</h4>
                               <div className="set-stepper">
                                 <button
                                   type="button"
@@ -2088,6 +2201,15 @@ export default function CoachDashboard() {
                             <p className="muted" style={{ margin: "6px 0 0", fontSize: ".76rem" }}>
                               Los valores se aplican a todas las series del ejercicio.
                             </p>
+
+                            <StudentMarks
+                              logs={detail?.logs ?? []}
+                              exerciseId={ex.id}
+                              exerciseName={base?.name || ex.name}
+                              routineId={draft.id}
+                              unit={ex.unit}
+                              setRir={detail?.profile?.anamnesis?.setRir ?? {}}
+                            />
 
                             <textarea
                               className="input"
