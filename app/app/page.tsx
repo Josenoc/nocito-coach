@@ -398,6 +398,10 @@ export default function ClientApp() {
           }
           setProfile(j.profile);
           loadRoutine();
+          // Suscripción automática si el permiso ya fue concedido.
+          if (Notification.permission === "granted") {
+            void enablePush();
+          }
         }
       })
       .catch(() => {})
