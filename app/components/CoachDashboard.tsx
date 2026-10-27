@@ -771,7 +771,7 @@ export default function CoachDashboard() {
         /* la próxima pasada reintenta */
       }
     };
-    const interval = window.setInterval(tick, 20000);
+    const interval = window.setInterval(tick, 5000);
     const onVisible = () => {
       if (document.visibilityState === "visible") tick();
     };
@@ -1445,6 +1445,9 @@ export default function CoachDashboard() {
                         Aprobar y Publicar
                       </button>
                     )}
+                    <button className="btn btn-outline" onClick={() => void reloadDetail()}>
+                      Actualizar ahora
+                    </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
