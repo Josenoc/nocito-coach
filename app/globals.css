@@ -1088,80 +1088,16 @@ textarea.input { resize: vertical; }
 .food-coach-slot:first-of-type { margin-top: 4px; }
 .food-coach-slot .food-slot-head { font-size: 0.72rem; margin-bottom: 4px; }
 
-.client-picker {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  width: 360px;
-  max-width: calc(100vw - 32px);
-  max-height: 70vh;
-  overflow-y: auto;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  z-index: 260;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-}
-.client-picker-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-.client-picker-tabs .chip {
-  padding: 6px 12px;
-  font-size: 0.8rem;
-}
-.client-picker-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.client-picker-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #121212;
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-}
-.client-picker-item:hover {
-  border-color: var(--gold);
-  background: #161616;
-}
-.client-picker-item.active {
-  border-color: var(--gold);
-  box-shadow: inset 0 0 0 1px var(--gold);
-}
-.client-picker-item .name {
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-.client-picker-item .meta {
-  color: #999;
-  font-size: 0.78rem;
-}
-.client-picker-empty {
-  color: #999;
-  font-size: 0.85rem;
-  padding: 12px;
-  text-align: center;
-}
 /* ---- Coach: editor en pantalla completa (spec 3) ---- */
 .coach-focus {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
   background:
     radial-gradient(900px 520px at 90% -10%, rgba(245, 158, 11, 0.08), transparent 60%),
     var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px clamp(14px, 3vw, 32px) 60px;
-  width: 100%;
+  overflow-y: auto;
+  padding: 18px clamp(14px, 4vw, 40px) 80px;
 }
 .focus-bar {
   display: flex;
@@ -1203,7 +1139,7 @@ textarea.input { resize: vertical; }
   flex-wrap: wrap;
 }
 .coach-focus .split {
-  grid-template-columns: minmax(192px, 228px) minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
   gap: 26px;
   margin-top: 4px;
 }
@@ -2205,57 +2141,6 @@ textarea.input { resize: vertical; }
 .mirror-ex.status-below { border-left-color: #ef4444; }
 .mirror-ex.status-stalled { border-left-color: #f59e0b; }
 .mirror-ex.status-logged { border-left-color: #34d399; }
-
-/* Espejo compacto: un ejercicio por línea, edición inline. */
-.mirror-compact { display: flex; flex-direction: column; gap: 8px; }
-.mirror-row {
-  border: 1px solid var(--border);
-  border-left: 3px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.015);
-}
-.mirror-row.status-below { border-left-color: #ef4444; }
-.mirror-row.status-stalled { border-left-color: #f59e0b; }
-.mirror-row.status-logged { border-left-color: #34d399; }
-.mirror-row-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
-}
-.mirror-row-head strong { font-size: .95rem; }
-.mirror-row-targets {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: .85rem;
-  color: var(--muted);
-}
-.mirror-row-targets label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.mirror-row-targets input {
-  width: 52px;
-  padding: 4px 6px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: #fff;
-  font-size: .85rem;
-  text-align: center;
-}
-.mirror-row-targets input:focus {
-  border-color: var(--gold);
-  outline: none;
-}
-.mirror-sep { color: var(--muted); }
-.mirror-unit { font-size: .78rem; color: var(--muted); margin-left: 2px; }
-.mirror-saving { font-size: .78rem; color: var(--gold); min-width: 90px; }
 
 .mirror-ex-head {
   display: flex;

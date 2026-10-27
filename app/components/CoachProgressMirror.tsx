@@ -60,168 +60,73 @@ function DeltaChip({ ex }: { ex: ProgressExercise }) {
   );
 }
 
-function EditableExerciseRow({
-  ex,
-  onSave,
-}: {
-  ex: ProgressExercise;
-  onSave: (patch: {
-    target_sets: number | null;
-    target_reps: number | null;
-    target_weight: number | null;
-  }) => Promise<void>;
-}) {
-  const [sets, setSets] = useState(
-    ex.targetSets != null ? String(ex.targetSets) : ""
-  );
-  const [reps, setReps] = useState(
-    ex.targetReps != null ? String(ex.targetReps) : ""
-  );
-  const [weight, setWeight] = useState(
-    ex.targetWeight != null ? String(ex.targetWeight) : ""
-  );
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const focusedRef = useRef(false);
-  const latestRef = useRef({ sets, reps, weight });
-  latestRef.current = { sets, reps, weight };
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Sincroniza cuando cambian los valores del servidor, si no estoy editando.
-  useEffect(() => {
-    if (focusedRef.current) return;
-    setSets(ex.targetSets != null ? String(ex.targetSets) : "");
-    setReps(ex.targetReps != null ? String(ex.targetReps) : "");
-    setWeight(ex.targetWeight != null ? String(ex.targetWeight) : "");
-  }, [ex.targetSets, ex.targetReps, ex.targetWeight]);
-
-  const doSave = async (vals: { sets: string; reps: string; weight: string }) => {
-    setSaving(true);
-    setError(null);
-    try {
-      await onSave({
-        target_sets: vals.sets === "" ? null : Number(vals.sets),
-        target_reps: vals.reps === "" ? null : Number(vals.reps),
-        target_weight: vals.weight === "" ? null : Number(vals.weight),
-      });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 1200);
-    } catch (e: any) {
-      setError(e?.message || "Error al guardar");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const scheduleSave = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => doSave(latestRef.current), 600);
-  };
-
-  const flushSave = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    void doSave(latestRef.current);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
+function ExerciseBlock({ ex }: { ex: ProgressExercise }) {
   return (
-    <div className={`mirror-row status-${ex.status}`}>
-      <div className="mirror-row-head">
-        <strong>{ex.name}</strong>
-        <DeltaChip ex={ex} />
-        <StatusBadge status={ex.status} />
+    <div className={`mirror-ex status-${ex.status}`}>
+      <div className="mirror-ex-head">
+        <div className="mirror-ex-title">
+          <strong>{ex.name}</strong>
+          <span className="mirror-ex-target">
+            Objetivo {ex.targetSets ?? "—"} × {ex.targetReps ?? "—"}
+            {ex.targetWeight != null ? ` · ${fmtWeight(ex.targetWeight)} ${ex.unit}` : ""}
+          </span>
+        </div>
+        <div className="mirror-ex-flags">
+          <DeltaChip ex={ex} />
+          <StatusBadge status={ex.status} />
+        </div>
       </div>
 
-      <div className="mirror-row-targets">
-        <label>
-          Series
-          <input
-            inputMode="numeric"
-            value={sets}
-            onFocus={() => (focusedRef.current = true)}
-            onBlur={() => {
-              focusedRef.current = false;
-              flushSave();
-            }}
-            onChange={(e) => {
-              const v = e.target.value.replace(/[^\d]/g, "");
-              setSets(v);
-              scheduleSave();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                flushSave();
-              }
-            }}
-          />
-        </label>
-        <span className="mirror-sep">×</span>
-        <label>
-          Reps
-          <input
-            inputMode="numeric"
-            value={reps}
-            onFocus={() => (focusedRef.current = true)}
-            onBlur={() => {
-              focusedRef.current = false;
-              flushSave();
-            }}
-            onChange={(e) => {
-              const v = e.target.value.replace(/[^\d]/g, "");
-              setReps(v);
-              scheduleSave();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                flushSave();
-              }
-            }}
-          />
-        </label>
-        <span className="mirror-sep">·</span>
-        <label>
-          Peso
-          <input
-            inputMode="decimal"
-            value={weight}
-            onFocus={() => (focusedRef.current = true)}
-            onBlur={() => {
-              focusedRef.current = false;
-              flushSave();
-            }}
-            onChange={(e) => {
-              const v = e.target.value.replace(/[^\d.,]/g, "");
-              setWeight(v);
-              scheduleSave();
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                flushSave();
-              }
-            }}
-          />
-          <span className="mirror-unit">{ex.unit}</span>
-        </label>
-        <span className="mirror-saving">
-          {saving ? "Guardando…" : saved ? "✓ Guardado" : error ? `⚠ ${error}` : ""}
+      <div className="scroll-x">
+        <table className="data-table mirror-table" style={{ minWidth: 520 }}>
+          <thead>
+            <tr>
+              <th>Serie</th>
+              <th>Reps</th>
+              <th>Peso ({ex.unit})</th>
+              <th>RIR</th>
+              <th>Registrado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ex.sets.map((s) => (
+              <tr key={s.set_number} className={s.belowTarget ? "row-below" : undefined}>
+                <td className="set-index">{s.set_number}</td>
+                <td>
+                  <span className="mirror-cell">
+                    <span className="mirror-target">{s.target_reps ?? "—"}</span>
+                    <b className={s.belowTarget ? "is-below" : undefined}>
+                      {s.actual_reps ?? "—"}
+                    </b>
+                  </span>
+                </td>
+                <td>
+                  <span className="mirror-cell">
+                    <span className="mirror-target">{fmtWeight(s.target_weight)}</span>
+                    <b>{fmtWeight(s.actual_weight)}</b>
+                  </span>
+                </td>
+                <td>{s.rir ?? "—"}</td>
+                <td className="muted" style={{ fontSize: ".82rem" }}>
+                  {s.logged ? "✓" : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mirror-ex-foot">
+        <span className="mirror-meta">
+          {ex.loggedSets}/{ex.totalSets} series · vol {ex.totalVolume} kg · último registro{" "}
+          {fmtDate(ex.lastDate)}
         </span>
-      </div>
-
-      <div className="mirror-row-meta">
-        Real: {ex.loggedSets}/{ex.totalSets} series · vol {ex.totalVolume} {ex.unit} · mejor{" "}
-        {fmtWeight(ex.bestWeight)} {ex.unit} · último {fmtDate(ex.lastDate)}
+        {ex.bestWeight != null && (
+          <span className="mirror-meta">
+            Mejor peso: {fmtWeight(ex.bestWeight)} {ex.unit}
+            {ex.prevBestWeight != null ? ` (ant. ${fmtWeight(ex.prevBestWeight)})` : ""}
+          </span>
+        )}
       </div>
 
       {ex.suggestion && <p className="mirror-suggestion">{ex.suggestion}</p>}
@@ -243,17 +148,7 @@ function EditableExerciseRow({
   );
 }
 
-function DayView({
-  day,
-  onSave,
-}: {
-  day: ProgressDay;
-  onSave: (exerciseId: string, patch: {
-    target_sets: number | null;
-    target_reps: number | null;
-    target_weight: number | null;
-  }) => Promise<void>;
-}) {
+function DayView({ day }: { day: ProgressDay }) {
   if (!day) return null;
   return (
     <div className="mirror-day">
@@ -268,15 +163,9 @@ function DayView({
           Este día no tiene ejercicios cargados.
         </p>
       )}
-      <div className="mirror-compact">
-        {day.exercises.map((ex) => (
-          <EditableExerciseRow
-            key={ex.key}
-            ex={ex}
-            onSave={(patch) => onSave(ex.exerciseId, patch)}
-          />
-        ))}
-      </div>
+      {day.exercises.map((ex) => (
+        <ExerciseBlock key={ex.key} ex={ex} />
+      ))}
     </div>
   );
 }
@@ -298,20 +187,6 @@ export default function CoachProgressMirror({
   const routines = detail?.routines ?? [];
   const logs = detail?.logs ?? [];
   const audio = detail?.audio ?? [];
-
-  const saveExercise = async (
-    exerciseId: string,
-    patch: { target_sets: number | null; target_reps: number | null; target_weight: number | null }
-  ) => {
-    const res = await fetch("/api/coach/exercise", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ exercise_id: exerciseId, ...patch }),
-    });
-    const json = await res.json().catch(() => ({ ok: false, error: "Error" }));
-    if (!json.ok) throw new Error(json.error || "No se pudo guardar");
-    await onRefresh();
-  };
 
   const weeks = useMemo(
     () =>
@@ -449,7 +324,7 @@ export default function CoachProgressMirror({
               </button>
             ))}
           </div>
-          <DayView day={activeDay as ProgressDay} onSave={saveExercise} />
+          <DayView day={activeDay as ProgressDay} />
         </>
       ) : (
         <p className="muted" style={{ margin: "14px 0 0" }}>
