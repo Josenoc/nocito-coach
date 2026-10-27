@@ -1,12 +1,34 @@
 import { getSupabaseAdmin } from "@/lib/supabase-server";
-import { sendCoachPush, sendPushToProfile, profileDisplayName } from "@/app/lib/push";
+import { profileDisplayName } from "@/app/lib/push";
 
 /**
- * Disparadores de notificaciones push. Nunca lanzan: un fallo de push no debe
- * romper el guardado de una serie.
+ * Disparadores de notificaciones push. No envían en el momento: encolan en
+ * `push_queue` y el cron /api/cron/push-triggers las manda. Nunca lanzan: un
+ * fallo de push no debe romper el guardado de una serie.
  */
 
 type Loaded = { exercise_id: string | null; set_number: number; actual_reps: number | null; actual_weight: number | null };
+
+type QueueItem = {
+  target: "coach" | "client";
+  clientId: string;
+  title: string;
+  body: string;
+  url: string;
+  tag: string;
+};
+
+async function enqueue(item: QueueItem): Promise<void> {
+  const { error } = await getSupabaseAdmin().from("push_queue").insert({
+    target: item.target,
+    client_id: item.clientId,
+    title: item.title,
+    body: item.body,
+    url: item.url,
+    tag: item.tag,
+  });
+  if (error) console.error("[push] enqueue", error.message);
+}
 
 function hasValues(l: Loaded): boolean {
   return l.actual_reps != null || l.actual_weight != null;
@@ -16,7 +38,9 @@ function hasValues(l: Loaded): boolean {
 export async function notifyCoachLoad(clientId: string, action: string): Promise<void> {
   try {
     const name = await profileDisplayName(clientId);
-    await sendCoachPush({
+    await enqueue({
+      target: "coach",
+      clientId,
       title: "Nocito Coach",
       body: `${name}: ${action}`,
       url: "/app/admin",
@@ -31,7 +55,9 @@ export async function notifyCoachLoad(clientId: string, action: string): Promise
 export async function notifyCoachEvent(clientId: string, tagPrefix: string, action: string): Promise<void> {
   try {
     const name = await profileDisplayName(clientId);
-    await sendCoachPush({
+    await enqueue({
+      target: "coach",
+      clientId,
       title: "Nocito Coach",
       body: `${name}: ${action}`,
       url: "/app/admin",
@@ -43,8 +69,8 @@ export async function notifyCoachEvent(clientId: string, tagPrefix: string, acti
 }
 
 /**
- * Tras guardar una serie del alumno, avisa al alumno si acaba de completar la
- * sesión del día o la semana. Solo avisa en el guardado que completa cada hito.
+ * Tras guardar una serie del alumno, encola un aviso si acaba de completar la
+ * sesión del día o la semana. Solo encola en el guardado que completa cada hito.
  */
 export async function notifyStudentMilestones(args: {
   clientId: string;
@@ -79,7 +105,9 @@ export async function notifyStudentMilestones(args: {
     const sessionDoneBefore = allDone(dayIds, dayRows, current);
 
     if (sessionDoneNow && !sessionDoneBefore) {
-      await sendPushToProfile(args.clientId, {
+      await enqueue({
+        target: "client",
+        clientId: args.clientId,
         title: "Sesión completa",
         body: "Terminaste el entrenamiento de hoy. Cada serie cuenta: buen trabajo.",
         url: "/app",
@@ -112,7 +140,9 @@ export async function notifyStudentMilestones(args: {
     const weekDoneBefore = allDone(weekIds, weekRows, current);
 
     if (weekDoneNow && !weekDoneBefore) {
-      await sendPushToProfile(args.clientId, {
+      await enqueue({
+        target: "client",
+        clientId: args.clientId,
         title: "Semana completa",
         body: "Cumpliste todas las sesiones de la semana. Eso es constancia: a por la próxima.",
         url: "/app",

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/check-payments",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/push-triggers",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
