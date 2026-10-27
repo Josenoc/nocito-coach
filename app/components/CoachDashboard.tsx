@@ -492,8 +492,6 @@ export default function CoachDashboard() {
   // el scroll del listado y Escape vuelve a la lista.
   useEffect(() => {
     if (!selectedId) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       if (clientPickerOpenRef.current) {
@@ -508,10 +506,7 @@ export default function CoachDashboard() {
       setMsg(null);
     };
     window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [selectedId]);
 
   // Cierra el selector flotante al hacer clic fuera.
@@ -1363,8 +1358,9 @@ export default function CoachDashboard() {
           </div>
         </div>
 
-        <div className="coach-layout">
-          <aside className="card">
+        {!selected ? (
+          <div className="coach-layout">
+            <aside className="card">
             <div className="row-between" style={{ marginBottom: 12, gap: 8 }}>
               <h3 style={{ margin: 0 }}>Clientes</h3>
               {pendingCount > 0 && (
@@ -1428,14 +1424,13 @@ export default function CoachDashboard() {
           </aside>
 
           <section>
-            {!selected && (
-              <div className="card">
-                <p className="muted">Seleccioná un cliente para ver su actividad.</p>
-              </div>
-            )}
-
-            {selected && (
-              <div className="coach-focus">
+            <div className="card">
+              <p className="muted">Seleccioná un cliente para ver su actividad.</p>
+            </div>
+          </section>
+        </div>
+        ) : (
+          <div className="coach-focus">
                 <div className="focus-bar">
                   <div
                     style={{
@@ -2634,8 +2629,6 @@ export default function CoachDashboard() {
                 </div>
               </div>
             )}
-          </section>
-        </div>
       </div>
     </main>
   );
