@@ -1561,7 +1561,6 @@ export default function ClientApp() {
                             </span>
                           )}
                         </div>
-                        <div className="scroll-x">
                         <table className="track-table">
                           <thead>
                             <tr>
@@ -1653,7 +1652,6 @@ export default function ClientApp() {
                             })}
                           </tbody>
                         </table>
-                        </div>
                         <p className="muted" style={{ fontSize: ".78rem", margin: "8px 0 0" }}>
                           RIR = repeticiones en reserva: cuántas repeticiones te quedaban antes del fallo.
                         </p>
