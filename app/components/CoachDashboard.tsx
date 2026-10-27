@@ -1342,8 +1342,9 @@ export default function CoachDashboard() {
           </div>
         </div>
 
-        <div className="coach-layout">
-          <aside className="card">
+        {!selected ? (
+          <div className="coach-layout">
+            <aside className="card">
             <div className="row-between" style={{ marginBottom: 12, gap: 8 }}>
               <h3 style={{ margin: 0 }}>Clientes</h3>
               {pendingCount > 0 && (
@@ -1407,14 +1408,13 @@ export default function CoachDashboard() {
           </aside>
 
           <section>
-            {!selected && (
-              <div className="card">
-                <p className="muted">Seleccioná un cliente para ver su actividad.</p>
-              </div>
-            )}
-
-            {selected && (
-              <div className="coach-focus">
+            <div className="card">
+              <p className="muted">Seleccioná un cliente para ver su actividad.</p>
+            </div>
+          </section>
+        </div>
+        ) : (
+          <div className="coach-focus">
                 <div className="focus-bar">
                   <div style={{ minWidth: 0 }}>
                     <span className="focus-eyebrow">Ficha del alumno</span>
@@ -1497,32 +1497,6 @@ export default function CoachDashboard() {
                 )}
 
                 {msg && <div className={`toast ${msg.type}`}>{msg.text}</div>}
-
-                <div className="tabs" style={{ margin: "0 0 12px" }}>
-                  {([
-                    "historial", "perfil", "rutinas", "importar", "generar", "nutricion", "acceso",
-                  ] as const).map((t) => (
-                    <button
-                      key={t}
-                      className={`chip ${tab === t ? "active" : ""}`}
-                      onClick={() => setTab(t)}
-                    >
-                      {t === "historial"
-                        ? "Historial"
-                        : t === "perfil"
-                        ? "Perfil"
-                        : t === "rutinas"
-                        ? "Rutinas"
-                        : t === "importar"
-                        ? "Importar"
-                        : t === "generar"
-                        ? "Generar IA"
-                        : t === "nutricion"
-                        ? "Nutrición"
-                        : "Acceso"}
-                    </button>
-                  ))}
-                </div>
 
                 <div className="split">
                   <aside>
@@ -1717,6 +1691,32 @@ export default function CoachDashboard() {
                 )}
                   </aside>
                   <div key={tab} className="tab-panel">
+                    <div className="tabs detail-tabs">
+                      {(
+                        ["historial", "perfil", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
+                      ).map((t) => (
+                        <button
+                          key={t}
+                          className={`chip ${tab === t ? "active" : ""}`}
+                          onClick={() => setTab(t)}
+                        >
+                          {t === "historial"
+                            ? "Historial"
+                            : t === "perfil"
+                            ? "Perfil"
+                            : t === "rutinas"
+                            ? "Rutinas"
+                            : t === "importar"
+                            ? "Importar"
+                            : t === "generar"
+                            ? "Generar IA"
+                            : t === "nutricion"
+                            ? "Nutrición"
+                            : "Acceso"}
+                        </button>
+                      ))}
+                    </div>
+
                 {tab === "historial" && (
                   <div className="card" style={{ marginTop: 12 }}>
                     <h3 style={{ marginTop: 0 }}>Métricas generales</h3>
@@ -2086,7 +2086,6 @@ export default function CoachDashboard() {
                               </div>
                             </div>
 
-                            <div className="scroll-x">
                             <table className="track-table coach-track">
                               <thead>
                                 <tr>
@@ -2162,7 +2161,6 @@ export default function CoachDashboard() {
                                 ))}
                               </tbody>
                             </table>
-                            </div>
                             <p className="muted" style={{ margin: "6px 0 0", fontSize: ".76rem" }}>
                               Se completa con la última sesión del alumno. Ajustá y guardá los
                               cambios.
@@ -2547,8 +2545,6 @@ export default function CoachDashboard() {
                 </div>
               </div>
             )}
-          </section>
-        </div>
       </div>
     </main>
   );
