@@ -298,7 +298,7 @@ h1, h2, h3, h4 {
   .num-input { min-width: 0; padding: 12px 8px; font-size: 1.05rem; }
   .cell-wrap .phantom { font-size: 1rem; }
   .mic-btn { width: 100%; justify-content: center; padding: 12px 16px; }
-  .set-index { width: auto; min-width: 52px; font-size: .68rem; }
+  .set-index { width: auto; min-width: 48px; font-size: .62rem; word-break: break-word; overflow-wrap: anywhere; }
 }
 
 .exercise-card {
@@ -459,7 +459,7 @@ h1, h2, h3, h4 {
 .track-table tbody tr + tr td { border-top: 1px solid var(--border); }
 .track-table tr.warmup-row td { background: rgba(255, 196, 0, .045); color: var(--muted); font-size: .85rem; }
 .track-table tr.warmup-row .set-index { color: var(--orange); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.set-index { color: var(--gold); font-weight: 700; width: auto; min-width: 48px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.set-index { color: var(--gold); font-weight: 700; width: auto; min-width: 48px; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; word-break: break-word; overflow-wrap: anywhere; hyphens: auto; vertical-align: middle; }
 
 .cell-wrap { position: relative; background: #1f1f22; border-radius: 8px; }
 .cell-wrap .phantom {
