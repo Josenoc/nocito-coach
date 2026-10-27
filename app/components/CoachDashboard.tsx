@@ -1427,6 +1427,13 @@ export default function CoachDashboard() {
                           ? "Pendiente de revisión"
                           : "Rutina activa"}
                       </span>
+                      <button
+                        className="btn btn-primary"
+                        onClick={backToClients}
+                        style={{ padding: "4px 10px", fontSize: ".78rem", marginLeft: 4 }}
+                      >
+                        Ver todos los clientes
+                      </button>
                       {selected.has_client_update && (
                         <span className="pill update">● Actualizó datos</span>
                       )}
@@ -1438,9 +1445,6 @@ export default function CoachDashboard() {
                         Aprobar y Publicar
                       </button>
                     )}
-                    <button className="btn btn-primary" onClick={backToClients}>
-                      Ver todos los clientes
-                    </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
