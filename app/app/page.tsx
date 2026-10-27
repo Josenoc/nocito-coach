@@ -444,7 +444,7 @@ export default function ClientApp() {
       const next: Record<string, SetRow[]> = {};
       for (const routine of rl) {
         for (const ex of routine.exercises ?? []) {
-          const count = Math.max(1, ex.target_sets || 3);
+          const count = Math.max(1, Math.min(9, ex.target_sets || 3));
           const existing = logsData.filter(
             (l) => l.exercise_id === ex.id && l.log_date === todayStr
           );
@@ -898,7 +898,7 @@ export default function ClientApp() {
 
     const lastSet = sets.reduce((m, s) => Math.max(m, s.set_number), 0);
     const total = Math.min(
-      12,
+      10,
       Math.max(lastSet, (rows[ex.id]?.length ?? 1) - 1, ex.target_sets ?? 0)
     );
     const order: Record<string, number> = {};
@@ -1547,7 +1547,7 @@ export default function ClientApp() {
                         <table className="track-table">
                           <thead>
                             <tr>
-                              <th>Series</th>
+                              <th>Tipo de serie</th>
                               <th>Reps</th>
                               <th>Peso ({ex.unit})</th>
                               <th>RIR</th>
@@ -1574,7 +1574,9 @@ export default function ClientApp() {
                                     : undefined
                                 }
                               >
-                                <td className="set-index">{r.set_number === 0 ? "Cal." : r.set_number}</td>
+                                <td className="set-index">
+                                  {r.set_number === 0 ? "Calentamiento" : "Efectiva"}
+                                </td>
                                 <td>
                                   <div className="cell-wrap">
                                     <span className="phantom">{ex.target_reps ?? ""}</span>

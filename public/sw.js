@@ -16,10 +16,11 @@ self.addEventListener("push", (event) => {
   const title = data.title || "Nocito Coach";
   const options = {
     body: data.body || "",
-    data: { url: data.url || "/app/admin" },
+    data: { url: data.url || "/app" },
     icon: "/img/logo-nocitocoach.jpeg",
     badge: "/img/logo-nocitocoach.jpeg",
     tag: data.tag || undefined,
+    vibrate: [200, 100, 200],
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
