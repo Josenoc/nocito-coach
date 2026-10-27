@@ -110,7 +110,7 @@ const GIF_BY_SLUG: Record<string, string> = {
   "barbell-squat": "glutes/barbell-low-bar-squat",
   "leg-press": "glutes/sled-45-leg-press",
   "romanian-deadlift": "glutes/barbell-romanian-deadlift",
-  "hip-thrust": "glutes/resistance-band-hip-thrusts-on-knees-female",
+  "hip-thrust": "glutes/barbell-glute-bridge",
   "leg-extension": "quads/lever-leg-extension",
   "lying-leg-curl": "hamstrings/lever-lying-leg-curl",
   "standing-calf-raise": "calves/standing-calves",
