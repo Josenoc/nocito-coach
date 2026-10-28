@@ -355,7 +355,7 @@ export async function generateProgram(input: ProgramInput): Promise<GeneratedPro
           Authorization: `Bearer ${groqKey}`,
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-20b",
+          model: "llama-3.3-70b-versatile",
           messages,
           temperature: 0,
           max_tokens: 4096,
