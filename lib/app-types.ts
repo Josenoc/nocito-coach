@@ -146,6 +146,7 @@ export interface Exercise {
   name: string;
   video_url?: string | null;
   technique_notes?: string | null;
+  technique_type?: string | null;
   order_index: number;
   target_sets?: number | null;
   target_reps?: number | null;

@@ -33,6 +33,9 @@ function cleanExercises(
         target_reps: numOrNull(e.target_reps),
         target_weight: numOrNull(e.target_weight),
         unit: e.unit === "lbs" ? "lbs" : "kg",
+        technique_type: ["normal", "superset", "drop_set", "rest_pause"].includes(String(e.technique_type))
+          ? String(e.technique_type)
+          : "normal",
       };
     })
     .filter(Boolean) as Record<string, unknown>[];

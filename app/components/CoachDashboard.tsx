@@ -28,6 +28,7 @@ interface ExRow {
   target_reps: string;
   target_weight: string;
   target_rir: string;
+  technique_type: string;
   unit: "kg" | "lbs";
 }
 
@@ -49,6 +50,7 @@ const emptyEx = (): ExRow => ({
   target_reps: "10",
   target_weight: "",
   target_rir: "",
+  technique_type: "normal",
   unit: "kg",
 });
 
@@ -1097,6 +1099,7 @@ export default function CoachDashboard() {
           target_reps: e.target_reps,
           target_weight: e.target_weight,
           unit: e.unit,
+          technique_type: e.technique_type,
         })),
     };
     const res = await fetch("/api/coach/routine", {
@@ -1155,6 +1158,7 @@ export default function CoachDashboard() {
         target_reps: e.target_reps != null ? String(e.target_reps) : "",
         target_weight: e.target_weight != null ? String(e.target_weight) : "",
         target_rir: rirFromNotes(e.technique_notes ?? ""),
+        technique_type: e.technique_type ?? "normal",
         unit: e.unit ?? "kg",
       }));
 
