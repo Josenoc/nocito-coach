@@ -173,6 +173,8 @@ export default function ClientApp() {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const [rows, setRows] = useState<Record<string, SetRow[]>>({});
+  const rowsRef = useRef<Record<string, SetRow[]>>({});
+  useEffect(() => { rowsRef.current = rows; }, [rows]);
   const [loadingData, setLoadingData] = useState(false);
   const [planStatus, setPlanStatus] = useState<string>("active");
   const [nutrition, setNutrition] = useState<NutritionPlan | null>(null);
@@ -547,6 +549,7 @@ export default function ClientApp() {
           });
         }
       }
+      rowsRef.current = next;
       setRows(next);
     } finally {
       setLoadingData(false);
@@ -653,12 +656,16 @@ export default function ClientApp() {
   };
 
   const updateRow = (exId: string, setNumber: number, patch: Partial<SetRow>) => {
-    setRows((prev) => ({
-      ...prev,
-      [exId]: (prev[exId] ?? []).map((r) =>
-        r.set_number === setNumber ? { ...r, ...patch } : r
-      ),
-    }));
+    setRows((prev) => {
+      const next = {
+        ...prev,
+        [exId]: (prev[exId] ?? []).map((r) =>
+          r.set_number === setNumber ? { ...r, ...patch } : r
+        ),
+      };
+      rowsRef.current = next;
+      return next;
+    });
   };
 
   const addSet = (ex: Exercise, asWarmup: boolean) => {
@@ -685,7 +692,9 @@ export default function ClientApp() {
         drops: [],
       };
       const next = [...current, newRow].sort((a, b) => a.set_number - b.set_number);
-      return { ...prev, [ex.id]: next };
+      const result = { ...prev, [ex.id]: next };
+      rowsRef.current = result;
+      return result;
     });
   };
 
@@ -723,10 +732,14 @@ export default function ClientApp() {
         );
       } catch { /* ignore */ }
     }
-    setRows((prev) => ({
-      ...prev,
-      [ex.id]: (prev[ex.id] ?? []).filter((r) => r.set_number !== last.set_number),
-    }));
+    setRows((prev) => {
+      const result = {
+        ...prev,
+        [ex.id]: (prev[ex.id] ?? []).filter((r) => r.set_number !== last.set_number),
+      };
+      rowsRef.current = result;
+      return result;
+    });
   };
 
   const updateDrop = (exId: string, setNumber: number, dropIndex: number, field: "reps" | "weight", value: string) => {
@@ -754,7 +767,7 @@ export default function ClientApp() {
   };
 
   const saveSet = async (ex: Exercise, setNumber: number) => {
-    const row = rows[ex.id]?.find((r) => r.set_number === setNumber);
+    const row = rowsRef.current[ex.id]?.find((r) => r.set_number === setNumber);
     if (!row) return;
     const logDate = retroDate ?? today;
     try {
