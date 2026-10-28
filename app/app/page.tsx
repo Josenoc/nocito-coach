@@ -1674,8 +1674,11 @@ export default function ClientApp() {
                 return (
                   <div
                     className="exercise-card block-card view-fade-item"
+                    style={{
+                      animationDelay: `${Math.min(idx, 6) * 40}ms`,
+                      borderLeft: ex.technique_type === "superset" ? "4px solid #FFC400" : undefined,
+                    }}
                     key={`${week}-${dayNameOf(current)}-${ex.id}`}
-                    style={{ animationDelay: `${Math.min(idx, 6) * 40}ms` }}
                   >
                     <div className="workout-grid">
                       <div>

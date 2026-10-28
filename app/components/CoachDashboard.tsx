@@ -2097,6 +2097,17 @@ export default function CoachDashboard() {
                                 <option value="kg">kg</option>
                                 <option value="lbs">lbs</option>
                               </select>
+                              <select
+                                className="input ex-unit-select"
+                                value={ex.technique_type}
+                                onChange={(e) => setEx(idx, { technique_type: e.target.value })}
+                                title="Tecnica avanzada"
+                              >
+                                <option value="normal">Normal</option>
+                                <option value="superset">Superset</option>
+                                <option value="drop_set">Drop set</option>
+                                <option value="rest_pause">Rest-pause</option>
+                              </select>
                             </div>
 
                             <div className="track-head" style={{ marginTop: 12, marginBottom: 4 }}>
