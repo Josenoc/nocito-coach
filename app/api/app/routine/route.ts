@@ -57,8 +57,7 @@ export async function GET(req: NextRequest) {
         .eq("client_id", clientId)
         .in("exercise_id", exerciseIds)
         .order("log_date", { ascending: false })
-        .order("set_number", { ascending: true })
-        .limit(2000);
+        .order("set_number", { ascending: true });
       if (logError) {
         console.error("[app/routine] error leyendo sets_logs", {
           clientId,
