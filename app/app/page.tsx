@@ -489,7 +489,7 @@ export default function ClientApp() {
   const loadRoutine = async () => {
     setLoadingData(true);
     try {
-      const res = await fetch("/api/app/routine");
+      const res = await fetch("/api/app/routine", { cache: "no-store" });
       const json = await res.json();
       if (!json.ok) return;
       const rl: Routine[] = json.routines ?? [];
