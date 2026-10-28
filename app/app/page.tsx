@@ -177,6 +177,7 @@ export default function ClientApp() {
   const [nutrition, setNutrition] = useState<NutritionPlan | null>(null);
   const [anamnesis, setAnamnesis] = useState<Anamnesis | null>(null);
   const [view, setView] = useState<"train" | "nutrition">("train");
+  const [trialExpired, setTrialExpired] = useState(false);
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
@@ -406,8 +407,14 @@ export default function ClientApp() {
 
   useEffect(() => {
     fetch("/api/auth/session")
-      .then((r) => r.json())
+      .then((r) => {
+        if (r.status === 403) {
+          return r.json().then((j) => { if (j?.trialExpired) setTrialExpired(true); return null; });
+        }
+        return r.json();
+      })
       .then((j) => {
+        if (!j) return;
         if (j.ok && j.profile) {
           if (j.profile.role === "coach") {
             router.replace("/entrenador");
@@ -1090,6 +1097,21 @@ export default function ClientApp() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, planStatus, detection.nudge.show]);
+
+  if (trialExpired) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0A0A0A", color: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ maxWidth: 520, width: "100%", background: "#111", border: "1px solid #242424", borderRadius: 12, padding: 28, textAlign: "center" }}>
+          <h1 style={{ color: "#FFC400", marginTop: 0 }}>Tu prueba gratuita vencio</h1>
+          <p style={{ color: "#a1a1aa" }}>Tus 30 dias de prueba terminaron. Elegi un plan para seguir entrenando con Nocito Coach.</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
+            <a className="btn btn-primary" href="/planes" style={{ background: "#FFC400", color: "#000", borderColor: "#FFC400" }}>Ver planes y pagar</a>
+            <a className="btn btn-outline" href="https://wa.me/5492616224718?text=Hola%20Jose%2C%20quiero%20activar%20mi%20plan." target="_blank" rel="noopener" style={{ borderColor: "#FFC400", color: "#f8fafc" }}>Consultar por WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (checking) {
     return (

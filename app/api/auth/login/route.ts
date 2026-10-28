@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     const query = getSupabaseAdmin()
       .from("profiles")
-      .select("id, email, username, role, full_name, pin_hash, activo")
+      .select("id, email, username, role, full_name, pin_hash, activo, plan, trial_ends_at")
       .eq("activo", true);
 
     const { data, error } = await (identifier.includes("@")
@@ -33,6 +33,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { ok: false, error: "Usuario/email o PIN incorrectos." },
         { status: 401 }
+      );
+    }
+
+    // Trial: bloquear si vencio (solo clientes en plan trial).
+    if (
+      data.role === "client" &&
+      (data.plan ?? "trial") === "trial" &&
+      data.trial_ends_at &&
+      new Date(data.trial_ends_at as string).getTime() < Date.now()
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Tu prueba gratuita vencio.", trialExpired: true },
+        { status: 403 }
       );
     }
 

@@ -210,6 +210,8 @@ export async function POST(req: NextRequest) {
           activo: true,
           anamnesis,
           routine_status: "pending_review",
+          plan: "trial",
+          trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         },
         { onConflict: "email" }
       )
