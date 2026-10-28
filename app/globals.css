@@ -295,7 +295,8 @@ h1, h2, h3, h4 {
   .exercise-name { font-size: 1.12rem; word-break: break-word; }
   .track-head { flex-wrap: wrap; }
   .track-table th { padding: 6px 4px; font-size: 0.76rem; }
-  .track-table td { padding: 4px; }
+  .track-table td { padding: 6px 4px; }
+  .track-table td .cell-wrap { margin: 0 2px; }
   .num-input { min-width: 0; padding: 12px 8px; font-size: 1.05rem; }
   .cell-wrap .phantom { font-size: 1rem; }
   .mic-btn { width: 100%; justify-content: center; padding: 12px 16px; }
