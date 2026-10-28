@@ -60,6 +60,7 @@ type SetRow = {
   actual_weight: string;
   rir: string;
   saved?: boolean;
+  drops: { reps: string; weight: string }[];
 };
 
 type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
@@ -536,6 +537,12 @@ export default function ClientApp() {
               // Sin esto, al recargar la app las series seguian guardadas en la
               // base pero perdian el check y parecia que no se habian guardado.
               saved: !!log,
+              drops: Array.isArray(log?.drops)
+                ? log.drops.map((d: any) => ({
+                    reps: d?.reps != null ? String(d.reps) : "",
+                    weight: d?.weight != null ? String(d.weight) : "",
+                  }))
+                : [],
             };
           });
         }
@@ -675,6 +682,7 @@ export default function ClientApp() {
         actual_weight: "",
         rir: "",
         saved: false,
+        drops: [],
       };
       const next = [...current, newRow].sort((a, b) => a.set_number - b.set_number);
       return { ...prev, [ex.id]: next };
@@ -721,6 +729,30 @@ export default function ClientApp() {
     }));
   };
 
+  const updateDrop = (exId: string, setNumber: number, dropIndex: number, field: "reps" | "weight", value: string) => {
+    setRows((prev) => ({
+      ...prev,
+      [exId]: (prev[exId] ?? []).map((r) => {
+        if (r.set_number !== setNumber) return r;
+        const drops = [...(r.drops ?? [])];
+        if (!drops[dropIndex]) drops[dropIndex] = { reps: "", weight: "" };
+        drops[dropIndex] = { ...drops[dropIndex], [field]: value };
+        return { ...r, drops };
+      }),
+    }));
+  };
+
+  const addDrop = (exId: string, setNumber: number) => {
+    setRows((prev) => ({
+      ...prev,
+      [exId]: (prev[exId] ?? []).map((r) => {
+        if (r.set_number !== setNumber) return r;
+        const drops = [...(r.drops ?? []), { reps: "", weight: "" }];
+        return { ...r, drops };
+      }),
+    }));
+  };
+
   const saveSet = async (ex: Exercise, setNumber: number) => {
     const row = rows[ex.id]?.find((r) => r.set_number === setNumber);
     if (!row) return;
@@ -735,6 +767,7 @@ export default function ClientApp() {
           actual_reps: row.actual_reps,
           actual_weight: row.actual_weight,
           rir: row.rir,
+          drops: row.drops.map((d) => ({ reps: d.reps, weight: d.weight })),
           target_reps: ex.target_reps,
           target_weight: ex.target_weight,
           phantom_reference_10_percent: ex.target_weight,
@@ -782,6 +815,7 @@ export default function ClientApp() {
                 actual_reps: reps,
                 actual_weight: weight,
                 rir,
+                drops: prevLog?.drops ?? null,
                 target_reps: ex.target_reps,
                 target_weight: ex.target_weight,
                 phantom_reference_10_percent: ex.target_weight,
@@ -1046,7 +1080,7 @@ export default function ClientApp() {
     setRows((prev) => {
       const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
       while (base.length - 1 < total) {
-        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "" });
+        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "", drops: [] });
       }
       for (const s of sets) {
         const r = base.find((x) => x.set_number === s.set_number);
@@ -1733,7 +1767,7 @@ export default function ClientApp() {
                             {(rows[ex.id] ?? []).map((r) => {
                               const fillKey = `${ex.id}:${r.set_number}`;
                               const stagger = fillOrder[fillKey];
-                              return (
+                              return ( <> 
                               <tr
                                 key={r.set_number}
                                 className={[
@@ -1806,7 +1840,23 @@ export default function ClientApp() {
                                   <div className="save-flag">{r.saved ? "✓" : ""}</div>
                                 </td>
                               </tr>
-                              );
+                              {ex.technique_type === "drop_set" && (
+                                <tr key={`drop-${r.set_number}`}>
+                                  <td colSpan={5} style={{ padding: "4px 8px", background: "rgba(255,196,0,.04)" }}>
+                                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                                      <span style={{ fontSize: ".75rem", color: "#a1a1aa" }}>Caídas:</span>
+                                      {(r.drops || []).map((d, di) => (
+                                        <span key={di} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
+                                          <input className="num-input" style={{ width: 52, padding: "6px 4px" }} placeholder="reps" value={d.reps} onChange={(e) => updateDrop(ex.id, r.set_number, di, "reps", e.target.value)} onBlur={() => saveSet(ex, r.set_number)} />
+                                          <input className="num-input" style={{ width: 60, padding: "6px 4px" }} placeholder="kg" value={d.weight} onChange={(e) => updateDrop(ex.id, r.set_number, di, "weight", e.target.value)} onBlur={() => saveSet(ex, r.set_number)} />
+                                        </span>
+                                      ))}
+                                      <button type="button" onClick={() => addDrop(ex.id, r.set_number)} style={{ background: "transparent", border: "1px solid #FFC400", color: "#FFC400", borderRadius: 6, padding: "2px 8px", fontSize: ".75rem", cursor: "pointer" }}>+ caída</button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                              </> );
                             })}
                           </tbody>
                         </table>
