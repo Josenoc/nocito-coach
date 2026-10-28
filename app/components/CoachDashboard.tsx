@@ -247,21 +247,37 @@ function LastSessionBlock({ logs, routines }: { logs: any[]; routines: any[] }) 
       {Object.keys(byEx).map((exId) => {
         const sets = [...byEx[exId]].sort((a, b) => a.set_number - b.set_number);
         return (
-          <div
-            key={exId}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 8,
-              padding: "6px 0",
-              borderBottom: "1px solid #1c1c1c",
-              fontSize: ".85rem",
-            }}
-          >
-            <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{names[exId] ?? "Ejercicio"}</span>
-            <span className="muted" style={{ textAlign: "right", minWidth: 0, overflowWrap: "anywhere" }}>
-              {sets.length} series · {sets.map((s) => `${s.actual_reps ?? "-"}×${s.actual_weight ?? "-"}`).join(" / ")}
-            </span>
+          <div key={exId} style={{ marginTop: 10 }}>
+            <div style={{ fontWeight: 600, color: "#f8fafc", marginBottom: 6, fontSize: ".85rem" }}>
+              {names[exId] ?? "Ejercicio"}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {sets.map((set, index) => (
+                <div
+                  key={set.id || index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    fontSize: ".8rem",
+                    padding: "6px 10px",
+                    background: "#0f0f0f",
+                    borderRadius: 6,
+                    border: "1px solid #242424",
+                  }}
+                >
+                  <span style={{ color: "#d4d4d8" }}>
+                    Serie {Number(set.set_number) > 0 ? set.set_number : index + 1}{" "}
+                    <span style={{ fontSize: ".7rem", color: "#71717a", marginLeft: 6 }}>
+                      ({Number(set.set_number) === 0 ? "Calentamiento" : "Efectiva"})
+                    </span>
+                  </span>
+                  <span style={{ fontFamily: "monospace", color: "#FFC400", fontWeight: 500 }}>
+                    {set.actual_reps ?? "-"} reps @ {set.actual_weight ?? "-"} kg
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         );
       })}
