@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic";
 const ACCENT = "#FFC400";
 const DARK = "#0A0A0A";
 const WHITE = "#FFFFFF";
-const GRAY = "#9a9a9a";
-const LIGHT = "#f4f4f4";
+const GRAY = "#6b7280";
+const CARD_BG = "#f8f8f8";
+const BORDER = "#e5e5e5";
 
 export async function GET(req: NextRequest) {
   const coach = await getCoach();
@@ -52,7 +53,6 @@ export async function GET(req: NextRequest) {
   const name = (profile.full_name || profile.email || "Alumno").trim();
   const safeName = name.replace(/[^a-zA-Z0-9-_ ]/g, "").replace(/\s+/g, "-") || "Alumno";
 
-  // Group logs by exercise_id
   const logsByEx: Record<string, any[]> = {};
   for (const l of logs) {
     if (!l.exercise_id) continue;
@@ -64,22 +64,29 @@ export async function GET(req: NextRequest) {
   doc.on("data", (c: Buffer) => chunks.push(c));
 
   const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+  const L = doc.page.margins.left;
+  const R = doc.page.margins.left + pageWidth;
 
-  // Header band
-  doc.rect(0, 0, doc.page.width, 70).fill(DARK);
-  doc.fillColor(ACCENT).font("Helvetica-Bold").fontSize(16).text("NOCITO COACH", 44, 22, { width: pageWidth });
-  doc.fillColor(WHITE).font("Helvetica").fontSize(10).text("Rutina de entrenamiento", 44, 44, { width: pageWidth });
-  doc.moveDown(2);
+  // ---- Header band ----
+  doc.rect(0, 0, doc.page.width, 86).fill(DARK);
+  doc.fillColor(ACCENT).font("Helvetica-Bold").fontSize(20).text("NOCITO COACH", L, 24, { width: pageWidth, align: "center" });
+  doc.fillColor(WHITE).font("Helvetica").fontSize(10).text("Rutina de entrenamiento", L, 50, { width: pageWidth, align: "center" });
+  doc.moveDown(1.2);
 
-  doc.fillColor(DARK).font("Helvetica-Bold").fontSize(14).text(name, { width: pageWidth });
-  doc.font("Helvetica").fontSize(9).fillColor(GRAY).text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, { width: pageWidth });
+  // ---- Student info block ----
+  doc.fillColor(DARK).font("Helvetica-Bold").fontSize(16).text(name, L, doc.y, { width: pageWidth, align: "center" });
+  doc.moveDown(0.3);
+  doc.font("Helvetica").fontSize(9).fillColor(GRAY).text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, L, doc.y, { width: pageWidth, align: "center" });
+  doc.moveDown(1.2);
+
+  // Divider
+  doc.moveTo(L, doc.y).lineTo(R, doc.y).strokeColor(BORDER).lineWidth(1).stroke();
   doc.moveDown(1);
 
   if (!routines.length) {
-    doc.fillColor(DARK).fontSize(11).text("Este alumno todavia no tiene rutinas publicadas.", { width: pageWidth });
+    doc.fillColor(DARK).font("Helvetica").fontSize(11).text("Este alumno todavia no tiene rutinas publicadas.", L, doc.y, { width: pageWidth, align: "center" });
   }
 
-  // Group routines by week
   const byWeek: Record<number, any[]> = {};
   for (const r of routines) {
     const w = Number(r.week_number) || 1;
@@ -87,39 +94,57 @@ export async function GET(req: NextRequest) {
   }
 
   for (const week of Object.keys(byWeek).map(Number).sort((a, b) => a - b)) {
-    doc.moveDown(0.6);
-    doc.fillColor(ACCENT).font("Helvetica-Bold").fontSize(12).text(`Semana ${week}`, { width: pageWidth });
-    doc.moveDown(0.3);
+    // Week title
+    doc.moveDown(0.4);
+    doc.fillColor(ACCENT).font("Helvetica-Bold").fontSize(13).text(`SEMANA ${week}`, L, doc.y, { width: pageWidth, align: "left" });
+    doc.moveDown(0.4);
 
     for (const r of byWeek[week]) {
-      doc.fillColor(DARK).font("Helvetica-Bold").fontSize(11).text(r.day_name || r.name || "Dia", { width: pageWidth });
-      doc.moveDown(0.2);
+      // Day card
+      const cardTop = doc.y;
+      doc.rect(L, cardTop, pageWidth, 22).fill(CARD_BG);
+      doc.fillColor(DARK).font("Helvetica-Bold").fontSize(11).text(r.day_name || r.name || "Dia", L + 10, cardTop + 5, { width: pageWidth - 20 });
+      doc.y = cardTop + 26;
 
       const exs = (r.exercises ?? []).sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0));
       for (const ex of exs) {
-        doc.font("Helvetica-Bold").fontSize(10).fillColor(DARK).text(ex.name || "Ejercicio", { width: pageWidth });
-        const target = `${ex.target_sets ?? "-"} series x ${ex.target_reps ?? "-"} reps${ex.target_weight ? ` @ ${ex.target_weight} ${ex.unit ?? "kg"}` : ""}`;
-        doc.font("Helvetica").fontSize(9).fillColor(GRAY).text(`Objetivo: ${target}`, { width: pageWidth });
+        // Exercise block
+        doc.font("Helvetica-Bold").fontSize(10.5).fillColor(DARK).text(ex.name || "Ejercicio", L + 6, doc.y, { width: pageWidth - 12 });
+        doc.moveDown(0.15);
+        const target = `${ex.target_sets ?? "-"} series x ${ex.target_reps ?? "-"} reps${ex.target_weight ? `  @  ${ex.target_weight} ${ex.unit ?? "kg"}` : ""}`;
+        doc.font("Helvetica").fontSize(9).fillColor(GRAY).text(`Objetivo: ${target}`, L + 6, doc.y, { width: pageWidth - 12 });
         if (ex.technique_notes) {
-          doc.font("Helvetica-Oblique").fontSize(8.5).fillColor(GRAY).text(ex.technique_notes, { width: pageWidth });
+          doc.font("Helvetica-Oblique").fontSize(8.5).fillColor(GRAY).text(ex.technique_notes, L + 6, doc.y, { width: pageWidth - 12 });
         }
 
-        const sets = (logsByEx[ex.id] ?? []).filter((l) => l.log_date);
-        // show latest session sets
+        const sets = (logsByEx[ex.id] ?? []);
         if (sets.length) {
           const lastDate = sets.map((s) => String(s.log_date)).sort().reverse()[0];
           const daySets = sets.filter((s) => s.log_date === lastDate).sort((a, b) => a.set_number - b.set_number);
-          doc.font("Helvetica-Bold").fontSize(9).fillColor(DARK).text(`Series cargadas (${lastDate.split("-").reverse().join("/")}):`, { width: pageWidth });
+          doc.moveDown(0.2);
+          doc.font("Helvetica-Bold").fontSize(9).fillColor(DARK).text(`Series cargadas (${lastDate.split("-").reverse().join("/")}):`, L + 6, doc.y, { width: pageWidth - 12 });
           for (const st of daySets) {
             const tipo = Number(st.set_number) === 0 ? "Calentamiento" : "Efectiva";
-            const rir = st.rir != null && st.rir !== "" ? `  RIR ${st.rir}` : "";
-            doc.font("Helvetica").fontSize(9).fillColor(GRAY).text(`  - ${tipo}: ${st.actual_reps ?? "-"} reps @ ${st.actual_weight ?? "-"} kg${rir}`, { width: pageWidth });
+            const rir = st.rir != null && st.rir !== "" ? `   RIR ${st.rir}` : "";
+            doc.font("Helvetica").fontSize(9).fillColor(GRAY).text(`   ${tipo}: ${st.actual_reps ?? "-"} reps  @  ${st.actual_weight ?? "-"} kg${rir}`, L + 6, doc.y, { width: pageWidth - 12 });
           }
         }
-        doc.moveDown(0.4);
+        doc.moveDown(0.5);
       }
       doc.moveDown(0.6);
     }
+  }
+
+  // Footer
+  const pages = doc.bufferedPageRange();
+  for (let i = 0; i < pages.count; i++) {
+    doc.switchToPage(i);
+    doc.font("Helvetica").fontSize(8).fillColor(GRAY).text(
+      `Nocito Coach  ·  ${name}  ·  Página ${i + 1} de ${pages.count}`,
+      L,
+      doc.page.height - 30,
+      { width: pageWidth, align: "center" }
+    );
   }
 
   doc.end();
