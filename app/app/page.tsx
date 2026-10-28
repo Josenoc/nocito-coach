@@ -62,6 +62,7 @@ type SetRow = {
   saved?: boolean;
   drops: { reps: string; weight: string }[];
   rest_pause_seconds: string;
+  series_type: "normal" | "warmup" | "drop_set" | "rest_pause";
 };
 
 type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
@@ -548,6 +549,12 @@ export default function ClientApp() {
                 : [],
               rest_pause_seconds:
                 log?.rest_pause_seconds != null ? String(log.rest_pause_seconds) : "",
+              series_type:
+                log?.series_type === "warmup" || log?.series_type === "drop_set" || log?.series_type === "rest_pause"
+                  ? log.series_type
+                  : setNumber === 0
+                  ? "warmup"
+                  : "normal",
             };
           });
         }
@@ -694,6 +701,7 @@ export default function ClientApp() {
         saved: false,
         drops: [],
         rest_pause_seconds: "",
+        series_type: asWarmup ? "warmup" : "normal",
       };
       const next = [...current, newRow].sort((a, b) => a.set_number - b.set_number);
       const result = { ...prev, [ex.id]: next };
@@ -786,6 +794,7 @@ export default function ClientApp() {
           rir: row.rir,
           drops: row.drops.map((d) => ({ reps: d.reps, weight: d.weight })),
           rest_pause_seconds: row.rest_pause_seconds,
+          series_type: row.series_type,
           target_reps: ex.target_reps,
           target_weight: ex.target_weight,
           phantom_reference_10_percent: ex.target_weight,
@@ -835,6 +844,7 @@ export default function ClientApp() {
                 rir,
                 drops: prevLog?.drops ?? null,
                 rest_pause_seconds: prevLog?.rest_pause_seconds ?? null,
+                series_type: prevLog?.series_type ?? null,
                 target_reps: ex.target_reps,
                 target_weight: ex.target_weight,
                 phantom_reference_10_percent: ex.target_weight,
@@ -1099,7 +1109,7 @@ export default function ClientApp() {
     setRows((prev) => {
       const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
       while (base.length - 1 < total) {
-        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "", drops: [], rest_pause_seconds: "" });
+        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "", drops: [], rest_pause_seconds: "", series_type: "normal" });
       }
       for (const s of sets) {
         const r = base.find((x) => x.set_number === s.set_number);
@@ -1806,7 +1816,21 @@ export default function ClientApp() {
                                 }
                               >
                                 <td className="set-index">
-                                  {r.set_number === 0 ? "Calentamiento" : "Efectiva"}
+                                  <select
+                                    className="num-input"
+                                    style={{ width: "100%", padding: "6px 4px", fontSize: ".75rem" }}
+                                    value={r.series_type}
+                                    onChange={(e) => {
+                                      const v = e.target.value as "normal" | "warmup" | "drop_set" | "rest_pause";
+                                      updateRow(ex.id, r.set_number, { series_type: v });
+                                    }}
+                                    onBlur={() => saveSet(ex, r.set_number)}
+                                  >
+                                    <option value="normal">Efectiva</option>
+                                    <option value="warmup">Calentamiento</option>
+                                    <option value="drop_set">Drop set</option>
+                                    <option value="rest_pause">Rest-pause</option>
+                                  </select>
                                 </td>
                                 <td>
                                   <div className="cell-wrap">
@@ -1862,7 +1886,7 @@ export default function ClientApp() {
                                   <div className="save-flag">{r.saved ? "✓" : ""}</div>
                                 </td>
                               </tr>
-                              {ex.technique_type === "drop_set" && (
+                              {r.series_type === "drop_set" && (
                                 <tr key={`drop-${r.set_number}`}>
                                   <td colSpan={5} style={{ padding: "4px 8px", background: "rgba(255,196,0,.04)" }}>
                                     <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
@@ -1878,7 +1902,7 @@ export default function ClientApp() {
                                   </td>
                                 </tr>
                               )}
-                              {ex.technique_type === "rest_pause" && (
+                              {r.series_type === "rest_pause" && (
                                 <tr key={`rp-${r.set_number}`}>
                                   <td colSpan={5} style={{ padding: "4px 8px", background: "rgba(255,196,0,.04)" }}>
                                     <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
