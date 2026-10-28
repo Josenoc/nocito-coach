@@ -433,6 +433,18 @@ export default function ClientApp() {
       .finally(() => setChecking(false));
   }, []);
 
+  // Polling suave: refleja en tiempo real los cambios que hace el coach (rutina, ejercicios).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const tick = async () => {
+      if (document.visibilityState !== "visible") return;
+      try { await loadRoutine(); } catch { /* ignore */ }
+    };
+    const iv = window.setInterval(tick, 30000);
+    return () => window.clearInterval(iv);
+  }, []);
+
+
   useEffect(() => {
     const day = routines.find((r) => r.id === activeDay) ?? routines[0];
     for (const ex of day?.exercises ?? []) {
