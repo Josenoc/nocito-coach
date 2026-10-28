@@ -76,8 +76,7 @@ export async function GET(req: NextRequest) {
       .select("*, exercises(name)")
       .eq("client_id", id)
       .order("log_date", { ascending: false })
-      .order("set_number", { ascending: true })
-      .limit(2000),
+      .order("set_number", { ascending: true }),
     supabase
       .from("audio_reports")
       .select("*, exercises(name)")
@@ -338,11 +337,7 @@ export async function DELETE(req: NextRequest) {
   const { data: routines } = await supabase.from("routines").select("id").eq("client_id", id);
   const routineIds = (routines ?? []).map((r: { id: string }) => r.id);
 
-  const logsDel = await supabase.from("sets_logs").delete().eq("client_id", id);
-  if (logsDel.error) {
-    return NextResponse.json({ ok: false, error: logsDel.error.message }, { status: 500 });
-  }
-
+  // Las series (sets_logs) NO se borran: quedan como historial permanente.
   const audioDel = await supabase.from("audio_reports").delete().eq("client_id", id);
   if (audioDel.error) {
     return NextResponse.json({ ok: false, error: audioDel.error.message }, { status: 500 });
