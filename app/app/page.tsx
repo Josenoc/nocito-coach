@@ -501,30 +501,30 @@ export default function ClientApp() {
       const next: Record<string, SetRow[]> = {};
       for (const routine of rl) {
         for (const ex of routine.exercises ?? []) {
+          const count = Math.max(1, Math.min(9, ex.target_sets || 3));
           const existing = logsData.filter(
             (l) => l.exercise_id === ex.id && l.log_date === todayStr
           );
-          // Sin filas estaticas: solo las series ya cargadas hoy.
-          // El alumno suma las que necesita con "+ Agregar serie".
-          next[ex.id] = existing
-            .map((log) => {
-              const setNumber = Number(log.set_number);
-              const rir = rirMap[`${ex.id}|${todayStr}|${setNumber}`];
-              return {
-                set_number: setNumber,
-                actual_reps:
-                  log.actual_reps !== null && log.actual_reps !== undefined
-                    ? String(log.actual_reps)
-                    : "",
-                actual_weight:
-                  log.actual_weight !== null && log.actual_weight !== undefined
-                    ? String(log.actual_weight)
-                    : "",
-                rir: rir !== null && rir !== undefined ? String(rir) : "",
-                saved: true,
-              };
-            })
-            .sort((a, b) => a.set_number - b.set_number);
+          next[ex.id] = Array.from({ length: count + 1 }, (_, i) => {
+            const setNumber = i;
+            const log = existing.find((l) => l.set_number === setNumber);
+            const rir = rirMap[ex.id + "|" + todayStr + "|" + setNumber];
+            return {
+              set_number: setNumber,
+              actual_reps:
+                log?.actual_reps !== null && log?.actual_reps !== undefined
+                  ? String(log.actual_reps)
+                  : "",
+              actual_weight:
+                log?.actual_weight !== null && log?.actual_weight !== undefined
+                  ? String(log.actual_weight)
+                  : "",
+              rir: rir !== null && rir !== undefined ? String(rir) : "",
+              // Sin esto, al recargar la app las series seguian guardadas en la
+              // base pero perdian el check y parecia que no se habian guardado.
+              saved: !!log,
+            };
+          });
         }
       }
       setRows(next);
