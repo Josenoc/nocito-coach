@@ -13,6 +13,8 @@ type ImportExercise = {
   notas?: unknown;
   peso?: unknown;
   rir?: unknown;
+  technique_type?: unknown;
+  technique?: unknown;
 };
 
 type ImportDay = {
@@ -59,6 +61,9 @@ function cleanExercises(
     .map((ex, idx) => {
       const name = String(ex?.ejercicio ?? "").trim();
       if (!name) return null;
+      const technique = String(ex?.technique_type ?? ex?.technique ?? "normal").trim().toLowerCase();
+      const allowed = ["normal", "superset", "drop_set", "rest_pause"];
+      const techniqueType = allowed.includes(technique) ? technique : "normal";
       return {
         routine_id: routineId,
         name,
@@ -68,6 +73,7 @@ function cleanExercises(
         target_weight: asNumber(ex?.peso),
         unit: "kg" as const,
         technique_notes: techniqueFor(ex),
+        technique_type: techniqueType,
       };
     })
     .filter(Boolean) as Record<string, unknown>[];

@@ -1648,6 +1648,29 @@ export default function ClientApp() {
                         <div className="exercise-head">
                           <span className="ex-badge">{idx + 1}</span>
                           <h3 className="exercise-name">{ex.name}</h3>
+                          {ex.technique_type && ex.technique_type !== "normal" && (
+                            <span
+                              style={{
+                                fontSize: ".7rem",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: ".06em",
+                                padding: "3px 8px",
+                                borderRadius: 6,
+                                background: "rgba(255,196,0,.15)",
+                                color: "#FFC400",
+                                border: "1px solid rgba(255,196,0,.4)",
+                              }}
+                            >
+                              {ex.technique_type === "superset"
+                                ? "Superset"
+                                : ex.technique_type === "drop_set"
+                                ? "Drop set"
+                                : ex.technique_type === "rest_pause"
+                                ? "Rest-pause"
+                                : ex.technique_type}
+                            </span>
+                          )}
                           <span className="target-chip">
                             <b>{ex.target_sets ?? "-"}</b> × <b>{ex.target_reps ?? "-"}</b>
                             {ex.target_weight ? (
