@@ -229,7 +229,11 @@ export async function POST(req: NextRequest) {
       log_date: logDate,
       drops: drops.length ? drops : null,
       rest_pause_seconds: toNum(body?.rest_pause_seconds),
-      series_type: ["normal", "warmup", "drop_set", "rest_pause"].includes(String(body?.series_type))
+      series_type: [
+        "normal", "warmup", "drop_set", "rest_pause",
+        "superset", "biseries", "triseries", "giant_set",
+        "pyramid_asc", "pyramid_desc", "cluster_set",
+      ].includes(String(body?.series_type))
         ? String(body.series_type)
         : null,
     };
