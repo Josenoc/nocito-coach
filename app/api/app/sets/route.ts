@@ -228,6 +228,7 @@ export async function POST(req: NextRequest) {
       phantom_reference_10_percent: toNum(body?.phantom_reference_10_percent),
       log_date: logDate,
       drops: drops.length ? drops : null,
+      rest_pause_seconds: toNum(body?.rest_pause_seconds),
     };
 
     const link = {

@@ -61,6 +61,7 @@ type SetRow = {
   rir: string;
   saved?: boolean;
   drops: { reps: string; weight: string }[];
+  rest_pause_seconds: string;
 };
 
 type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
@@ -545,6 +546,8 @@ export default function ClientApp() {
                     weight: d?.weight != null ? String(d.weight) : "",
                   }))
                 : [],
+              rest_pause_seconds:
+                log?.rest_pause_seconds != null ? String(log.rest_pause_seconds) : "",
             };
           });
         }
@@ -690,6 +693,7 @@ export default function ClientApp() {
         rir: "",
         saved: false,
         drops: [],
+        rest_pause_seconds: "",
       };
       const next = [...current, newRow].sort((a, b) => a.set_number - b.set_number);
       const result = { ...prev, [ex.id]: next };
@@ -781,6 +785,7 @@ export default function ClientApp() {
           actual_weight: row.actual_weight,
           rir: row.rir,
           drops: row.drops.map((d) => ({ reps: d.reps, weight: d.weight })),
+          rest_pause_seconds: row.rest_pause_seconds,
           target_reps: ex.target_reps,
           target_weight: ex.target_weight,
           phantom_reference_10_percent: ex.target_weight,
@@ -829,6 +834,7 @@ export default function ClientApp() {
                 actual_weight: weight,
                 rir,
                 drops: prevLog?.drops ?? null,
+                rest_pause_seconds: prevLog?.rest_pause_seconds ?? null,
                 target_reps: ex.target_reps,
                 target_weight: ex.target_weight,
                 phantom_reference_10_percent: ex.target_weight,
@@ -1093,7 +1099,7 @@ export default function ClientApp() {
     setRows((prev) => {
       const base = (prev[ex.id] ?? []).map((r) => ({ ...r }));
       while (base.length - 1 < total) {
-        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "", drops: [] });
+        base.push({ set_number: base.length, actual_reps: "", actual_weight: "", rir: "", drops: [], rest_pause_seconds: "" });
       }
       for (const s of sets) {
         const r = base.find((x) => x.set_number === s.set_number);
@@ -1868,6 +1874,16 @@ export default function ClientApp() {
                                         </span>
                                       ))}
                                       <button type="button" onClick={() => addDrop(ex.id, r.set_number)} style={{ background: "transparent", border: "1px solid #FFC400", color: "#FFC400", borderRadius: 6, padding: "2px 8px", fontSize: ".75rem", cursor: "pointer" }}>+ caída</button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                              {ex.technique_type === "rest_pause" && (
+                                <tr key={`rp-${r.set_number}`}>
+                                  <td colSpan={5} style={{ padding: "4px 8px", background: "rgba(255,196,0,.04)" }}>
+                                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                                      <span style={{ fontSize: ".75rem", color: "#a1a1aa" }}>Pausa (s):</span>
+                                      <input className="num-input" style={{ width: 60, padding: "6px 4px" }} placeholder="seg" value={r.rest_pause_seconds} onChange={(e) => updateRow(ex.id, r.set_number, { rest_pause_seconds: e.target.value.replace(/[^\d]/g, "") })} onBlur={() => saveSet(ex, r.set_number)} />
                                     </div>
                                   </td>
                                 </tr>

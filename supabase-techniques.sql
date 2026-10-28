@@ -6,5 +6,9 @@ alter table public.exercises
 alter table public.sets_logs
   add column if not exists drops jsonb;
 
+-- sets_logs: segundos de pausa corta para rest-pause
+alter table public.sets_logs
+  add column if not exists rest_pause_seconds int;
+
 create index if not exists idx_exercises_technique on public.exercises(technique_type);
 ```
