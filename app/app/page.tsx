@@ -178,6 +178,7 @@ export default function ClientApp() {
   const [anamnesis, setAnamnesis] = useState<Anamnesis | null>(null);
   const [view, setView] = useState<"train" | "nutrition">("train");
   const [trialExpired, setTrialExpired] = useState(false);
+  const [addMenuEx, setAddMenuEx] = useState<string | null>(null);
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
@@ -1738,7 +1739,17 @@ export default function ClientApp() {
                           RIR = repeticiones en reserva: cuántas repeticiones te quedaban antes del fallo.
                         </p>
 
-                        <div style={{ marginTop: 14 }}>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12, marginBottom: 8, alignItems: "center" }}>
+              <button type="button" onClick={() => setAddMenuEx(addMenuEx === ex.id ? null : ex.id)} style={{ background: "transparent", border: "1px solid #242424", color: "#a1a1aa", borderRadius: 8, padding: "6px 12px", fontSize: ".8rem", cursor: "pointer" }}>+ Agregar serie</button>
+              {addMenuEx === ex.id && (
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button type="button" disabled={(rows[ex.id] || []).some((r) => r.set_number === 0)} onClick={() => { addSet(ex, true); setAddMenuEx(null); }} style={{ background: "transparent", border: "1px solid #FFC400", color: "#FFC400", borderRadius: 8, padding: "6px 10px", fontSize: ".78rem", cursor: "pointer" }}>Calentamiento</button>
+                  <button type="button" disabled={(rows[ex.id] || []).length >= 10} onClick={() => { addSet(ex, false); setAddMenuEx(null); }} style={{ background: "transparent", border: "1px solid #FFC400", color: "#FFC400", borderRadius: 8, padding: "6px 10px", fontSize: ".78rem", cursor: "pointer" }}>Efectiva</button>
+                </div>
+              )}
+              <span className="muted" style={{ fontSize: ".72rem" }}>{(rows[ex.id] || []).length} / 10</span>
+            </div>
+            <div style={{ marginTop: 14 }}>
                           <button
                             className={`mic-btn ${recording ? "rec" : ""} ${processing ? "proc" : ""}`}
                             disabled={processing || (voiceBusy !== null && !processing)}
