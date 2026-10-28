@@ -208,6 +208,15 @@ function LastSessionBlock({ logs, routines }: { logs: any[]; routines: any[] }) 
       names[e.id] = e.name;
     })
   );
+  // Fallback por exercise_name (cuando el ejercicio se recreo y perdio el vinculo).
+  logs.forEach((l: any) => {
+    if (l.exercise_id && !names[l.exercise_id] && l.exercise_name) {
+      names[l.exercise_id] = l.exercise_name;
+    }
+    if (l.exercise_id && !names[l.exercise_id] && l.exercises?.name) {
+      names[l.exercise_id] = l.exercises.name;
+    }
+  });
   const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
   const head = (
     <h4
@@ -233,7 +242,7 @@ function LastSessionBlock({ logs, routines }: { logs: any[]; routines: any[] }) 
   const last = sessions[0];
   const byEx: Record<string, any[]> = {};
   loaded
-    .filter((l) => l.log_date === last && Number(l.set_number) > 0)
+    .filter((l) => l.log_date === last)
     .forEach((l) => {
       (byEx[l.exercise_id] = byEx[l.exercise_id] || []).push(l);
     });
@@ -267,13 +276,13 @@ function LastSessionBlock({ logs, routines }: { logs: any[]; routines: any[] }) 
                   }}
                 >
                   <span style={{ color: "#d4d4d8" }}>
-                    Serie {Number(set.set_number) > 0 ? set.set_number : index + 1}{" "}
-                    <span style={{ fontSize: ".7rem", color: "#71717a", marginLeft: 6 }}>
-                      ({Number(set.set_number) === 0 ? "Calentamiento" : "Efectiva"})
-                    </span>
+                    {Number(set.set_number) === 0
+                      ? "Calentamiento"
+                      : `Serie ${set.set_number} (Efectiva)`}{" "}
                   </span>
                   <span style={{ fontFamily: "monospace", color: "#FFC400", fontWeight: 500 }}>
                     {set.actual_reps ?? "-"} reps @ {set.actual_weight ?? "-"} kg
+                    {set.rir != null && set.rir !== "" ? ` · RIR ${set.rir}` : ""}
                   </span>
                 </div>
               ))}
