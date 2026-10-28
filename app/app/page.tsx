@@ -494,30 +494,30 @@ export default function ClientApp() {
       const next: Record<string, SetRow[]> = {};
       for (const routine of rl) {
         for (const ex of routine.exercises ?? []) {
-          const count = Math.max(1, Math.min(9, ex.target_sets || 3));
           const existing = logsData.filter(
             (l) => l.exercise_id === ex.id && l.log_date === todayStr
           );
-          next[ex.id] = Array.from({ length: count + 1 }, (_, i) => {
-            const setNumber = i;
-            const log = existing.find((l) => l.set_number === setNumber);
-            const rir = rirMap[`${ex.id}|${todayStr}|${setNumber}`];
-            return {
-              set_number: setNumber,
-              actual_reps:
-                log?.actual_reps !== null && log?.actual_reps !== undefined
-                  ? String(log.actual_reps)
-                  : "",
-              actual_weight:
-                log?.actual_weight !== null && log?.actual_weight !== undefined
-                  ? String(log.actual_weight)
-                  : "",
-              rir: rir !== null && rir !== undefined ? String(rir) : "",
-              // Sin esto, al recargar la app las series seguían guardadas en la
-              // base pero perdían el ✓ y parecía que no se habían guardado.
-              saved: !!log,
-            };
-          });
+          // Sin filas estaticas: solo las series ya cargadas hoy.
+          // El alumno suma las que necesita con "+ Agregar serie".
+          next[ex.id] = existing
+            .map((log) => {
+              const setNumber = Number(log.set_number);
+              const rir = rirMap[`${ex.id}|${todayStr}|${setNumber}`];
+              return {
+                set_number: setNumber,
+                actual_reps:
+                  log.actual_reps !== null && log.actual_reps !== undefined
+                    ? String(log.actual_reps)
+                    : "",
+                actual_weight:
+                  log.actual_weight !== null && log.actual_weight !== undefined
+                    ? String(log.actual_weight)
+                    : "",
+                rir: rir !== null && rir !== undefined ? String(rir) : "",
+                saved: true,
+              };
+            })
+            .sort((a, b) => a.set_number - b.set_number);
         }
       }
       setRows(next);
@@ -632,6 +632,33 @@ export default function ClientApp() {
         r.set_number === setNumber ? { ...r, ...patch } : r
       ),
     }));
+  };
+
+  const addSet = (ex: Exercise, asWarmup: boolean) => {
+    setRows((prev) => {
+      const current = prev[ex.id] ?? [];
+      if (current.length >= 10) return prev;
+      let newSetNumber: number;
+      if (asWarmup) {
+        // Un solo slot de calentamiento (set_number 0).
+        if (current.some((r) => r.set_number === 0)) return prev;
+        newSetNumber = 0;
+      } else {
+        const used = new Set(current.map((r) => r.set_number));
+        newSetNumber = 1;
+        while (used.has(newSetNumber) && newSetNumber < 10) newSetNumber++;
+        if (newSetNumber >= 10) return prev;
+      }
+      const newRow: SetRow = {
+        set_number: newSetNumber,
+        actual_reps: "",
+        actual_weight: "",
+        rir: "",
+        saved: false,
+      };
+      const next = [...current, newRow].sort((a, b) => a.set_number - b.set_number);
+      return { ...prev, [ex.id]: next };
+    });
   };
 
   const saveSet = async (ex: Exercise, setNumber: number) => {
@@ -949,7 +976,7 @@ export default function ClientApp() {
     const lastSet = sets.reduce((m, s) => Math.max(m, s.set_number), 0);
     const total = Math.min(
       10,
-      Math.max(lastSet, (rows[ex.id]?.length ?? 1) - 1, ex.target_sets ?? 0)
+      Math.max(lastSet, (rows[ex.id]?.length ?? 0))
     );
     const order: Record<string, number> = {};
     sets.forEach((s, i) => {
