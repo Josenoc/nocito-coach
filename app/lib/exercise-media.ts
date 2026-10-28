@@ -56,6 +56,22 @@ const RULES: Rule[] = [
   { match: /pajaros|deltoides posterior/, slug: "rear-delt-fly", en: "Rear Delt Fly" },
   { match: /rotacion externa/, slug: "rear-delt-fly", en: "Rear Delt Fly" },
   { match: /cardio|hiit/, slug: "hiit-cardio", en: "HIIT Cardio" },
+  { match: /zancadas/, slug: "dumbbell-lunge", en: "Dumbbell Lunge" },
+  { match: /bulgara/, slug: "bulgarian-split-squat", en: "Bulgarian Split Squat" },
+  { match: /patada.*(gluteo|polea)/, slug: "cable-glute-kickback", en: "Cable Glute Kickback" },
+  { match: /abductor/, slug: "hip-abduction", en: "Hip Abduction" },
+  { match: /aductor/, slug: "hip-adduction", en: "Hip Adduction" },
+  { match: /press plano.*(mancuerna|dumbbell)/, slug: "dumbbell-bench-press", en: "Dumbbell Bench Press" },
+  { match: /press declinado/, slug: "decline-bench-press", en: "Decline Bench Press" },
+  { match: /remo.*(mancuerna|una mano)/, slug: "one-arm-dumbbell-row", en: "One Arm Dumbbell Row" },
+  { match: /pullover.*(polea|alta)/, slug: "cable-pullover", en: "Cable Pullover" },
+  { match: /extension(es)? lumbares|lumbares en banco/, slug: "back-extension", en: "Back Extension" },
+  { match: /press militar.*(mancuerna|dumbbell)/, slug: "dumbbell-shoulder-press", en: "Dumbbell Shoulder Press" },
+  { match: /face pull/, slug: "face-pull", en: "Face Pull" },
+  { match: /curl concentrado/, slug: "concentration-curl", en: "Concentration Curl" },
+  { match: /fondos en paralelas/, slug: "parallel-bar-dip", en: "Parallel Bar Dip" },
+  { match: /pallof/, slug: "pallof-press", en: "Pallof Press" },
+  { match: /caminata aerobica|caminata/, slug: "treadmill-walk", en: "Treadmill Walk" },
 ];
 
 export function exerciseAnatomySlug(name: string): string | null {
