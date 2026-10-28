@@ -180,6 +180,8 @@ export default function ClientApp() {
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
+  const [pushPrompt, setPushPrompt] = useState<"audit" | "weekly" | null>(null);
+  const [pushResponse, setPushResponse] = useState("");
 
   useEffect(() => {
     if (
@@ -398,6 +400,8 @@ export default function ClientApp() {
     if (params.get("demo") === "week") {
       setWeeklyOpen(true);
     }
+    const p = params.get("push");
+    if (p === "audit" || p === "weekly") setPushPrompt(p);
   }, []);
 
   useEffect(() => {
@@ -432,6 +436,35 @@ export default function ClientApp() {
       }
     }
   }, [routines, activeDay]);
+
+  const submitPushResponse = async (responseType: "text" | "choice", value: string) => {
+    try {
+      await fetch("/api/app/push/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: pushPrompt,
+          response_type: responseType,
+          content: responseType === "text" ? value : null,
+          choice: responseType === "choice" ? value : null,
+        }),
+      });
+      showToast(
+        { exId: "", kind: "ok", title: "Respuesta enviada", detail: "Gracias por tu feedback." },
+        3000
+      );
+    } catch {
+      showToast({ exId: "", kind: "err", title: "No se pudo enviar" }, 3000);
+    } finally {
+      setPushPrompt(null);
+      setPushResponse("");
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("push");
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+  };
 
   const loadRoutine = async () => {
     setLoadingData(true);
@@ -1957,6 +1990,32 @@ export default function ClientApp() {
         }}
         onRest={nudgeRest}
       />
+
+      {pushPrompt && (
+        <div className="modal-overlay" onClick={() => setPushPrompt(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ background: "#0A0A0A", border: "1px solid #242424", maxWidth: 420 }}>
+            <h3 style={{ marginTop: 0, color: "#f8fafc" }}>{pushPrompt === "audit" ? "¿Qué pasó hoy?" : "Resumen semanal"}</h3>
+            <p className="muted" style={{ marginTop: -6, marginBottom: 14 }}>{pushPrompt === "audit" ? "Decime si no fuiste a entrenar o te olvidaste de completar los datos en la app." : "Elegí una opción o dejá tu feedback con texto o dictado."}</p>
+            {pushPrompt === "weekly" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                {["Mejoré mis cargas", "Cumplí la semana", "Necesito ajustar la rutina"].map((opt) => (
+                  <button key={opt} className="btn btn-outline" onClick={() => void submitPushResponse("choice", opt)} style={{ justifyContent: "flex-start", borderColor: "#FFC400", color: "#f8fafc" }}>{opt}</button>
+                ))}
+              </div>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <textarea className="input" rows={4} placeholder={pushPrompt === "audit" ? "Contame qué pasó..." : "Dejá tu comentario..."} value={pushResponse} onChange={(e) => setPushResponse(e.target.value)} style={{ width: "100%", background: "#0f0f0f", border: "1px solid #242424", color: "#f8fafc" }} />
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between" }}>
+                <button className="btn btn-outline" onClick={() => { try { const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition; if (!SR) { showToast({ exId: "", kind: "err", title: "Dictado no disponible" }, 2500); return; } const rec = new SR(); rec.lang = "es-AR"; rec.interimResults = false; rec.maxAlternatives = 1; rec.onresult = (ev: any) => { const t = ev.results[0][0].transcript; setPushResponse((p) => (p ? p + " " + t : t)); }; rec.onerror = () => showToast({ exId: "", kind: "err", title: "No se pudo dictar" }, 2500); rec.start(); showToast({ exId: "", kind: "ok", title: "Escuchando..." }, 1500); } catch { showToast({ exId: "", kind: "err", title: "Dictado no disponible" }, 2500); } }} style={{ borderColor: "#FFC400", color: "#f8fafc" }}>Dictar por voz</button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="btn btn-outline" onClick={() => setPushPrompt(null)}>Cancelar</button>
+                  <button className="btn btn-primary" onClick={() => void submitPushResponse("text", pushResponse)} disabled={!pushResponse.trim()} style={{ background: "#FFC400", color: "#000", borderColor: "#FFC400" }}>Enviar respuesta</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <VoiceNoteRecorder open={voiceOpen} onClose={() => setVoiceOpen(false)} />
 
