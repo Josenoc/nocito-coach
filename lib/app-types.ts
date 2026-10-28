@@ -164,6 +164,7 @@ export interface SetLog {
   actual_reps?: number | null;
   actual_weight?: number | null;
   rir?: number | null;
+  drops?: { reps: number | null; weight: number | null }[] | null;
   phantom_reference_10_percent?: number | null;
   log_date: string;
   created_at: string;
