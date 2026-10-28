@@ -279,7 +279,8 @@ export function buildProgramUserMessage(input: ProgramInput): string {
     `- Lesiones / limitaciones: ${input.injuries || "ninguna declarada"}`,
     `- Restricciones alimentarias: ${input.food_restrictions || "ninguna declarada"}`,
     "",
-    "Generá el plan JSON completo respetando todas las reglas (edad, experiencia, nomenclatura argentina, nutrición específica).",
+    "INSTRUCCION CRITICA: USA EXCLUSIVAMENTE LOS DATOS REALES DEL ALUMNO ARRIBA. Si la edad es <= 15, es principiante o tiene lesiones/notas (ej: hiperlaxitud), la rutina DEBE adaptarse: cero cargas axiales pesadas, volumen reducido, control motor, rangos seguros. NO generes rutinas genericas de culturismo.",
+    "Generá el plan JSON completo respetando edad, nivel, lesiones, dias disponibles y nomenclatura argentina.",
   ];
   return lines.join("\n");
 }
