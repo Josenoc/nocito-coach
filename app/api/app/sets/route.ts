@@ -314,3 +314,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
   }
 }
+
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ ok: false, error: "No autenticado" }, { status: 401 });
+    }
+    const url = new URL(req.url);
+    const exerciseId = String(url.searchParams.get("exercise_id") || "");
+    const setNumberRaw = url.searchParams.get("set_number");
+    const setNumber = setNumberRaw === null ? null : toNum(setNumberRaw);
+    const logDate = url.searchParams.get("log_date");
+    const clientId =
+      session.role === "coach" && url.searchParams.get("client_id")
+        ? String(url.searchParams.get("client_id"))
+        : session.id;
+
+    if (!exerciseId || setNumber === null) {
+      return NextResponse.json({ ok: false, error: "exercise_id y set_number requeridos" }, { status: 400 });
+    }
+
+    const supabase = getSupabaseAdmin();
+    let q = supabase
+      .from("sets_logs")
+      .delete()
+      .eq("client_id", clientId)
+      .eq("exercise_id", exerciseId)
+      .eq("set_number", Math.round(setNumber));
+    if (logDate && isValidISODate(logDate)) q = q.eq("log_date", logDate);
+
+    const { error } = await q;
+    if (error) {
+      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[sets] DELETE excepcion", err);
+    return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
+  }
+}

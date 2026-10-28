@@ -669,6 +669,24 @@ export default function ClientApp() {
     });
   };
 
+  const removeSet = async (ex: Exercise, setNumber: number) => {
+    const row = (rows[ex.id] ?? []).find((r) => r.set_number === setNumber);
+    if (row?.saved) {
+      try {
+        await fetch(
+          "/api/app/sets?exercise_id=" + encodeURIComponent(ex.id) +
+            "&set_number=" + encodeURIComponent(String(setNumber)) +
+            "&log_date=" + encodeURIComponent(retroDate ?? today),
+          { method: "DELETE" }
+        );
+      } catch { /* ignore */ }
+    }
+    setRows((prev) => ({
+      ...prev,
+      [ex.id]: (prev[ex.id] ?? []).filter((r) => r.set_number !== setNumber),
+    }));
+  };
+
   const saveSet = async (ex: Exercise, setNumber: number) => {
     const row = rows[ex.id]?.find((r) => r.set_number === setNumber);
     if (!row) return;
@@ -1728,7 +1746,10 @@ export default function ClientApp() {
                                   </div>
                                 </td>
                                 <td>
-                                  <div className="save-flag">{r.saved ? "✓" : ""}</div>
+                                  <div className="save-flag" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                    {r.saved ? <span>✓</span> : null}
+                                    <button type="button" onClick={() => void removeSet(ex, r.set_number)} title="Sacar serie" style={{ background: "transparent", border: "none", color: "#71717a", cursor: "pointer", fontSize: ".9rem", padding: 0, lineHeight: 1 }}>{"×"}</button>
+                                  </div>
                                 </td>
                               </tr>
                               );
@@ -1740,7 +1761,7 @@ export default function ClientApp() {
                         </p>
 
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12, marginBottom: 8, alignItems: "center" }}>
-              <button type="button" onClick={() => setAddMenuEx(addMenuEx === ex.id ? null : ex.id)} style={{ background: "transparent", border: "1px solid #242424", color: "#a1a1aa", borderRadius: 8, padding: "6px 12px", fontSize: ".8rem", cursor: "pointer" }}>+ Agregar serie</button>
+              <button type="button" onClick={() => setAddMenuEx(addMenuEx === ex.id ? null : ex.id)} style={{ background: "#FFC400", border: "none", color: "#000", fontWeight: 700, borderRadius: 8, padding: "6px 14px", fontSize: ".8rem", cursor: "pointer" }}>+ Agregar serie</button>
               {addMenuEx === ex.id && (
                 <div style={{ display: "flex", gap: 6 }}>
                   <button type="button" disabled={(rows[ex.id] || []).some((r) => r.set_number === 0)} onClick={() => { addSet(ex, true); setAddMenuEx(null); }} style={{ background: "transparent", border: "1px solid #FFC400", color: "#FFC400", borderRadius: 8, padding: "6px 10px", fontSize: ".78rem", cursor: "pointer" }}>Calentamiento</button>
