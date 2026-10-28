@@ -8,7 +8,6 @@ import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
 import ProgramEditor from "@/app/components/ProgramEditor";
 import CoachProfileEditor from "@/app/components/CoachProfileEditor";
-import CoachProgressMirror from "@/app/components/CoachProgressMirror";
 
 interface ClientRow {
   id: string;
@@ -1804,14 +1803,6 @@ export default function CoachDashboard() {
 
                 {tab === "perfil" && detail && (
                   <div style={{ marginTop: 12 }}>
-                    <CoachProgressMirror
-                      key={`mirror-${selectedId ?? "none"}`}
-                      detail={detail}
-                      clientName={
-                        detail?.profile?.full_name || detail?.profile?.email || "el alumno"
-                      }
-                      onRefresh={refreshProgress}
-                    />
                     <CoachProfileEditor
                       key={`perfil-${selectedId ?? "none"}`}
                       clientId={selectedId ?? ""}
