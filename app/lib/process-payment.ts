@@ -94,6 +94,21 @@ async function deliverAccess(
       return { provisioned: false, reason: prof.error };
     }
 
+    // Convertir trial a plan pago cuando se aprueba un pago.
+    const planKey = String(metadata.planKey || "").trim().toLowerCase();
+    if (planKey) {
+      try {
+        const { getSupabaseAdmin } = await import("@/lib/supabase-server");
+        const supabase = getSupabaseAdmin();
+        await supabase
+          .from("profiles")
+          .update({ plan: planKey, trial_ends_at: null })
+          .eq("email", prov.email.trim().toLowerCase());
+      } catch (err) {
+        console.error("[access] update plan:", err);
+      }
+    }
+
     const mail = await sendAlumnoAccessEmail({
       name,
       email: prov.email,
