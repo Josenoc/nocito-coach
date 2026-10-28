@@ -62,7 +62,18 @@ type SetRow = {
   saved?: boolean;
   drops: { reps: string; weight: string }[];
   rest_pause_seconds: string;
-  series_type: "normal" | "warmup" | "drop_set" | "rest_pause";
+  series_type:
+    | "normal"
+    | "warmup"
+    | "drop_set"
+    | "rest_pause"
+    | "superset"
+    | "biseries"
+    | "triseries"
+    | "giant_set"
+    | "pyramid_asc"
+    | "pyramid_desc"
+    | "cluster_set";
 };
 
 type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
@@ -1830,6 +1841,13 @@ export default function ClientApp() {
                                     <option value="warmup">Calentamiento</option>
                                     <option value="drop_set">Drop set</option>
                                     <option value="rest_pause">Rest-pause</option>
+                                    <option value="superset">Superserie</option>
+                                    <option value="biseries">Biserie</option>
+                                    <option value="triseries">Triserie</option>
+                                    <option value="giant_set">Serie gigante</option>
+                                    <option value="pyramid_asc">Piramidal asc.</option>
+                                    <option value="pyramid_desc">Piramidal desc.</option>
+                                    <option value="cluster_set">Cluster set</option>
                                   </select>
                                 </td>
                                 <td>
@@ -1909,6 +1927,25 @@ export default function ClientApp() {
                                       <span style={{ fontSize: ".75rem", color: "#a1a1aa" }}>Pausa (s):</span>
                                       <input className="num-input" style={{ width: 60, padding: "6px 4px" }} placeholder="seg" value={r.rest_pause_seconds} onChange={(e) => updateRow(ex.id, r.set_number, { rest_pause_seconds: e.target.value.replace(/[^\d]/g, "") })} onBlur={() => saveSet(ex, r.set_number)} />
                                     </div>
+                                  </td>
+                                </tr>
+                              )}
+                              {r.series_type === "cluster_set" && (
+                                <tr key={`cl-${r.set_number}`}>
+                                  <td colSpan={5} style={{ padding: "4px 8px", background: "rgba(255,196,0,.04)" }}>
+                                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                                      <span style={{ fontSize: ".75rem", color: "#a1a1aa" }}>Micro-pausa (s):</span>
+                                      <input className="num-input" style={{ width: 60, padding: "6px 4px" }} placeholder="seg" value={r.rest_pause_seconds} onChange={(e) => updateRow(ex.id, r.set_number, { rest_pause_seconds: e.target.value.replace(/[^\d]/g, "") })} onBlur={() => saveSet(ex, r.set_number)} />
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                              {(r.series_type === "pyramid_asc" || r.series_type === "pyramid_desc") && (
+                                <tr key={`py-${r.set_number}`}>
+                                  <td colSpan={5} style={{ padding: "4px 8px", background: "rgba(255,196,0,.04)" }}>
+                                    <span style={{ fontSize: ".75rem", color: "#a1a1aa" }}>
+                                      {r.series_type === "pyramid_asc" ? "Piramidal ascendente: sube peso, baja reps." : "Piramidal descendente: baja peso, sube reps."}
+                                    </span>
                                   </td>
                                 </tr>
                               )}
