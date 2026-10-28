@@ -523,39 +523,6 @@ export default function CoachProfileEditor({
         </F>
       </div>
 
-      {/* Historial de cambios */}
-      <div className="profile-history">
-        <div className="profile-history-head">
-          <History size={15} /> Historial de cambios
-          {changes.length > 0 && <span className="history-count">{changes.length}</span>}
-        </div>
-        {changes.length === 0 ? (
-          <p className="muted" style={{ margin: 0, fontSize: ".9rem" }}>
-            Todavía no hay cambios registrados.
-          </p>
-        ) : (
-          <ul className="history-list">
-            {changes.map((c) => (
-              <li key={c.id} className="history-item">
-                <span className="history-date">
-                  {new Date(c.created_at).toLocaleDateString("es-AR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                  })}
-                </span>
-                <span className="history-field">{c.field_label || c.field}</span>
-                <span className="history-diff">
-                  <em className="old">{c.old_value || "—"}</em>
-                  <span className="arrow">→</span>
-                  <em className="new">{c.new_value || "—"}</em>
-                </span>
-                {c.changed_by && <span className="history-by">{c.changed_by}</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
     </div>
   );
 }
