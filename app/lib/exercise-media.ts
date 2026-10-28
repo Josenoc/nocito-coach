@@ -137,6 +137,11 @@ const GIF_BY_SLUG: Record<string, string> = {
   "incline-dumbbell-curl": "biceps/dumbbell-incline-biceps-curl",
   "dumbbell-lying-triceps-extension": "triceps/dumbbell-lying-triceps-extension",
   "lever-standing-calf-raise": "calves/lever-standing-calf-raise",
+  "dumbbell-lunge": "glutes/dumbbell-lunge",
+  "dumbbell-bench-press": "pectorals/dumbbell-bench-press",
+  "decline-bench-press": "pectorals/barbell-decline-bench-press",
+  "one-arm-dumbbell-row": "upper-back/dumbbell-one-arm-bent-over-row",
+  "concentration-curl": "biceps/dumbbell-concentration-curl",
 };
 
 export function exerciseGifSrc(name: string): string | null {
