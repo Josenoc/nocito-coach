@@ -484,7 +484,7 @@ export default function CoachDashboard() {
   const [blockGuideline, setBlockGuideline] = useState("");
   const [blockSaving, setBlockSaving] = useState(false);
   const [tab, setTab] = useState<
-    "historial" | "perfil" | "rutinas" | "importar" | "generar" | "nutricion" | "acceso"
+    "historial" | "perfil" | "importar" | "generar" | "nutricion" | "acceso"
   >("historial");
 
   const [draft, setDraft] = useState<Draft>(emptyDraft());
@@ -1010,7 +1010,7 @@ export default function CoachDashboard() {
       setBlockGuideline(edited.block?.guideline ?? "");
       setEditingProgram(false);
       setProgram(null);
-      setTab("rutinas");
+      setTab("perfil");
       setMsg({ type: "ok", text: `Plan publicado (bloque de ${weeksCount} semanas).` });
       await loadClients();
       await reloadDetail();
@@ -1190,7 +1190,7 @@ export default function CoachDashboard() {
       exercises,
     });
     setBaseline(baseRows.map((e) => ({ ...e })));
-    setTab("rutinas");
+    setTab("perfil");
     setMsg(null);
   };
 
@@ -1721,7 +1721,7 @@ export default function CoachDashboard() {
                   <div key={tab} className="tab-panel">
                     <div className="tabs detail-tabs">
                       {(
-                        ["historial", "perfil", "rutinas", "importar", "generar", "nutricion", "acceso"] as const
+                        ["historial", "perfil", "importar", "generar", "nutricion", "acceso"] as const
                       ).map((t) => (
                         <button
                           key={t}
@@ -1732,8 +1732,6 @@ export default function CoachDashboard() {
                             ? "Historial"
                             : t === "perfil"
                             ? "Perfil"
-                            : t === "rutinas"
-                            ? "Rutinas"
                             : t === "importar"
                             ? "Importar"
                             : t === "generar"
@@ -1960,7 +1958,7 @@ export default function CoachDashboard() {
                   </div>
                 )}
 
-                {tab === "rutinas" && detail && (
+                {tab === "perfil" && detail && (
                   <div style={{ marginTop: 12 }}>
                     <div className="card" style={{ marginBottom: 16 }}>
                       <h3 style={{ marginTop: 0 }}>Guía del bloque (Sem 1–6)</h3>
