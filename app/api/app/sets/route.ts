@@ -209,6 +209,14 @@ export async function POST(req: NextRequest) {
       firstOfDay = !count;
     }
 
+    const dropsRaw = Array.isArray(body?.drops) ? body.drops : [];
+    const drops = dropsRaw
+      .map((d: any) => ({
+        reps: toNum(d?.reps),
+        weight: toNum(d?.weight),
+      }))
+      .filter((d: { reps: number | null; weight: number | null }) => d.reps !== null || d.weight !== null);
+
     const row = {
       exercise_id: exerciseId,
       client_id: clientId,
@@ -219,6 +227,7 @@ export async function POST(req: NextRequest) {
       actual_weight: toNum(body?.actual_weight),
       phantom_reference_10_percent: toNum(body?.phantom_reference_10_percent),
       log_date: logDate,
+      drops: drops.length ? drops : null,
     };
 
     const link = {
