@@ -580,6 +580,24 @@ h1, h2, h3, h4 {
 }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 
+/* ---------- Print / Exportar PDF ---------- */
+#printable-routine { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  #printable-routine { display: block; visibility: visible; }
+  #printable-routine, #printable-routine * { visibility: visible; }
+  #printable-routine {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+}
+
 /* ---------- Lista clientes (coach) ---------- */
 .list-item {
   display: block;

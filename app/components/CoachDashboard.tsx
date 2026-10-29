@@ -752,34 +752,9 @@ export default function CoachDashboard() {
     }
   };
 
-  const handleExportPDF = async () => {
-    console.log("Botón PDF presionado");
-    if (!selectedId) {
-      console.warn("No hay cliente seleccionado");
-      return;
-    }
-    try {
-      const res = await fetch(
-        `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`,
-        { cache: "no-store" }
-      );
-      if (!res.ok) {
-        const j = await res.json().catch(() => null);
-        throw new Error(j?.error || `Error ${res.status}`);
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Rutina.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (err: any) {
-      console.error("[export-pdf]", err);
-      setMsg({ type: "err", text: err?.message || "No se pudo exportar el PDF." });
-    }
+  const handleExportPDF = () => {
+    console.log("Exportando PDF...");
+    window.print();
   };
 
   // Refresco silencioso para el espejo en vivo: sólo actualiza los datos de
@@ -1509,7 +1484,7 @@ export default function CoachDashboard() {
                     <button
                       type="button"
                       className="btn btn-outline"
-                      onClick={() => void handleExportPDF()}
+                      onClick={() => { console.log("Exportando PDF..."); window.print(); }}
                       style={{ borderColor: "#FFC400", color: "#FFC400" }}
                     >
                       Exportar PDF
@@ -2615,6 +2590,48 @@ export default function CoachDashboard() {
                 </div>
               </div>
             )}
+
+      <div id="printable-routine" style={{ display: "none" }}>
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <div style={{ display: "inline-block", width: 5, height: 5, background: "#FFC400", marginRight: 6, verticalAlign: "middle" }} />
+          <span style={{ fontWeight: 700, fontSize: 9.5, letterSpacing: 3.2, color: "#6B6B6B" }}>NOCITO COACH</span>
+        </div>
+        <h1 style={{ textAlign: "center", fontSize: 38, fontWeight: 700, margin: "8px 0 4px", color: "#141414" }}>
+          {(detail?.profile?.full_name || detail?.profile?.email || "ALUMNO").toUpperCase()}
+        </h1>
+        <div style={{ textAlign: "center", fontSize: 9, fontWeight: 700, color: "#FFC400", letterSpacing: 1.6, marginBottom: 4 }}>
+          RUTINA  ·  SEMANA {detail?.routines?.[0]?.week_number ?? 1}  ·  {detail?.routines?.length ?? 0} DÍAS  ·  {new Date().toLocaleDateString("es-AR")}
+        </div>
+        <div style={{ textAlign: "center", fontSize: 8, color: "#6B6B6B", marginBottom: 12 }}>
+          Generado: {new Date().toLocaleDateString("es-AR")}
+        </div>
+        <hr style={{ border: "none", borderTop: "1px solid #e5e5e5", margin: "8px 0 12px" }} />
+        {(detail?.routines ?? []).map((r: any, i: number) => (
+          <div key={i} style={{ background: "#f5f5f5", borderRadius: 6, padding: 10, marginBottom: 8 }}>
+            <div style={{ fontWeight: 700, fontSize: 10.5, color: "#141414", marginBottom: 6 }}>
+              DÍA {String(i + 1).padStart(2, "0")}  {(r.day_name || r.name || "").toUpperCase()}
+            </div>
+            {(r.exercises ?? []).map((ex: any, ei: number) => (
+              <div key={ei} style={{ marginBottom: 6 }}>
+                <div style={{ fontWeight: 700, fontSize: 10, color: "#141414" }}>{ex.name}</div>
+                <div style={{ fontSize: 9, color: "#6B6B6B" }}>
+                  {ex.target_sets ?? "-"} x {ex.target_reps ?? "-"}{ex.target_weight ? `  @  ${ex.target_weight} ${ex.unit ?? "kg"}` : ""}{ex.target_rir != null ? `   RIR ${ex.target_rir}` : ""}
+                </div>
+                {ex.technique_notes && <div style={{ fontSize: 8, color: "#6B6B6B", fontStyle: "italic" }}>{ex.technique_notes}</div>}
+              </div>
+            ))}
+          </div>
+        ))}
+        <div style={{ textAlign: "center", fontSize: 6.8, color: "#6B6B6B", marginTop: 12 }}>
+          RIR = repeticiones en reserva: cuántas te quedan antes de no poder más.
+        </div>
+        <div style={{ textAlign: "center", fontSize: 9, fontWeight: 700, color: "#B37A00", letterSpacing: 2.6, marginTop: 6 }}>
+          @NOCITO.COACH
+        </div>
+        <div style={{ textAlign: "center", fontSize: 6.6, color: "#6B6B6B", letterSpacing: 2.2, marginTop: 2 }}>
+          NOCITO-COACH.VERCEL.APP
+        </div>
+      </div>
       </div>
     </main>
   );
