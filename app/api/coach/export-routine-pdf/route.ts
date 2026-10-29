@@ -5,6 +5,7 @@ import { getCoach } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const ACCENT = "#FFC400";
 const DARK = "#141414";
@@ -288,33 +289,13 @@ export async function GET(req: NextRequest) {
     
       let k = Math.min(1.2, (ZONE_H - (n - 1) * 8) / n / 118);
       if (maxEx > 8) k = k * (8 / maxEx);
-      let result: { doc: PDFKit.PDFDocument; chunks: Buffer[] } | null = null;
-      for (let attempt = 0; attempt < 6; attempt++) {
-        const r = makeDoc(k);
-        const bufPromise = new Promise<Buffer>((resolve) => {
-          r.doc.on("end", () => resolve(Buffer.concat(r.chunks)));
-        });
-        r.doc.end();
-        await bufPromise;
-        const pageCount = r.doc.bufferedPageRange().count;
-        if (pageCount <= 1) {
-          result = r;
-          break;
-        }
-        k *= 0.85;
-        if (k < 0.5) k = 0.5;
-      }
-      if (!result) {
-        const r = makeDoc(k);
-        const p = new Promise<void>((resolve) => {
-          r.doc.on("end", () => resolve());
-        });
-        r.doc.end();
-        await p;
-        result = r;
-      }
-    
-      const buffer = Buffer.concat(result.chunks);
+      const r = makeDoc(k);
+      const bufPromise = new Promise<Buffer>((resolve) => {
+        r.doc.on("end", () => resolve(Buffer.concat(r.chunks)));
+      });
+      r.doc.end();
+      await bufPromise;
+      const buffer = Buffer.concat(r.chunks);
       const fileName = `Rutina-${safeName}-Nocito-Coach.pdf`;
     
       return new NextResponse(new Uint8Array(buffer), {
