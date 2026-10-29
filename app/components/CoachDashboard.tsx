@@ -752,6 +752,36 @@ export default function CoachDashboard() {
     }
   };
 
+  const handleExportPDF = async () => {
+    console.log("Botón PDF presionado");
+    if (!selectedId) {
+      console.warn("No hay cliente seleccionado");
+      return;
+    }
+    try {
+      const res = await fetch(
+        `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`,
+        { cache: "no-store" }
+      );
+      if (!res.ok) {
+        const j = await res.json().catch(() => null);
+        throw new Error(j?.error || `Error ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Rutina.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err: any) {
+      console.error("[export-pdf]", err);
+      setMsg({ type: "err", text: err?.message || "No se pudo exportar el PDF." });
+    }
+  };
+
   // Refresco silencioso para el espejo en vivo: sólo actualiza los datos de
   // progreso del alumno (series, audios, rutinas y anamnesis), sin pisar
   // ediciones en curso (nutrición / guía del bloque).
@@ -1477,32 +1507,9 @@ export default function CoachDashboard() {
                       Actualizar ahora
                     </button>
                     <button
+                      type="button"
                       className="btn btn-outline"
-                      onClick={async () => {
-                        if (!selectedId) return;
-                        try {
-                          const res = await fetch(
-                            `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`,
-                            { cache: "no-store" }
-                          );
-                          if (!res.ok) {
-                            const j = await res.json().catch(() => null);
-                            throw new Error(j?.error || `Error ${res.status}`);
-                          }
-                          const blob = await res.blob();
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = `Rutina.pdf`;
-                          document.body.appendChild(a);
-                          a.click();
-                          a.remove();
-                          setTimeout(() => URL.revokeObjectURL(url), 1000);
-                        } catch (err: any) {
-                          console.error("[export-pdf]", err);
-                          setMsg({ type: "err", text: err?.message || "No se pudo exportar el PDF." });
-                        }
-                      }}
+                      onClick={() => void handleExportPDF()}
                       style={{ borderColor: "#FFC400", color: "#FFC400" }}
                     >
                       Exportar PDF
