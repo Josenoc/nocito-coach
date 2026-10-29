@@ -8,6 +8,7 @@ import { safeBase64ToUint8Array } from "@/app/lib/base64";
 import type { GeneratedProgram } from "@/app/lib/program";
 import ProgramEditor from "@/app/components/ProgramEditor";
 import CoachProfileEditor from "@/app/components/CoachProfileEditor";
+import ExportRoutineButton from "@/app/components/ExportRoutineButton";
 
 interface ClientRow {
   id: string;
@@ -1542,19 +1543,24 @@ export default function CoachDashboard() {
                     <button className="btn btn-outline" onClick={() => void reloadDetail()}>
                       Actualizar ahora
                     </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline"
-                      onClick={() => {
-                        if (!selectedId) { alert("Selecciona un cliente primero"); return; }
-                        const url = `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`;
-                        console.log("Navegando a:", url);
-                        window.location.href = url;
+                    <ExportRoutineButton
+                      clientData={{ name: detail?.profile?.full_name || detail?.profile?.email, email: detail?.profile?.email }}
+                      routineData={{
+                        week: detail?.routines?.[0]?.week_number ?? 1,
+                        daysCount: (detail?.routines ?? []).length,
+                        days: (detail?.routines ?? []).map((r: any) => ({
+                          type: (r.day_name || r.name || "").replace(/^D[ií]a\s*\d+\s*[-–]?\s*/i, "").trim() || "Dia",
+                          subtitle: "",
+                          exercises: (r.exercises ?? []).map((ex: any) => ({
+                            name: ex.name || "",
+                            sets: ex.target_sets ?? 3,
+                            reps: ex.target_reps ?? 10,
+                            rir: ex.target_rir != null ? String(ex.target_rir) : (ex.technique_notes?.match(/RIR\s*([0-9]+)/i)?.[1] ?? "-"),
+                            note: ex.technique_notes || "",
+                          })),
+                        })),
                       }}
-                      style={{ borderColor: "#FFC400", color: "#FFC400" }}
-                    >
-                      Exportar PDF
-                    </button>
+                    />
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
