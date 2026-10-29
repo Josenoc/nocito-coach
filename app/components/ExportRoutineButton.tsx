@@ -65,7 +65,7 @@ export default function ExportRoutineButton({
             height: "1123px",
             backgroundColor: "#0A0A0A",
             color: "#FFFFFF",
-            padding: "30px",
+            padding: "30px 40px",
             fontFamily: "Helvetica, Arial, sans-serif",
             boxSizing: "border-box",
             display: "flex",
@@ -74,28 +74,27 @@ export default function ExportRoutineButton({
           }}
         >
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #333", paddingBottom: "10px", marginBottom: "15px" }}>
-              <div>
-                <h1 style={{ margin: 0, fontSize: "13pt", color: "#FFC400", fontWeight: "bold" }}>NOCITO COACH</h1>
-                <h2 style={{ margin: "2px 0 0 0", fontSize: "16pt", textTransform: "uppercase", fontWeight: "800" }}>{clientData?.name || "ALUMNO"}</h2>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <p style={{ margin: 0, fontSize: "9pt", fontWeight: "bold", color: "#FFC400" }}>RUTINA</p>
-                <p style={{ margin: "2px 0 0 0", fontSize: "8pt", color: "#A0A0A0" }}>SEMANA {routineData?.week || 1} - {routineData?.daysCount || 5} DÍAS</p>
-              </div>
+            {/* Cabecera */}
+            <div style={{ borderBottom: "1px solid #333", paddingBottom: "10px", marginBottom: "12px" }}>
+              <h1 style={{ margin: 0, fontSize: "13pt", color: "#FFC400", fontWeight: "bold", letterSpacing: "2px" }}>NOCITO COACH LAB</h1>
+              <h2 style={{ margin: "4px 0 0 0", fontSize: "18pt", textTransform: "uppercase", fontWeight: "800", color: "#FFFFFF" }}>{clientData?.name || "ALUMNO"}</h2>
+              <p style={{ margin: "4px 0 0 0", fontSize: "9pt", fontWeight: "bold", color: "#FFC400" }}>
+                RUTINA DE ENTRENAMIENTO SEMANA {routineData?.week || 1} ({routineData?.daysCount || 5} DÍAS)
+              </p>
             </div>
 
+            {/* Cuadrícula de Días */}
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {routineData?.days?.map((day: ExportDay, idx: number) => (
                 <div key={idx} style={{ backgroundColor: "#161616", border: "1px solid #262626", borderRadius: "4px", padding: "8px 12px" }}>
-                  <div style={{ fontSize: "8pt", fontWeight: "bold", color: "#FFC400", textTransform: "uppercase", marginBottom: "4px" }}>
-                    DÍA {idx + 1} &bull; {day.type}
+                  <div style={{ fontSize: "8.5pt", fontWeight: "bold", color: "#FFC400", textTransform: "uppercase", marginBottom: "4px" }}>
+                    DÍA {idx + 1} &bull; {day.type || "ENTRENAMIENTO"}
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                     {day.exercises?.map((ex: ExportExercise, i: number) => (
-                      <div key={i} style={{ fontSize: "8.5pt", display: "flex", justifyContent: "space-between" }}>
+                      <div key={i} style={{ fontSize: "9pt", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ color: "#E5E5E5", fontWeight: "500" }}>{ex.name}</span>
-                        <span style={{ color: "#A0A0A0" }}>{ex.sets}x{ex.reps} | {ex.rir}</span>
+                        <span style={{ color: "#A0A0A0" }}>{ex.sets}x{ex.reps} | {ex.rir} RIR {ex.note ? `· ${ex.note}` : ""}</span>
                       </div>
                     ))}
                   </div>
@@ -104,12 +103,14 @@ export default function ExportRoutineButton({
             </div>
           </div>
 
+          {/* Footer Oficial */}
           <div style={{ borderTop: "1px solid #333", paddingTop: "8px" }}>
             <p style={{ margin: 0, fontSize: "7.5pt", color: "#A0A0A0" }}>RIR (repeticiones en reserva): cuántas te quedan antes de no poder más.</p>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "8.5pt", fontWeight: "bold", color: "#FFC400", marginTop: "4px" }}>
               <span>@NOCITO.COACH</span>
               <span>NOCITO-COACH.VERCEL.APP</span>
             </div>
+            <p style={{ margin: "6px 0 0 0", fontSize: "7pt", color: "#666", textAlign: "center" }}>NOCITO COACH LAB nocito-coach.vercel.app Todos los derechos reservados</p>
           </div>
         </div>
       </div>
