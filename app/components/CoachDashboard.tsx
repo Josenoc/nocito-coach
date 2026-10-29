@@ -1542,13 +1542,19 @@ export default function CoachDashboard() {
                     <button className="btn btn-outline" onClick={() => void reloadDetail()}>
                       Actualizar ahora
                     </button>
-                    <a
+                    <button
+                      type="button"
                       className="btn btn-outline"
-                      href={selectedId ? `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}` : "#"}
-                      style={{ borderColor: "#FFC400", color: "#FFC400", textDecoration: "none", display: "inline-flex", alignItems: "center", cursor: "pointer" }}
+                      onClick={() => {
+                        if (!selectedId) { alert("Selecciona un cliente primero"); return; }
+                        const url = `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`;
+                        console.log("Navegando a:", url);
+                        window.location.href = url;
+                      }}
+                      style={{ borderColor: "#FFC400", color: "#FFC400" }}
                     >
                       Exportar PDF
-                    </a>
+                    </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
