@@ -2677,7 +2677,21 @@ export default function CoachDashboard() {
               </div>
             )}
 
-      <div id="printable-routine">
+      <div
+        id="printable-routine"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: 0,
+          width: "794px",
+          minHeight: "1123px",
+          backgroundColor: "#0A0A0A",
+          color: "#FFFFFF",
+          padding: "40px",
+          fontFamily: "sans-serif",
+          boxSizing: "border-box",
+        }}
+      >
         <div style={{ textAlign: "center", marginBottom: 12 }}>
           <div style={{ display: "inline-block", width: 5, height: 5, background: "#FFC400", marginRight: 6, verticalAlign: "middle" }} />
           <span style={{ fontWeight: 700, fontSize: 9.5, letterSpacing: 3.2, color: "#6B6B6B" }}>NOCITO COACH</span>
