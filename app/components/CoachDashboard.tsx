@@ -1506,15 +1506,39 @@ export default function CoachDashboard() {
                     <button className="btn btn-outline" onClick={() => void reloadDetail()}>
                       Actualizar ahora
                     </button>
-                    <a
+                    <button
+                      type="button"
                       className="btn btn-outline"
-                      href={selectedId ? `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}` : "#"}
-                      target="_blank"
-                      rel="noopener"
-                      style={{ borderColor: "#FFC400", color: "#FFC400", textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+                      onClick={async () => {
+                        console.log("Exportando PDF...");
+                        if (!selectedId) { console.warn("sin cliente"); return; }
+                        try {
+                          const res = await fetch(
+                            `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`,
+                            { cache: "no-store" }
+                          );
+                          if (!res.ok) {
+                            const j = await res.json().catch(() => null);
+                            throw new Error(j?.error || `Error ${res.status}`);
+                          }
+                          const blob = await res.blob();
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `Rutina.pdf`;
+                          document.body.appendChild(a);
+                          a.click();
+                          a.remove();
+                          setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        } catch (err: any) {
+                          console.error("[export-pdf]", err);
+                          setMsg({ type: "err", text: err?.message || "No se pudo exportar el PDF." });
+                        }
+                      }}
+                      style={{ borderColor: "#FFC400", color: "#FFC400" }}
                     >
                       Exportar PDF
-                    </a>
+                    </button>
                     <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
                       Eliminar cliente
                     </button>
