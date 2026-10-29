@@ -16,12 +16,12 @@ const LOWER_BG = "#D9DCE0";
 const NEUTRAL_BG = "#F6F6F6";
 const PAGE_W = 595.28;
 const PAGE_H = 841.89;
-const M = 40;
+const M = 28;
 const MARGIN = M;
 const PAGE_WIDTH = PAGE_W - M * 2;
 const CENTER = PAGE_W / 2;
-const ZONE_TOP = 132;
-const ZONE_BOTTOM = 82;
+const ZONE_TOP = 120;
+const ZONE_BOTTOM = 23;
 const ZONE_H = PAGE_H - ZONE_TOP - ZONE_BOTTOM;
 
 function normalize(s: string): string {
