@@ -341,6 +341,7 @@ function latestStudentLogs(
 
 function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: string }) {
   const active = routines.filter((r) => r.active !== false);
+  const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   const wrap = { marginTop: 16, paddingTop: 14, borderTop: "1px solid #242424" };
   const head = (
     <h4
@@ -369,6 +370,7 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
     (byWeek[w] = byWeek[w] || []).push(r);
   });
   const weekKeys = Object.keys(byWeek).map(Number).sort((a, b) => a - b);
+  const currentWeek = selectedWeek ?? (weekKeys[0] ?? 1);
 
   return (
     <div style={wrap}>
@@ -389,8 +391,32 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
           {guideline}
         </p>
       )}
-      {weekKeys.map((w) => {
-        const days = [...byWeek[w]].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
+      {weekKeys.length > 1 && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+          {weekKeys.map((w) => (
+            <button
+              key={w}
+              type="button"
+              onClick={() => setSelectedWeek(w)}
+              style={{
+                padding: "4px 10px",
+                fontSize: ".75rem",
+                borderRadius: 6,
+                border: "1px solid #242424",
+                background: currentWeek === w ? "#FFC400" : "transparent",
+                color: currentWeek === w ? "#000" : "#a1a1aa",
+                cursor: "pointer",
+                fontWeight: currentWeek === w ? 700 : 400,
+              }}
+            >
+              Sem {w}
+            </button>
+          ))}
+        </div>
+      )}
+      {(() => {
+        const w = currentWeek;
+        const days = [...(byWeek[w] ?? [])].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
         const total = days.reduce((acc, d) => acc + (d.exercises ?? []).length, 0);
         return (
           <div key={w} style={{ marginBottom: 10 }}>
@@ -409,7 +435,7 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
             </div>
             {days.map((d, di) => {
               const exs = [...(d.exercises ?? [])].sort(
-                (a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0)
+                (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
               );
               return (
                 <details key={d.id ?? di} style={{ borderBottom: "1px solid #1c1c1c" }}>
@@ -435,7 +461,7 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
                     </span>
                   </summary>
                   <ul style={{ listStyle: "none", margin: "0 0 8px", padding: 0 }}>
-                    {exs.map((ex: any, ei: number) => (
+                    {exs.map((ex, ei) => (
                       <li
                         key={ei}
                         style={{
@@ -452,7 +478,7 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
                         </span>
                         <span className="muted" style={{ whiteSpace: "nowrap" }}>
                           {ex.target_sets ?? "-"} × {ex.target_reps ?? "-"}
-                          {ex.target_weight ? ` · ${ex.target_weight} ${ex.unit ?? "kg"}` : ""}
+                          {ex.target_weight ? `  ·  ${ex.target_weight} ${ex.unit ?? "kg"}` : ""}
                         </span>
                       </li>
                     ))}
@@ -462,7 +488,7 @@ function RoutineSummary({ routines, guideline }: { routines: any[]; guideline?: 
             })}
           </div>
         );
-      })}
+      })()}
     </div>
   );
 }
