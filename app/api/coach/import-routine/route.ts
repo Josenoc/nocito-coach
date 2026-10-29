@@ -41,15 +41,13 @@ function asNumber(value: unknown): number | null {
 }
 
 function techniqueFor(ex: ImportExercise): string | null {
+  // Mantener corto: solo RIR y (opcional) descanso. Las notas largas van en un
+  // bloque global de "Notas Generales", no por ejercicio.
   const parts: string[] = [];
-  const reps = ex.reps ? String(ex.reps).trim() : "";
-  if (reps && /[^\d]/.test(reps)) parts.push(`Reps ${reps}`);
-  const descanso = ex.descanso ? String(ex.descanso).trim() : "";
-  if (descanso) parts.push(`Descanso ${descanso}`);
   const rir = asNumber(ex.rir);
   if (rir != null) parts.push(`RIR ${rir}`);
-  const notas = ex.notas ? String(ex.notas).trim() : "";
-  if (notas) parts.push(notas);
+  const descanso = ex.descanso ? String(ex.descanso).trim() : "";
+  if (descanso) parts.push(`Descanso ${descanso}`);
   return parts.length ? parts.join(" · ") : null;
 }
 
