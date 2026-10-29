@@ -1,5 +1,55 @@
 -- Migracion: estandarizar nombres de ejercicios (corregir erratas)
 -- Ejecutar en el SQL Editor de Supabase (proyecto uatjjjmsbpxlwmgweszq).
+-- 5. aperturas deltoides trasero -> Aperturas posterior en maquina
+UPDATE exercises SET name = 'Aperturas posterior en maquina'
+  WHERE name ILIKE '%aperturas%deltoides%trasero%' OR name ILIKE '%aperturas%deltoides%tras%';
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sets_logs' AND column_name='exercise_name') THEN
+    UPDATE sets_logs SET exercise_name = 'Aperturas posterior en maquina'
+      WHERE exercise_name ILIKE '%aperturas%deltoides%trasero%' OR exercise_name ILIKE '%aperturas%deltoides%tras%';
+  END IF;
+END $$;
+
+-- 6. rotacion externa con polea -> rotacion externa en polea
+UPDATE exercises SET name = 'rotación externa en polea'
+  WHERE name ILIKE '%rotacion%externa%polea%';
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sets_logs' AND column_name='exercise_name') THEN
+    UPDATE sets_logs SET exercise_name = 'rotación externa en polea'
+      WHERE exercise_name ILIKE '%rotacion%externa%polea%';
+  END IF;
+END $$;
+
+-- 7. press militar -> press militar con mancuerna
+UPDATE exercises SET name = 'press militar con mancuerna'
+  WHERE name ILIKE '%press%militar%' AND name NOT ILIKE '%mancuerna%';
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sets_logs' AND column_name='exercise_name') THEN
+    UPDATE sets_logs SET exercise_name = 'press militar con mancuerna'
+      WHERE exercise_name ILIKE '%press%militar%' AND exercise_name NOT ILIKE '%mancuerna%';
+  END IF;
+END $$;
+
+-- 8. hip thrust -> hip thrust en maquina
+UPDATE exercises SET name = 'hip thrust en maquina'
+  WHERE name ILIKE '%hip%thrust%' AND name NOT ILIKE '%maquina%';
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sets_logs' AND column_name='exercise_name') THEN
+    UPDATE sets_logs SET exercise_name = 'hip thrust en maquina'
+      WHERE exercise_name ILIKE '%hip%thrust%' AND exercise_name NOT ILIKE '%maquina%';
+  END IF;
+END $$;
+
+-- 9. Remo en barra T -> Remo T en maquina 45
+UPDATE exercises SET name = 'Remo T en maquina 45°'
+  WHERE name ILIKE '%remo%barra%t%' OR name ILIKE '%remo%t%45%';
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sets_logs' AND column_name='exercise_name') THEN
+    UPDATE sets_logs SET exercise_name = 'Remo T en maquina 45°'
+      WHERE exercise_name ILIKE '%remo%barra%t%' OR exercise_name ILIKE '%remo%t%45%';
+  END IF;
+END $$;
+
 -- RECOMENDADO: ejecutar ANTES supabase-logs-permanentes.sql para que sets_logs
 -- tenga la columna exercise_name y se actualice el historial. Si no existe,
 -- la migracion omite esas actualizaciones sin fallar.
