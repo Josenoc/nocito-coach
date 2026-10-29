@@ -754,30 +754,66 @@ export default function CoachDashboard() {
 
   const handleExportPDF = async () => {
     console.log("Exportando PDF...");
-    if (!selectedId) {
-      console.warn("No hay cliente seleccionado");
+    const el = document.getElementById("printable-routine");
+    if (!el) {
+      console.error("No se encontro #printable-routine");
+      setMsg({ type: "err", text: "No hay rutina para exportar." });
       return;
     }
     try {
-      const res = await fetch(
-        `/api/coach/export-routine-pdf?id=${encodeURIComponent(selectedId)}`,
-        { cache: "no-store" }
-      );
-      if (!res.ok) {
-        const j = await res.json().catch(() => null);
-        throw new Error(j?.error || `Error ${res.status}`);
+      // Mostrar temporalmente para que html2canvas pueda capturarlo
+      el.style.display = "block";
+      el.style.position = "fixed";
+      el.style.left = "0";
+      el.style.top = "0";
+      el.style.zIndex = "9999";
+      el.style.background = "#FFFFFF";
+
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
+
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#FFFFFF",
+        windowWidth: el.scrollWidth,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      if (imgHeight <= pdfHeight) {
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      } else {
+        // Escalar para que entre en una pagina
+        const scale = pdfHeight / imgHeight;
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth * scale, pdfHeight);
       }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Rutina.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      pdf.save(`Rutina.pdf`);
+
+      // Ocultar de nuevo
+      el.style.display = "none";
+      el.style.position = "";
+      el.style.left = "";
+      el.style.top = "";
+      el.style.zIndex = "";
+      el.style.background = "";
     } catch (err: any) {
       console.error("[export-pdf]", err);
+      const el2 = document.getElementById("printable-routine");
+      if (el2) {
+        el2.style.display = "none";
+        el2.style.position = "";
+        el2.style.left = "";
+        el2.style.top = "";
+        el2.style.zIndex = "";
+        el2.style.background = "";
+      }
       setMsg({ type: "err", text: err?.message || "No se pudo exportar el PDF." });
     }
   };
