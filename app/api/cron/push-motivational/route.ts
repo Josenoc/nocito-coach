@@ -81,19 +81,36 @@ export async function GET(req: NextRequest) {
     .eq("activo", true);
 
   let enqueued = 0;
+  const todayDow = now.getDay(); // 0=Dom ... 6=Sab
+
   for (const c of (clients ?? []) as { id: string; full_name: string | null }[]) {
     const { data: routines } = await supabase
       .from("routines")
-      .select("id, day_name, name, week_number, active, exercises(id, name)")
+      .select("id, day_name, name, week_number, active, training_day_of_week, exercises(id, name)")
       .eq("client_id", c.id)
       .eq("active", true)
       .order("week_number", { ascending: true })
-      .order("position", { ascending: true })
-      .limit(1);
+      .order("position", { ascending: true });
 
-    const routine = (routines ?? [])[0] as
-      | { id: string; day_name: string | null; name: string | null; exercises: { id: string; name: string }[] | null }
-      | undefined;
+    const allRoutines = (routines ?? []) as {
+      id: string;
+      day_name: string | null;
+      name: string | null;
+      week_number: number;
+      training_day_of_week: number | null;
+      exercises: { id: string; name: string }[] | null;
+    }[];
+
+    // Si hay rutinas con dia de entrenamiento programado, solo enviar si hoy es dia de entrenamiento.
+    const scheduled = allRoutines.filter((r) => r.training_day_of_week != null);
+    if (scheduled.length > 0 && !scheduled.some((r) => r.training_day_of_week === todayDow)) {
+      // Dia de descanso: no enviar notificacion.
+      continue;
+    }
+
+    // Elegir la rutina del dia (la que coincide con hoy, o la primera activa).
+    const routine =
+      scheduled.find((r) => r.training_day_of_week === todayDow) ?? allRoutines[0];
 
     const dayName = (routine?.day_name || routine?.name || "").trim();
     const exNames = (routine?.exercises ?? []).map((e) => e.name || "");
