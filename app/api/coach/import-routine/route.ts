@@ -21,6 +21,7 @@ type ImportDay = {
   dia?: unknown;
   nombre?: unknown;
   ejercicios?: ImportExercise[];
+  training_day_of_week?: unknown;
 };
 
 type ImportWeek = {
@@ -140,6 +141,8 @@ export async function POST(req: NextRequest) {
       const dia = String(day?.dia ?? "").trim() || `Día ${i + 1}`;
       const nombre = String(day?.nombre ?? "").trim() || dia;
 
+      const dowRaw = Number(day?.training_day_of_week);
+      const trainingDayOfWeek = Number.isFinite(dowRaw) && dowRaw >= 0 && dowRaw <= 6 ? dowRaw : null;
       const { data: row, error: rErr } = await supabase
         .from("routines")
         .insert({
@@ -149,6 +152,7 @@ export async function POST(req: NextRequest) {
           week_number: week.week_number,
           position: i,
           active: true,
+          training_day_of_week: trainingDayOfWeek,
         })
         .select("id")
         .single();
