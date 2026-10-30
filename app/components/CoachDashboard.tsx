@@ -40,6 +40,7 @@ interface Draft {
   week_number: string;
   position: string;
   active: boolean;
+  training_day_of_week: string;
   exercises: ExRow[];
 }
 
@@ -91,6 +92,7 @@ const emptyDraft = (): Draft => ({
   week_number: "1",
   position: "0",
   active: true,
+  training_day_of_week: "",
   exercises: [emptyEx()],
 });
 
@@ -1183,6 +1185,7 @@ export default function CoachDashboard() {
       week_number: draft.week_number,
       position: draft.position,
       active: draft.active,
+      training_day_of_week: draft.training_day_of_week === "" ? null : Number(draft.training_day_of_week),
       exercises: draft.exercises
         .filter((e) => e.name.trim())
         .map((e, i) => ({
@@ -1286,6 +1289,7 @@ export default function CoachDashboard() {
       week_number: String(r.week_number),
       position: String(r.position),
       active: r.active,
+      training_day_of_week: r.training_day_of_week != null ? String(r.training_day_of_week) : "",
       exercises,
     });
     setBaseline(baseRows.map((e) => ({ ...e })));
@@ -2127,6 +2131,25 @@ export default function CoachDashboard() {
                             value={draft.position}
                             onChange={(e) => setDraft({ ...draft, position: e.target.value })}
                           />
+                        </div>
+                        <div>
+                          <label className="lbl">Día de entrenamiento</label>
+                          <select
+                            className="input"
+                            value={draft.training_day_of_week}
+                            onChange={(e) =>
+                              setDraft({ ...draft, training_day_of_week: e.target.value })
+                            }
+                          >
+                            <option value="">Sin programar</option>
+                            <option value="0">Domingo</option>
+                            <option value="1">Lunes</option>
+                            <option value="2">Martes</option>
+                            <option value="3">Miércoles</option>
+                            <option value="4">Jueves</option>
+                            <option value="5">Viernes</option>
+                            <option value="6">Sábado</option>
+                          </select>
                         </div>
                         <div>
                           <label className="lbl">Activa</label>
