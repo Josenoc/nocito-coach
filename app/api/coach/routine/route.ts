@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
       week_number: numOrNull(body?.week_number) ?? 1,
       position: numOrNull(body?.position) ?? 0,
       active: body?.active === false ? false : true,
+      training_day_of_week: numOrNull(body?.training_day_of_week),
     })
     .select()
     .single();
@@ -104,6 +105,7 @@ export async function PUT(req: NextRequest) {
   if (body?.week_number !== undefined) patch.week_number = numOrNull(body.week_number) ?? 1;
   if (body?.position !== undefined) patch.position = numOrNull(body.position) ?? 0;
   if (body?.active !== undefined) patch.active = Boolean(body.active);
+  if (body?.training_day_of_week !== undefined) patch.training_day_of_week = numOrNull(body.training_day_of_week);
 
   if (Object.keys(patch).length) {
     const { error } = await supabase.from("routines").update(patch).eq("id", id);
