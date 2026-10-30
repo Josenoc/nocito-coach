@@ -20,9 +20,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "clientId requerido" }, { status: 400 });
   }
 
+  // Lectura fresca (sin cache) de los datos actuales del alumno.
   const { data: profile, error } = await getSupabaseAdmin()
     .from("profiles")
-    .select("full_name, anamnesis")
+    .select("full_name, anamnesis, updated_at")
     .eq("id", clientId)
     .single();
 
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       );
     }
-    return NextResponse.json({ ok: true, program });
+    return NextResponse.json({ ok: true, program }, { headers: { "Cache-Control": "no-store" } });
   } catch (err: any) {
     return NextResponse.json(
       { ok: false, error: err?.message || "Error al generar el plan" },
