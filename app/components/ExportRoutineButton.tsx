@@ -76,7 +76,7 @@ export default function ExportRoutineButton({
           <div>
             {/* Cabecera */}
             <div style={{ borderBottom: "1px solid #333", paddingBottom: "10px", marginBottom: "12px" }}>
-              <h1 style={{ margin: 0, fontSize: "13pt", color: "#FFC400", fontWeight: "bold", letterSpacing: "2px" }}>NOCITO COACH LAB</h1>
+              <h1 style={{ margin: 0, fontSize: "13pt", color: "#FFC400", fontWeight: "bold", letterSpacing: "2px" }}>NOCITO COACH</h1>
               <h2 style={{ margin: "4px 0 0 0", fontSize: "18pt", textTransform: "uppercase", fontWeight: "800", color: "#FFFFFF" }}>{clientData?.name || "ALUMNO"}</h2>
               <p style={{ margin: "4px 0 0 0", fontSize: "9pt", fontWeight: "bold", color: "#FFC400" }}>
                 RUTINA DE ENTRENAMIENTO SEMANA {routineData?.week || 1} ({routineData?.daysCount || 5} DÍAS)
@@ -110,7 +110,7 @@ export default function ExportRoutineButton({
               <span>@NOCITO.COACH</span>
               <span>NOCITO-COACH.VERCEL.APP</span>
             </div>
-            <p style={{ margin: "6px 0 0 0", fontSize: "7pt", color: "#666", textAlign: "center" }}>NOCITO COACH LAB nocito-coach.vercel.app Todos los derechos reservados</p>
+            <p style={{ margin: "6px 0 0 0", fontSize: "7pt", color: "#666", textAlign: "center" }}>nocito.coach nocito-coach.vercel.app Todos los derechos reservados</p>
           </div>
         </div>
       </div>
