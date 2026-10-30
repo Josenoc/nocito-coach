@@ -1048,16 +1048,17 @@ export default function CoachDashboard() {
     setMsg(null);
     setPublishingProgram(true);
     try {
-      const weeksCount = Math.max(1, edited.block?.weeks ?? 6);
-      const weeks = Array.from({ length: weeksCount }, (_, i) => {
-        const weekNumber = i + 1;
-        return {
-          week_number: weekNumber,
+      // Solo se genera la Semana 1 (rutina base). Las semanas siguientes se
+      // programan progresivamente cuando el alumno avanza.
+      const weeksCount = 1;
+      const weeks = [
+        {
+          week_number: 1,
           days: edited.days.map((d) => ({
             dia: d.dia,
             nombre: d.nombre,
             ejercicios: d.ejercicios.map((ex) => {
-              const t = ex.progresion?.find((p) => p.sem === weekNumber);
+              const t = ex.progresion?.find((p) => p.sem === 1);
               return {
                 ejercicio: ex.ejercicio,
                 series: ex.series,
@@ -1069,8 +1070,8 @@ export default function CoachDashboard() {
               };
             }),
           })),
-        };
-      });
+        },
+      ];
 
       const routineRes = await fetch("/api/coach/import-routine", {
         method: "POST",
@@ -1087,7 +1088,7 @@ export default function CoachDashboard() {
           body: JSON.stringify({
             client_id: selectedId,
             guideline: edited.block.guideline ?? "",
-            weeks: weeksCount,
+            weeks: 1,
           }),
         });
       }
@@ -1105,7 +1106,7 @@ export default function CoachDashboard() {
       setEditingProgram(false);
       setProgram(null);
       setTab("perfil");
-      setMsg({ type: "ok", text: `Plan publicado (bloque de ${weeksCount} semanas).` });
+      setMsg({ type: "ok", text: "Plan publicado (Semana 1)." });
       await loadClients();
       await reloadDetail();
     } catch (err: any) {
