@@ -215,6 +215,7 @@ export default function ClientApp() {
   >("checking");
   const [pushPrompt, setPushPrompt] = useState<"audit" | "weekly" | null>(null);
   const [pushResponse, setPushResponse] = useState("");
+  const [showPushBanner, setShowPushBanner] = useState(false);
 
   useEffect(() => {
     if (
@@ -237,6 +238,14 @@ export default function ClientApp() {
         setPushStatus(sub ? "on" : "idle");
       })
       .catch(() => setPushStatus("idle"));
+  }, []);
+
+  // Banner de ayuda para habilitar notificaciones si no estan concedidas.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission !== "granted") {
+      setShowPushBanner(true);
+    }
   }, []);
 
   const enablePush = async () => {
@@ -1477,6 +1486,61 @@ export default function ClientApp() {
 
   return (
     <>
+      {showPushBanner && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 16,
+            left: 16,
+            right: 16,
+            zIndex: 1000,
+            background: "#161616",
+            border: "1px solid #242424",
+            borderRadius: 12,
+            padding: 14,
+            color: "#f8fafc",
+            boxShadow: "0 8px 24px rgba(0,0,0,.4)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span style={{ color: "#FFC400", fontSize: "1.2rem" }}>🔔</span>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: ".9rem" }}>Habilitá las notificaciones</p>
+              <p style={{ margin: "4px 0 0", fontSize: ".8rem", color: "#a1a1aa" }}>
+                Hacé clic en el ícono del candado 🔒 junto a la barra de direcciones de tu navegador y permití las notificaciones de nocito.coach.
+              </p>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    try {
+                      const perm = await Notification.requestPermission();
+                      if (perm === "granted") {
+                        setShowPushBanner(false);
+                        void enablePush();
+                      } else {
+                        setShowPushBanner(false);
+                      }
+                    } catch {
+                      setShowPushBanner(false);
+                    }
+                  }}
+                  style={{ background: "#FFC400", color: "#000", borderColor: "#FFC400", padding: "6px 12px", fontSize: ".8rem" }}
+                >
+                  Habilitar
+                </button>
+                <button
+                  className="btn btn-outline"
+                  onClick={() => setShowPushBanner(false)}
+                  style={{ padding: "6px 12px", fontSize: ".8rem" }}
+                >
+                  Después
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <WelcomeScreen
         open={welcomeOpen}
         name={profile.full_name || profile.email.split("@")[0]}
