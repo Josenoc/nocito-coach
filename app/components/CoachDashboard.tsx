@@ -1026,6 +1026,8 @@ export default function CoachDashboard() {
     setGenerating(true);
     setProgram(null);
     try {
+      // Refrescar la ficha antes de generar, para usar los datos mas recientes.
+      await reloadDetail();
       const res = await fetch("/api/coach/generate-program", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
