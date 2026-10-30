@@ -76,6 +76,20 @@ type SetRow = {
     | "cluster_set";
 };
 
+const TECHNIQUE_INFO: Record<string, string> = {
+  normal: "Series tradicionales con carga fija y descanso pautado.",
+  warmup: "Serie de calentamiento con carga liviana y RIR alto.",
+  drop_set: "Llegas al fallo, bajas un 20% el peso y seguis sin descansar.",
+  rest_pause: "Cerca del fallo, descansas 15 segundos y sacas un par de repes mas.",
+  superset: "2 ejercicios seguidos sin descanso (mismo grupo o antagonistas).",
+  biseries: "Bloque de 2 ejercicios encadenados sin pausa intermedia.",
+  triseries: "Bloque de 3 ejercicios encadenados sin pausa intermedia.",
+  giant_set: "4 o mas ejercicios seguidos para un estimulo metabolico brutal.",
+  pyramid_asc: "Piramidal ascendente: subis peso y bajas repeticiones en cada serie.",
+  pyramid_desc: "Piramidal descendente: bajas peso y subis repeticiones en cada serie.",
+  cluster_set: "Bloques con micro-pausas de 10-15s dentro de la misma serie para mantener potencia.",
+};
+
 type VoiceSet = { set_number: number; reps: number | null; weight: number | null };
 
 // Confirmación de voz que vive dentro de la tarjeta del ejercicio.
@@ -195,6 +209,7 @@ export default function ClientApp() {
   const [view, setView] = useState<"train" | "nutrition">("train");
   const [trialExpired, setTrialExpired] = useState(false);
   const [addMenuEx, setAddMenuEx] = useState<string | null>(null);
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null);
   const [pushStatus, setPushStatus] = useState<
     "checking" | "idle" | "on" | "denied" | "unsupported" | "busy"
   >("checking");
@@ -1827,28 +1842,71 @@ export default function ClientApp() {
                                 }
                               >
                                 <td className="set-index">
-                                  <select
-                                    className="num-input"
-                                    style={{ width: "100%", padding: "6px 4px", fontSize: ".75rem" }}
-                                    value={r.series_type}
-                                    onChange={(e) => {
-                                      const v = e.target.value as "normal" | "warmup" | "drop_set" | "rest_pause";
-                                      updateRow(ex.id, r.set_number, { series_type: v });
-                                    }}
-                                    onBlur={() => saveSet(ex, r.set_number)}
-                                  >
-                                    <option value="normal">Efectiva</option>
-                                    <option value="warmup">Calentamiento</option>
-                                    <option value="drop_set">Drop set</option>
-                                    <option value="rest_pause">Rest-pause</option>
-                                    <option value="superset">Superserie</option>
-                                    <option value="biseries">Biserie</option>
-                                    <option value="triseries">Triserie</option>
-                                    <option value="giant_set">Serie gigante</option>
-                                    <option value="pyramid_asc">Piramidal asc.</option>
-                                    <option value="pyramid_desc">Piramidal desc.</option>
-                                    <option value="cluster_set">Cluster set</option>
-                                  </select>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                    <select
+                                      className="num-input"
+                                      style={{ flex: 1, padding: "6px 4px", fontSize: ".75rem" }}
+                                      value={r.series_type}
+                                      onChange={(e) => {
+                                        const v = e.target.value as SetRow["series_type"];
+                                        updateRow(ex.id, r.set_number, { series_type: v });
+                                      }}
+                                      onBlur={() => saveSet(ex, r.set_number)}
+                                    >
+                                      <option value="normal">Efectiva</option>
+                                      <option value="warmup">Calentamiento</option>
+                                      <option value="drop_set">Drop set</option>
+                                      <option value="rest_pause">Rest-pause</option>
+                                      <option value="superset">Superserie</option>
+                                      <option value="biseries">Biserie</option>
+                                      <option value="triseries">Triserie</option>
+                                      <option value="giant_set">Serie gigante</option>
+                                      <option value="pyramid_asc">Piramidal asc.</option>
+                                      <option value="pyramid_desc">Piramidal desc.</option>
+                                      <option value="cluster_set">Cluster set</option>
+                                    </select>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setOpenTooltip(openTooltip === `${ex.id}:${r.set_number}` ? null : `${ex.id}:${r.set_number}`)
+                                      }
+                                      style={{
+                                        background: "transparent",
+                                        border: "1px solid #242424",
+                                        color: "#FFC400",
+                                        borderRadius: 4,
+                                        width: 22,
+                                        height: 22,
+                                        fontSize: ".7rem",
+                                        fontWeight: 700,
+                                        cursor: "pointer",
+                                        padding: 0,
+                                        flexShrink: 0,
+                                      }}
+                                      title="Info"
+                                    >
+                                      ?
+                                    </button>
+                                  </div>
+                                  {openTooltip === `${ex.id}:${r.set_number}` && (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        zIndex: 50,
+                                        background: "#161616",
+                                        border: "1px solid #242424",
+                                        borderRadius: 8,
+                                        padding: "8px 10px",
+                                        fontSize: ".75rem",
+                                        color: "#d4d4d8",
+                                        maxWidth: 220,
+                                        boxShadow: "0 4px 12px rgba(0,0,0,.5)",
+                                        marginTop: 4,
+                                      }}
+                                    >
+                                      {TECHNIQUE_INFO[r.series_type]}
+                                    </div>
+                                  )}
                                 </td>
                                 <td>
                                   <div className="cell-wrap">
