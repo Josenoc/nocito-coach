@@ -280,8 +280,8 @@ export async function GET(req: NextRequest) {
         const footerY2 = PAGE_H - 40;
         const footerY3 = PAGE_H - 28;
         doc.fillColor(GRAY).font("Helvetica").fontSize(6.8).text("RIR = repeticiones en reserva: cuántas te quedan antes de no poder más.", MARGIN, footerY1 - 6.8 * 0.75, { width: PAGE_WIDTH, align: "center" });
-        doc.fillColor(GOLD_DARK).font("Helvetica-Bold").fontSize(9).text("@NOCITO.COACH", MARGIN, footerY2 - 9 * 0.75, { width: PAGE_WIDTH, align: "center", characterSpacing: 2.6 });
-        doc.fillColor(GRAY).font("Helvetica").fontSize(6.6).text("NOCITO-COACH.VERCEL.APP", MARGIN, footerY3 - 6.6 * 0.75, { width: PAGE_WIDTH, align: "center", characterSpacing: 2.2 });
+        doc.fillColor(GOLD_DARK).font("Helvetica-Bold").fontSize(9).text("nocito.coach", MARGIN, footerY2 - 9 * 0.75, { width: PAGE_WIDTH, align: "center", characterSpacing: 2.6 });
+        doc.fillColor(GRAY).font("Helvetica").fontSize(6.6).text("nocito-coach.vercel.app", MARGIN, footerY3 - 6.6 * 0.75, { width: PAGE_WIDTH, align: "center", characterSpacing: 2.2 });
     
         doc.end();
         return { doc, chunks };
