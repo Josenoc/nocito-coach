@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   // Lectura fresca (sin cache) de los datos actuales del alumno.
   const { data: profile, error } = await getSupabaseAdmin()
     .from("profiles")
-    .select("full_name, anamnesis, updated_at")
+    .select("full_name, anamnesis")
     .eq("id", clientId)
     .single();
 
